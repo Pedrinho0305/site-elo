@@ -1,0 +1,323 @@
+/* ================= Variáveis de Cores (Claro/Escuro) ================= */
+:root {
+    --bg-color: #ffffff;
+    --text-main: #1a1a2e;
+    --text-muted: #666666;
+    --primary-blue: #1877F2;
+    --primary-blue-hover: #155db8;
+    --secondary-green: #2e8b57;
+    --secondary-green-hover: #246d44;
+    --card-bg: #f8f9fa;
+    --card-border: #e2e8f0;
+    --header-bg: #ffffff;
+    --shadow-hover: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] {
+    --bg-color: #0b132b;
+    --text-main: #ffffff;
+    --text-muted: #a0aec0;
+    --card-bg: #1c2541;
+    --card-border: #2d3748;
+    --header-bg: #0b132b;
+    --shadow-hover: rgba(0, 0, 0, 0.2);
+}
+
+/* ================= Resets Básicos ================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+}
+
+/* ================= Tipografia ================= */
+h1, h2, h3 { font-weight: 700; }
+h1 { font-size: 2.8rem; line-height: 1.2; margin-bottom: 1rem; }
+h1 span { color: var(--secondary-green); }
+h2 { font-size: 2.2rem; text-align: center; margin-bottom: 2rem; }
+h2 span { color: var(--primary-blue); }
+p { color: var(--text-muted); line-height: 1.6; }
+
+/* ================= Estrutura Global das Seções ================= */
+section {
+    padding: 80px 5% 40px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Única seção com largura 100% e altura exata de 100vh */
+.hero {
+    width: 100%;
+    height: 100vh;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 80px; /* Compensa o header */
+    overflow: hidden; /* Impede que o conteúdo crie barra de rolagem dupla */
+}
+
+/* Containers para centralizar o conteúdo e fixar limite máximo de largura */
+.section-content, .hero-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ================= Animações de Scroll ================= */
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.cards-grid .card:nth-child(1) { transition-delay: 0.1s; }
+.cards-grid .card:nth-child(2) { transition-delay: 0.15s; }
+.cards-grid .card:nth-child(3) { transition-delay: 0.2s; }
+.cards-grid .card:nth-child(4) { transition-delay: 0.25s; }
+.cards-grid .card:nth-child(5) { transition-delay: 0.3s; }
+.cards-grid .card:nth-child(6) { transition-delay: 0.35s; }
+
+/* ================= Botões ================= */
+.btn {
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-align: center;
+    display: inline-block;
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px var(--shadow-hover);
+}
+
+.btn-green { background-color: var(--secondary-green); color: white; }
+.btn-green:hover { background-color: var(--secondary-green-hover); }
+
+.btn-outline { background-color: transparent; border: 2px solid var(--primary-blue); color: var(--primary-blue); }
+.btn-outline:hover { background-color: var(--primary-blue); color: white; }
+
+.btn-blue { background-color: var(--primary-blue); color: white; width: 100%; max-width: 300px; }
+.btn-blue:hover { background-color: var(--primary-blue-hover); }
+
+/* ================= Header ================= */
+header {
+    background-color: var(--header-bg);
+    padding: 1rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.logo { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+
+.nav-links { display: flex; gap: 1.5rem; align-items: center; }
+.nav-links a { font-size: 0.95rem; font-weight: 500; position: relative; padding-bottom: 4px; }
+
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--primary-blue);
+    transition: width 0.3s ease;
+}
+.nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+
+.header-controls { display: flex; align-items: center; gap: 1rem; }
+.theme-toggle, .menu-toggle {
+    background: none; border: none; color: var(--text-main); font-size: 1.5rem;
+    cursor: pointer; transition: transform 0.2s ease;
+}
+.theme-toggle:hover { transform: scale(1.05) rotate(5deg); }
+.menu-toggle { display: none; }
+
+/* ================= Seção Hero ================= */
+.hero-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.hero-text { flex: 1; }
+.hero-text p { margin-bottom: 2rem; font-size: 1.15rem; }
+.hero-buttons { display: flex; gap: 1rem; }
+.hero-image { flex: 1; text-align: center; }
+.hero-image img { max-width: 100%; border-radius: 20px; transition: transform 0.3s ease; }
+
+/* ================= Grid e Cards (Tecnologia) ================= */
+.tecnologia { text-align: center; }
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 3rem;
+    width: 100%;
+}
+
+.card, .stat-card, .info-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover, .stat-card:hover, .info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px var(--shadow-hover);
+    border-color: var(--primary-blue);
+}
+
+.card { padding: 2rem; text-align: left; }
+.card h3 { margin: 1.2rem 0 0.5rem; font-size: 1.2rem; }
+.card p { font-size: 0.95rem; }
+
+.icon-box {
+    width: 45px; height: 45px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; color: white;
+}
+.icon-red { background-color: #ef4444; }
+.icon-orange { background-color: #f97316; }
+.icon-green { background-color: #22c55e; }
+.icon-blue { background-color: #3b82f6; }
+
+/* ================= Seção Diferencial (Específicos) ================= */
+.diferencial { text-align: center; }
+.diferencial-texto { max-width: 800px; margin: 0 auto; text-align: center;}
+
+.stats-grid {
+    display: flex; justify-content: center; gap: 2rem; margin: 3rem 0; flex-wrap: wrap;
+}
+.stat-card { padding: 2rem 3rem; text-align: center; flex: 1; min-width: 200px; }
+.stat-card h3 { color: var(--primary-blue); font-size: 2.2rem; margin-bottom: 0.5rem; }
+
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; text-align: left; }
+.info-card { padding: 2.5rem; border-radius: 1.25rem;}
+
+.info-card ul { margin-top: 1.5rem; list-style-position: inside; }
+.info-card ul li { margin-bottom: 1rem; color: var(--text-muted); font-size: 1rem; }
+
+/* === Estilo Específico para o Card "Nosso Objetivo" === */
+.card-objetivo {
+    background-color: #A5D6A7 !important; /* Verde claro do fundo (ajustado para ser suave) */
+    border: none!important; /* Borda azul grossa */
+    border-radius: 1.25rem !important; /* Cantos mais retos conforme a imagem */
+    padding: 2.5rem; /* Adicionado para compensar a falta da classe info-card */
+}
+
+/* Trava a cor do texto para ficar legível mesmo se o usuário ativar o dark mode */
+.card-objetivo p {
+    color: #1F2937 !important;
+}
+
+.card-objetivo h3 {
+    color: #1F2937 !important; /* Título em verde escuro */
+    margin-bottom: 1rem; /* Dá espaço entre o título e o texto */
+}
+
+/* ================= CTA e Footer ================= */
+.cta-section { text-align: center; }
+footer { background: linear-gradient(135deg, var(--primary-blue), var(--secondary-green)); color: white; text-align: center; padding: 4rem 5% 2rem; width: 100%; }
+footer p { color: rgba(255, 255, 255, 0.9); margin-top: 1rem; font-size: 0.9rem; }
+
+/* ================= Responsividade (Mobile e Tablet) ================= */
+@media (max-width: 992px) {
+    .cards-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+    .menu-toggle { display: block; }
+
+    .nav-links {
+        position: fixed; top: 70px; left: -100%; width: 100%; height: calc(100vh - 70px);
+        background-color: var(--header-bg); flex-direction: column; justify-content: flex-start;
+        padding-top: 2rem; transition: left 0.3s ease-in-out;
+    }
+    .nav-links.active { left: 0; }
+    .nav-links a { font-size: 1.2rem; padding: 1.2rem; width: 100%; text-align: center; border-bottom: 1px solid var(--card-border); }
+    .nav-links a::after { display: none; }
+
+    .hero { 
+        height: auto; /* Permite que a seção cresça além da tela se o conteúdo for grande */
+        min-height: 100vh; 
+        padding: 120px 5% 60px; /* Aumentei o padding superior para descolar bem do header */
+        overflow: visible; /* Remove a trava que estava cortando o texto */
+        justify-content: flex-start; /* Força o conteúdo a começar de cima para baixo, evitando cortar o topo */
+    }
+    
+    .hero-container { flex-direction: column; text-align: center; justify-content: center; }
+    h1 { font-size: 2.2rem; }
+    .hero-buttons { flex-direction: column; align-items: center; }
+    .hero-buttons .btn { width: 100%; max-width: 100%; }
+
+    .cards-grid { grid-template-columns: 1fr; }
+    .info-grid { grid-template-columns: 1fr; }
+    .stat-card { min-width: 100%; }
+}
+
+/* ================= Imagem no Modo Escuro ================= */
+/* Esconde a imagem escura por padrão (no modo claro) */
+.hero-image .img-escura {
+    display: none;
+}
+
+/* Quando o modo escuro for ativado... */
+[data-theme="dark"] .hero-image .img-clara {
+    display: none; /* Esconde a clara */
+}
+
+[data-theme="dark"] .hero-image .img-escura {
+    display: block; /* Mostra a escura */
+}
+
+[data-theme="dark"] .card-objetivo{
+    background-color: #0B2716 !important; /* Fundo verde bem escuro (ou escolha a sua cor) */
+    border-color: var(--secondary-green) !important;
+}
+[data-theme="dark"] .card-objetivo p {
+    color: white !important;
+    opacity: 85%;
+}
+[data-theme="dark"] .card-objetivo h3 {
+    color: white !important;
+}
+
+
+

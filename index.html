@@ -1,50 +1,159 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projeto Elo</title>
+    <title>ELO - Conecte-se com quem você ama</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="./index.js" defer></script>
+    <link rel="shortcut icon" href="./assets/Vector.png" type="image/x-icon">
 </head>
 <body>
+
+    <!-- Cabeçalho -->
     <header>
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            ELO
+        </div>
+        
         <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="instrucoes.html">Instruções</a></li>
-                <li><a href="produto.html">Produto</a></li>
-                <li><a href="quem-somos.html">Quem Somos?</a></li>
-                <li><a href="referencias.html">Referências</a></li>
-                <li><a href="jogo.html">Jogo</a></li>
-                <li><a href="login.html">Login</a></li>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#" class="active">Início</a></li>
+                <li><a href="#">Instruções</a></li>
+                <li><a href="#">Produto</a></li>
+                <li><a href="#">Quem Somos?</a></li>
+                <li><a href="#">Referências</a></li>
+                <li><a href="#">Jogo</a></li>
             </ul>
         </nav>
+
+        <div class="header-controls">
+            <button class="theme-toggle" id="themeToggle" aria-label="Alternar Tema">🌙</button>
+            <button class="menu-toggle" id="menuToggle" aria-label="Abrir Menu">☰</button>
+        </div>
     </header>
 
     <main>
-        <h1>Conecte-se com quem você ama, onde quer que estejam</h1>
-        <p>A pochete inteligente ELO mantém idosos seguros e independentes, conectando cuidadores em tempo real com tecnologia de ponta.</p>
+        <!-- Seção Hero -->
+        <section class="hero animate-on-scroll">
+            <div class="hero-container">
+                <div class="hero-text">
+                    <h1>Conecte-se com quem você ama, <span>onde quer que estejam</span></h1>
+                    <p>A pochete inteligente ELO mantém idosos seguros e independentes, conectando cuidadores em tempo real com tecnologia de ponta.</p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-green">Conheça a ELO</button>
+                        <button class="btn btn-outline">Como Funciona</button>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="./assets/ChatGPT Image 4 de mai. de 2026, 16_10_10 2.png" class="img-clara" alt="Produto Claro">
+    <img src="./assets/04c9d10c-390e-4b8d-86ed-7be4b5b1bba8.png" class="img-escura" alt="Produto Escuro">
+                </div>
+            </div>
+        </section>
 
-        <div class="home-buttons">
-            <button>
-                Conheça o Elo
-            </button>
+        <!-- Seção Tecnologia -->
+        <section class="tecnologia">
+            <div class="section-content">
+                <h2 class="animate-on-scroll">Tecnologia que Cuida</h2>
+                <p class="animate-on-scroll" style="text-align: center;">Recursos desenvolvidos pensando na segurança e autonomia dos idosos</p>
+                
+                <div class="cards-grid">
+                    <div class="card animate-on-scroll">
+                        <div class="icon-box icon-red">🔔</div>
+                        <h3>Botão de Alerta 192</h3>
+                        <p>Em caso de emergência, um simples toque aciona o SAMU e notifica o cuidador imediatamente.</p>
+                    </div>
+                    <div class="card animate-on-scroll">
+                        <div class="icon-box icon-orange">🚗</div>
+                        <h3>Uber com Aprovação</h3>
+                        <p>Solicite transporte com um botão. O cuidador recebe notificação e pode aprovar ou negar a corrida.</p>
+                    </div>
+                    <div class="card animate-on-scroll">
+                        <div class="icon-box icon-green">🎤</div>
+                        <h3>Comandos de Voz</h3>
+                        <p>Interface por voz e áudio para facilitar o uso, mesmo para quem tem dificuldades com tecnologia.</p>
+                    </div>
+                    <div class="card animate-on-scroll">
+                        <div class="icon-box icon-blue">📱</div>
+                        <h3>App do Cuidador</h3>
+                        <p>Aplicativo completo para cadastrar idosos, receber alertas e monitorar atividades em tempo real.</p>
+                    </div>
+                    <div class="card animate-on-scroll">
+                        <div class="icon-box icon-green">🛡️</div>
+                        <h3>Segurança Total</h3>
+                        <p>Rastreamento em tempo real e notificações instantâneas garantem tranquilidade para toda a família.</p>
+                    </div>
+                    <div class="card animate-on-scroll">
+                        <div class="icon-box icon-blue">❤️</div>
+                        <h3>Conexão Constante</h3>
+                        <p>Mantenha contato direto e saiba sempre onde seu ente querido está, promovendo independência com segurança.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-            <button>
-                Como funciona
-            </button>
-        </div>
+        <!-- Seção Diferencial -->
+        <section class="diferencial">
+            <div class="section-content">
+                <h2 class="animate-on-scroll">Nosso <span>Diferencial</span></h2>
+                <p class="diferencial-texto animate-on-scroll">A ELO é a única solução que combina pochete inteligente com app integrado, oferecendo comandos de voz, aprovação de transportes pelo cuidador e acionamento direto do SAMU. Não é apenas tecnologia - é cuidado humanizado em cada detalhe.</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-card animate-on-scroll">
+                        <h3>100%</h3>
+                        <p>Foco no Idoso</p>
+                    </div>
+                    <div class="stat-card animate-on-scroll">
+                        <h3>24/7</h3>
+                        <p>Monitoramento</p>
+                    </div>
+                    <div class="stat-card animate-on-scroll">
+                        <h3>1º</h3>
+                        <p>No Mercado</p>
+                    </div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-card animate-on-scroll">
+                        <h3>👥 Público-Alvo</h3>
+                        <ul>
+                            <li><strong>Idosos ativos</strong> que valorizam independência mas precisam de segurança extra.</li>
+                            <li><strong>Familiares e cuidadores</strong> que desejam monitorar sem ser invasivos.</li>
+                            <li><strong>Instituições de cuidado</strong> que buscam soluções tecnológicas eficientes.</li>
+                            <li><strong>Profissionais de saúde</strong> especializados em geriatria.</li>
+                        </ul>
+                    </div>
+                    <div class="card-objetivo">
+                        <h3>🎯 Nosso Objetivo</h3>
+                        <p>Proporcionar <strong>autonomia e segurança</strong> para idosos através de tecnologia intuitiva, conectando-os aos entes queridos de forma inteligente.</p>
+                        <br>
+                        <p>Queremos reduzir a ansiedade de familiares e aumentar a qualidade de vida dos idosos, permitindo que vivam com dignidade e liberdade, sabendo que ajuda está sempre a um toque de distância.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Final -->
+        <section class="cta-section animate-on-scroll">
+            <div class="section-content">
+                <h2>Pronto para fortalecer o elo com quem você ama?</h2>
+                <button class="btn btn-blue" style="margin-top: 1.5rem;">Conhecer a ELO agora</button>
+            </div>
+        </section>
     </main>
-    <hr>
 
-    <section>
-        <h2>Tecnologia que cuida</h2>
-
-        <p>Recursos desenvolvidos pensando na segurança e autonomia dos idosos</p>
-        <div class="alerta">
-            <i><img src="./assets/alerta.png" alt=""></i>
-            <h3>Botão de Alerta 192</h3>
-            <p>Em caso de emergência, um simples toque aciona o SAMU (192) e notifica o cuidador imediatamente.</p>
+    <!-- Footer -->
+    <footer>
+        <div class="logo animate-on-scroll" style="justify-content: center; margin-bottom: 1rem;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
         </div>
-    </section>
+        <p class="animate-on-scroll">Conectando cuidadores e idosos com segurança e carinho.</p>
+        <p class="animate-on-scroll">© 2025 ELO. Todos os direitos reservados.</p>
+    </footer>
+
+    
 </body>
 </html>
