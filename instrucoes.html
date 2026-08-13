@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELO - Manual de Instruções</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="instrucoes.css">
+    <script src="./instrucoes.js" defer></script>
+    <link rel="shortcut icon" href="./assets/Vector.png" type="image/x-icon">
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            ELO
+        </div>
+        
+        <nav>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html" >Início</a></li>
+                <li><a href="instrucoes.html"class="active">Instruções</a></li>
+                <li><a href="produtos.html">Produto</a></li>
+                <li><a href="quem-somos.html">Quem Somos?</a></li>
+                <li><a href="referencias.html">Referências</a></li>
+                <li><a href="jogo.html">Jogo</a></li>
+            </ul>
+        </nav>
+
+        <div class="header-controls">
+            <button class="theme-toggle" id="themeToggle" aria-label="Alternar Tema">🌙</button>
+            <button class="menu-toggle" id="menuToggle" aria-label="Abrir Menu">☰</button>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-header">
+            <div class="header-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            </div>
+            <h1>Manual de Instruções</h1>
+            <p>Guia completo para configurar e usar o ELO - passo a passo simplificado</p>
+        </section>
+
+        <section class="steps-section">
+            <div class="step-card">
+                <div class="step-icon icon-blue">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+                <div class="step-content">
+                    <h3>1. Cadastro no App</h3>
+                    <p>Baixe o app ELO na App Store ou Google Play. Crie sua conta como cuidador e cadastre os dados do idoso (nome, idade, contatos de emergência e informações médicas importantes).</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-icon icon-green">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+                </div>
+                <div class="step-content">
+                    <h3>2. Configure a Pochete</h3>
+                    <p>Ligue a pochete ELO pressionando o botão lateral por 3 segundos. Conecte via Bluetooth ao aplicativo seguindo as instruções na tela. A pochete deve ser carregada completamente antes do primeiro uso (cerca de 2 horas).</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-icon icon-red">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                </div>
+                <div class="step-content">
+                    <h3>3. Teste o Botão de Emergência</h3>
+                    <p>O botão vermelho aciona o SAMU (192) e envia alerta ao cuidador. Faça um teste (modo demonstração no app) para garantir que tudo funciona. IMPORTANTE: Não pressione em modo real sem necessidade.</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-icon icon-orange">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="7" cy="21" r="2"></circle><circle cx="17" cy="21" r="2"></circle><path d="M14 11V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v4"></path></svg>
+                </div>
+                <div class="step-content">
+                    <h3>4. Configure Uber</h3>
+                    <p>No app, vincule uma conta Uber e defina as permissões. Quando o idoso pressionar o botão amarelo na pochete, você receberá uma notificação para aprovar ou negar a corrida antes dela ser solicitada.</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-icon icon-purple">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+                </div>
+                <div class="step-content">
+                    <h3>5. Ative Comandos de Voz</h3>
+                    <p>Diga "Oi ELO" para ativar o assistente por voz. Comandos disponíveis: "Ligar para [nome]", "Onde estou?", "Chamar transporte", "Emergência". A pochete responde com confirmações em áudio.</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-icon icon-teal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                </div>
+                <div class="step-content">
+                    <h3>6. Uso Diário</h3>
+                    <p>O idoso deve usar a pochete sempre que sair. A bateria dura até 48 horas. Recarregue diariamente. O app mostra localização em tempo real e histórico de atividades. Configure notificações de acordo com suas preferências.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="video-section">
+            <div class="video-container">
+                <div class="video-header">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                    <h2>Vídeo Demonstrativo</h2>
+                    <p>Assista ao guia completo de utilização do ELO</p>
+                </div>
+                <div class="video-player">
+                    <div class="play-button">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+                    </div>
+                    <h3>Vídeo em Produção</h3>
+                    <p>Demonstração completa será inserida aqui</p>
+                    <span class="video-meta">Resolução: 1920x1080 | Duração: 5-7 minutos</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="tips-section">
+            <div class="tips-box">
+                <div class="tips-header">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    <h3>Dicas Importantes</h3>
+                </div>
+                <ul>
+                    <li>Mantenha a pochete sempre carregada (carregador incluso na embalagem)</li>
+                    <li>Teste os botões semanalmente em modo demonstração</li>
+                    <li>Configure múltiplos contatos de emergência no app</li>
+                    <li>A pochete é resistente à água (IP65), mas não submergível</li>
+                    <li>Em caso de problemas, consulte o suporte 24/7 no app</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="logo-footer">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            </div>
+            <p>Conectando cuidadores e idosos com segurança e carinho</p>
+            <p class="copyright">© 2026 ELO. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    
+</body>
+</html>
