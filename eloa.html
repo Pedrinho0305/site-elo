@@ -4,270 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eloá - Assistente Virtual ELO</title>
-    <style>
-        /* Variáveis do Tema Escuro (Padrão) */
-        :root {
-            --bg-color: #0d1117;
-            --chat-bg: #161b22;
-            --primary-gradient: linear-gradient(135deg, #00ff87 0%, #60efff 100%);
-            --text-light: #c9d1d9;
-            --text-title: #ffffff;
-            --ai-msg-bg: #21262d;
-            --input-bg: #0d1117;
-            --border-color: rgba(255, 255, 255, 0.1);
-            --header-bg: rgba(22, 27, 34, 0.8);
-        }
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-        /* Variáveis do Tema Claro */
-        body.light-mode {
-            --bg-color: #e2e8f0;
-            --chat-bg: #ffffff;
-            --text-light: #475569;
-            --text-title: #0f172a;
-            --ai-msg-bg: #f1f5f9;
-            --input-bg: #f8fafc;
-            --border-color: rgba(0, 0, 0, 0.1);
-            --header-bg: rgba(255, 255, 255, 0.9);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-light);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            transition: background-color 0.4s ease;
-        }
-
-        .chat-container {
-            width: 100%;
-            max-width: 500px;
-            background-color: var(--chat-bg);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
-            height: 85vh;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-            transition: all 0.4s ease;
-        }
-
-        /* O Avatar Animado da Eloá e Cabeçalho */
-        .header {
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border-bottom: 1px solid var(--border-color);
-            background: var(--header-bg);
-            backdrop-filter: blur(10px);
-            transition: all 0.4s ease;
-        }
-
-        .avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--primary-gradient);
-            box-shadow: 0 0 15px rgba(0, 255, 135, 0.5);
-            animation: pulse-and-float 3s ease-in-out infinite;
-            flex-shrink: 0;
-        }
-
-        @keyframes pulse-and-float {
-            0%, 100% { transform: translateY(0) scale(1); box-shadow: 0 0 15px rgba(0, 255, 135, 0.5); }
-            50% { transform: translateY(-5px) scale(1.05); box-shadow: 0 0 25px rgba(96, 239, 255, 0.8); }
-        }
-
-        .header-info {
-            flex-grow: 1;
-        }
-
-        .header h2 {
-            margin: 0;
-            color: var(--text-title);
-            font-size: 1.2rem;
-            transition: color 0.4s ease;
-        }
-
-        .header p {
-            margin: 0;
-            font-size: 0.85rem;
-            color: #00ca6a;
-            font-weight: 500;
-        }
-
-        /* Botão de Tema */
-        .theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 50%;
-            transition: transform 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .theme-toggle:hover {
-            transform: scale(1.1) rotate(15deg);
-        }
-
-        /* Área de Mensagens */
-        .chat-box {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .message {
-            max-width: 85%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            font-size: 0.95rem;
-            line-height: 1.4;
-            transition: all 0.4s ease;
-        }
-
-        .message.ai {
-            background-color: var(--ai-msg-bg);
-            color: var(--text-title);
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
-        }
-
-        .message.user {
-            background: var(--primary-gradient);
-            color: #000;
-            font-weight: 500;
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-        }
-
-        /* Área de Digitação */
-        .input-area {
-            padding: 20px;
-            display: flex;
-            gap: 10px;
-            background-color: var(--chat-bg);
-            border-top: 1px solid var(--border-color);
-            transition: all 0.4s ease;
-        }
-
-        input {
-            flex: 1;
-            padding: 12px 20px;
-            border-radius: 25px;
-            border: 1px solid var(--border-color);
-            background-color: var(--input-bg);
-            color: var(--text-title);
-            font-size: 1rem;
-            outline: none;
-            transition: 0.3s;
-        }
-
-        input:focus {
-            border-color: #00ff87;
-        }
-
-        input::placeholder {
-            color: #8b949e;
-        }
-
-        .send-btn {
-            background: var(--primary-gradient);
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.2s;
-            flex-shrink: 0;
-        }
-
-        .send-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .send-btn svg {
-            width: 20px;
-            height: 20px;
-            fill: #000;
-            transform: translateX(2px);
-        }
-
-        /* RESPONSIVIDADE PARA TELAS MENORES */
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-            .chat-container {
-                height: 98vh;
-                border-radius: 15px;
-            }
-            .header {
-                padding: 15px;
-            }
-            .input-area {
-                padding: 15px;
-            }
-            .message {
-                font-size: 0.9rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="eloa.css?v=3">
+    <link rel="stylesheet" href="header.css">
 </head>
-<body>
+<body class="eloa-page">
+
+    <header class="site-header">
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            ELO
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="index.html">Início</a></li>
+                <li><a href="instrucoes.html">Instruções</a></li>
+                <li><a href="produtos.html">Produto</a></li>
+                <li><a href="quem-somos.html">Quem Somos?</a></li>
+                <li><a href="referencias.html">Referências</a></li>
+                <li><a href="jogo.html">Jogo</a></li>
+                <li><a href="eloa.html" class="active">eloá</a></li>
+            </ul>
+        </nav>
+        <div class="header-controls">
+            <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema">🌙</button>
+            <button class="menu-toggle" id="menuToggle" type="button" aria-label="Abrir menu">☰</button>
+        </div>
+    </header>
 
     <div class="chat-container">
-        <div class="header">
-            <div class="avatar"></div>
+        <div class="chat-header">
+            <div class="avatar" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M4 22a8 8 0 0 1 16 0"/></svg></div>
             <div class="header-info">
-                <h2>Eloá</h2>
+                <h1>Eloá</h1>
                 <p>Online e pronta para ajudar</p>
             </div>
-            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Mudar Tema">☀️</button>
         </div>
 
         <div class="chat-box" id="chat-box">
-            <div class="message ai">Olá! Eu sou a Eloá, a assistente do projeto ELO. Como posso te ajudar a entender melhor a nossa pochete inteligente hoje?</div>
+            <div class="message ai">Olá! Eu sou a Eloá, a assistente do projeto ELO. Como posso ajudar você hoje?</div>
         </div>
 
         <div class="input-area">
-            <input type="text" id="user-input" placeholder="Pergunte algo sobre o projeto..." onkeypress="handleKeyPress(event)">
-            <button class="send-btn" onclick="enviarMensagem()">
+            <input type="text" id="user-input" placeholder="Pergunte algo sobre o projeto..." aria-label="Sua mensagem" onkeydown="handleKeyPress(event)">
+            <button class="send-btn" type="button" aria-label="Enviar mensagem" onclick="enviarMensagem()">
                 <svg viewBox="0 0 24 24"><path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/></svg>
             </button>
         </div>
     </div>
 
     <script>
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            const btn = document.getElementById('theme-btn');
-            
-            if (document.body.classList.contains('light-mode')) {
-                btn.innerText = '🌙';
-            } else {
-                btn.innerText = '☀️';
-            }
-        }
+        const themeToggle = document.getElementById('themeToggle');
+        const htmlElement = document.documentElement;
+        function updateThemeIcon(theme) { themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙'; }
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        htmlElement.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+        themeToggle.addEventListener('click', () => {
+            const newTheme = htmlElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            htmlElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.querySelector('.nav-links');
+        menuToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
 
         async function enviarMensagem() {
             const input = document.getElementById("user-input");
@@ -277,7 +81,8 @@
             addMessage(texto, "user");
             input.value = "";
 
-            const msgCarregando = addMessage("Processando...", "ai");
+            const msgCarregando = addMessage("Eloá está preparando uma resposta...", "ai");
+            msgCarregando.classList.add('is-loading');
 
             try {
                 // AQUI ESTÁ A MUDANÇA: Coloque o seu IP no lugar de "SEU_IP_AQUI"
@@ -299,6 +104,7 @@
                 console.error("Erro no envio:", erro);
                 msgCarregando.innerText = "Desculpe, perdi a conexão com o servidor central.";
             }
+            msgCarregando.classList.remove('is-loading');
         }
 
         function addMessage(texto, remetente) {
@@ -312,7 +118,7 @@
         }
 
         function handleKeyPress(e) {
-            if (e.key === 'Enter') enviarMensagem();
+            if (e.key === 'Enter') { e.preventDefault(); enviarMensagem(); }
         }
     </script>
 

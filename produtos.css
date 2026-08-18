@@ -1,0 +1,356 @@
+/* Variables & Theme Color Mapping */
+:root {
+  /* Light Theme */
+  --bg-main: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-banner: linear-gradient(135deg, #3b82f6 0%, #0d9488 100%);
+  --bg-table-header: #2563eb;
+  --bg-table-subtotal: #f1f5f9;
+  --bg-included: #e6f4ea;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-banner: #ffffff;
+  --text-accent: #059669;
+  --text-nav: #334155;
+  --border-color: #e2e8f0;
+  
+  --footer-bg: linear-gradient(135deg, #2563eb 0%, #0d9488 100%);
+  --footer-text: #ffffff;
+  --badge-bg: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] {
+  /* Dark Theme */
+  --bg-main: #050c17;
+  --bg-card: #0b1321;
+  --bg-banner: linear-gradient(135deg, #092138 0%, #064e3b 100%);
+  --bg-table-header: #1f2b5c;
+  --bg-table-subtotal: #0a111e;
+  --bg-included: #082118;
+
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-banner: #ffffff;
+  --text-accent: #10b981;
+  --text-nav: #e2e8f0;
+  --border-color: #1e293b;
+
+  --footer-bg: linear-gradient(135deg, #0d1e3a 0%, #064e3b 100%);
+  --footer-text: #cbd5e1;
+  --badge-bg: rgba(0, 0, 0, 0.3);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--text-nav);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.nav-links a.active,
+.nav-links a:hover {
+  color: #3b82f6;
+}
+
+.menu-toggle, .theme-toggle {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.menu-toggle {
+  display: none;
+}
+
+/* Main Layout */
+.main-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+/* Hero Section */
+.hero {
+  text-align: center;
+}
+
+.cube-icon {
+  font-size: 2.5rem;
+  color: #3b82f6;
+  margin-bottom: 0.5rem;
+}
+
+.hero h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.hero p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+}
+
+/* Banner Card */
+.banner-card {
+  background: var(--bg-banner);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-banner);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.banner-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.banner-card h2 {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.banner-card p {
+  font-size: 0.95rem;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto 1.5rem auto;
+}
+
+.badges {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.badge {
+  background: var(--badge-bg);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  backdrop-filter: blur(4px);
+}
+
+/* Component Table */
+.components-section h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.table-container {
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-card);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th, td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.9rem;
+}
+
+th {
+  background-color: var(--bg-table-header);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.price {
+  color: var(--text-accent);
+  font-weight: 600;
+}
+
+tfoot .subtotal-row {
+  background-color: var(--bg-table-subtotal);
+}
+
+tfoot td {
+  font-size: 0.95rem;
+}
+
+.highlight {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* Product Image Preview */
+.product-preview {
+  display: flex;
+  justify-content: center;
+}
+
+.product-box-placeholder img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+/* Included Items Section */
+.included-card {
+  background-color: var(--bg-included);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+}
+
+.included-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-primary);
+}
+
+.included-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.included-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.included-item i {
+  color: var(--text-accent);
+}
+
+/* Footer */
+.footer {
+  background: var(--footer-bg);
+  color: var(--footer-text);
+  text-align: center;
+  padding: 2rem 1rem;
+  margin-top: auto;
+}
+
+.footer-logo {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.footer p {
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.footer .copyright {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* Responsividade (Mobile) */
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--bg-card);
+    flex-direction: column;
+    padding: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .nav-links.show {
+    display: flex;
+  }
+
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: table-cell;
+  }
+
+  .included-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .badges {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

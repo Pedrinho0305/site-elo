@@ -62,8 +62,31 @@ header {
 .logo { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
 
 .nav-links { display: flex; gap: 1.5rem; align-items: center; }
-.nav-links a { font-size: 0.95rem; font-weight: 500; color: var(--text-muted); }
-.nav-links a.active, .nav-links a:hover { color: var(--primary-color); }
+.nav-links a {
+    position: relative;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    padding-bottom: 4px;
+}
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--primary-blue, #1877F2);
+    transition: width 0.3s ease;
+}
+.nav-links a.active,
+.nav-links a:hover {
+    color: var(--primary-blue, #1877F2);
+}
+.nav-links a.active::after,
+.nav-links a:hover::after {
+    width: 100%;
+}
 
 .header-controls { display: flex; align-items: center; gap: 1rem; }
 .theme-toggle, .menu-toggle {
@@ -147,6 +170,7 @@ main {
 .step-content p {
     font-size: 0.95rem;
     color: var(--text-muted);
+    text-align: justify;
 }
 
 /* ================= Vídeo Demonstrativo ================= */

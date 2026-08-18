@@ -16,3 +16,12 @@
 .site-header .menu-toggle span { width: 20px; height: 2px; margin: 2px 0; background: currentColor; border-radius: 3px; transition: transform .2s, opacity .2s; }
 .site-header .mobile-theme-toggle, .site-header .nav-theme-button { display: none; }
 @media (max-width: 768px) { .site-header .menu-toggle { display: flex; flex-direction: column; } .site-header .navigation { position: fixed; top: 72px; left: -100%; width: 100%; height: calc(100vh - 72px); flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 0; padding-top: 2rem; background-color: var(--header-bg, var(--bg-color, #fff)); transition: left .3s ease-in-out; } .site-header .navigation.active, .site-header .navigation.is-open { left: 0; } .site-header .navigation a { padding: 1.2rem; border-bottom: 1px solid var(--card-border, var(--line, #e2e8f0)); text-align: center; font-size: 1.2rem; } .site-header .navigation a::after { display: none; } .site-header .nav-theme-button { display: block; margin: 1rem auto; padding: .7rem 1rem; border: 1px solid var(--card-border, var(--line, #e2e8f0)); border-radius: 8px; color: inherit; background: transparent; cursor: pointer; } }
+
+*{
+    font-family: 'Inter', sans-serif;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}

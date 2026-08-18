@@ -4,6 +4,7 @@
     --text-main: #1a1a2e;
     --text-muted: #666666;
     --primary-blue: #1877F2;
+    --primary-gradient: linear-gradient(135deg, #00ff87 0%, #60efff 100%);
     --primary-blue-hover: #155db8;
     --secondary-green: #2e8b57;
     --secondary-green-hover: #246d44;
@@ -11,6 +12,12 @@
     --card-border: #e2e8f0;
     --header-bg: #ffffff;
     --shadow-hover: rgba(0, 0, 0, 0.05);
+    /* Chat-specific defaults */
+    --chat-bg: #ffffff;
+    --ai-msg-bg: #f1f5f9;
+    --input-bg: #f8fafc;
+    --text-title: #0f172a;
+    --border-color: rgba(0,0,0,0.08);
 }
 
 [data-theme="dark"] {
@@ -21,6 +28,12 @@
     --card-border: #2d3748;
     --header-bg: #0b132b;
     --shadow-hover: rgba(0, 0, 0, 0.2);
+    /* Chat-specific dark */
+    --chat-bg: #161b22;
+    --ai-msg-bg: #21262d;
+    --input-bg: #0d1117;
+    --text-title: #ffffff;
+    --border-color: rgba(255,255,255,0.08);
 }
 
 /* ================= Resets Básicos ================= */

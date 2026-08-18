@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Produto ELO - Pochete Inteligente</title>
+  <link rel="stylesheet" href="produtos.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="./produtos.js"></script>
+</head>
+<body>
+
+  <!-- Navegação -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="#" class="logo">ELO</a>
+      
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="#">Início</a>
+        <a href="#">Instruções</a>
+        <a href="#" class="active">Produto</a>
+        <a href="#">Quem Somos?</a>
+        <a href="#">Referências</a>
+        <a href="#">Jogo</a>
+      </nav>
+
+      <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="main-container">
+
+    <!-- Hero Title -->
+    <section class="hero">
+      <div class="cube-icon">
+        <i class="fa-solid fa-cube"></i>
+      </div>
+      <h1>Produto ELO</h1>
+      <p>Componentes, tecnologia e investimento para criar a pochete inteligente</p>
+    </section>
+
+    <!-- Banner Principal -->
+    <section class="banner-card">
+      <div class="banner-icon">
+        <i class="fa-solid fa-cube"></i>
+      </div>
+      <h2>Pochete Inteligente ELO</h2>
+      <p>Tecnologia vestível compacta e elegante, desenvolvida especialmente para a terceira idade.</p>
+      
+      <div class="badges">
+        <div class="badge"><i class="fa-solid fa-mobile-screen-button"></i> App integrado</div>
+        <div class="badge"><i class="fa-brands fa-usb"></i> USB C recarregável</div>
+        <div class="badge"><i class="fa-solid fa-shield-halved"></i> IP63 resistente</div>
+      </div>
+    </section>
+
+    <!-- Tabela de Componentes -->
+    <section class="components-section">
+      <h2>Componentes Utilizados</h2>
+      
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th class="desktop-only">Descrição</th>
+              <th>Qtd</th>
+              <th>Valor Un.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Módulo GPS/GPRS SIM800L</td>
+              <td class="desktop-only">Rastreamento em tempo real e conectividade</td>
+              <td>1</td>
+              <td class="price">R$ 45,00</td>
+            </tr>
+            <tr>
+              <td>ESP32 DevKit V1</td>
+              <td class="desktop-only">Microcontrolador com Wi-Fi e Bluetooth 4.2</td>
+              <td>1</td>
+              <td class="price">R$ 32,00</td>
+            </tr>
+            <tr>
+              <td>Bateria Li-Po 3,7V 2000mAh</td>
+              <td class="desktop-only">Alimentação recarregável e de longa duração</td>
+              <td>1</td>
+              <td class="price">R$ 28,00</td>
+            </tr>
+            <tr>
+              <td>Módulo de Áudio/Microfone</td>
+              <td class="desktop-only">Comunicação de voz e alerta sonoro</td>
+              <td>1</td>
+              <td class="price">R$ 18,00</td>
+            </tr>
+            <tr>
+              <td>Botões Táticos (3 unidades)</td>
+              <td class="desktop-only">Emergência (SOS), Ligar e Configurações</td>
+              <td>3</td>
+              <td class="price">R$ 12,00</td>
+            </tr>
+            <tr>
+              <td>Pochete Tática Ajustável</td>
+              <td class="desktop-only">Base de tecido resistente e ajuste de cintura</td>
+              <td>1</td>
+              <td class="price">R$ 38,00</td>
+            </tr>
+            <tr>
+              <td>Carregador USB-C 5V/2A</td>
+              <td class="desktop-only">Carregador rápido seguro</td>
+              <td>1</td>
+              <td class="price">R$ 19,00</td>
+            </tr>
+            <tr>
+              <td>Placa PCB Customizada</td>
+              <td class="desktop-only">Integração perfeita dos componentes</td>
+              <td>1</td>
+              <td class="price">R$ 25,00</td>
+            </tr>
+            <tr>
+              <td>Alto-falante Mini 8Ω 2W</td>
+              <td class="desktop-only">Exibição de áudio e áudio guia de retorno</td>
+              <td>1</td>
+              <td class="price">R$ 9,00</td>
+            </tr>
+            <tr>
+              <td>Resistores, LEDs e Conectores</td>
+              <td class="desktop-only">Componentes eletrônicos diversos</td>
+              <td>1</td>
+              <td class="price">R$ 15,00</td>
+            </tr>
+            <tr>
+              <td>Testes e Certificação</td>
+              <td class="desktop-only">Controle de qualidade e segurança</td>
+              <td>1</td>
+              <td class="price">R$ 85,00</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="subtotal-row">
+              <td colspan="2" class="desktop-only"><strong>Subtotal Componentes:</strong></td>
+              <td class="mobile-only"><strong>Subtotal</strong></td>
+              <td class="mobile-only"></td>
+              <td class="price highlight">R$ 326,00</td>
+            </tr>
+            <tr class="subtotal-row">
+              <td colspan="2" class="desktop-only"><strong>Montagem, Embalagem e Logística:</strong></td>
+              <td class="mobile-only"><strong>Montagem & Logística</strong></td>
+              <td class="mobile-only"></td>
+              <td class="price highlight">R$ 120,00</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+    <!-- Imagem do Produto -->
+    <section class="product-preview">
+      <div class="product-box-placeholder">
+        <img src="https://via.placeholder.com/600x350/0f2b48/ffffff?text=Produto+ELO+Pochete+%2B+Caixa" alt="Caixa do Produto ELO e Pochete Inteligente">
+      </div>
+    </section>
+
+    <!-- O que está incluso -->
+    <section class="included-card">
+      <h3><i class="fa-solid fa-cart-shopping"></i> O que está incluso no produto final</h3>
+      <div class="included-grid">
+        <div class="included-item"><i class="fa-solid fa-check"></i> Pochete ELO completa e montada</div>
+        <div class="included-item"><i class="fa-solid fa-check"></i> Atualizações de software gratuitas</div>
+        <div class="included-item"><i class="fa-solid fa-check"></i> Suporte técnico 24/7</div>
+        <div class="included-item"><i class="fa-solid fa-check"></i> Garantia de 12 meses</div>
+        <div class="included-item"><i class="fa-solid fa-check"></i> Carregador USB-C com cabo de 1,5m</div>
+        <div class="included-item"><i class="fa-solid fa-check"></i> Manual ilustrado em português</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <i class="fa-solid fa-infinity"></i>
+    </div>
+    <p>Conectando cuidadores e idosos com segurança e carinho</p>
+    <p class="copyright">&copy; 2026 ELO. Todos os direitos reservados.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
