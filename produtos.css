@@ -354,3 +354,40 @@ tfoot td {
     align-items: stretch;
   }
 }
+
+/* Define a animação de rotação */
+/* Define a animação de rotação no eixo X */
+/* Animação para girar no eixo X e Y (Horizontal) ao mesmo tempo */
+/* O container precisa ter perspectiva para o efeito 3D funcionar */
+.container-3d {
+  perspective: 1000px; /* Define a "distância" da câmera. Quanto menor, mais exagerado é o 3D */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 50px;
+}
+
+/* A classe que vai na sua imagem */
+.product-box-placeholder {
+  width: 200px; /* Ajuste para o tamanho da sua imagem */
+  border-radius: 15px; /* Deixa as bordas arredondadas (opcional) */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Adiciona uma sombra para destacar o efeito flutuante */
+  
+  /* Essencial para manter os elementos filhos no espaço 3D, se houver */
+  transform-style: preserve-3d;
+  
+  /* Aplica a animação: 6 segundos, velocidade constante, sem parar */
+  animation: girar3D 6s linear infinite;
+}
+
+/* A animação usando rotate3d */
+@keyframes girar3D {
+  from {
+    /* rotate3d(x, y, z, ângulo) */
+    transform: rotate3d(1, 1, 0, 0deg);
+  }
+  to {
+    /* Os números 1, 1, 0 ativam a rotação nos eixos X e Y juntos */
+    transform: rotate3d(1, 1, 0, 360deg); 
+  }
+}
