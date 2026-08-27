@@ -66,7 +66,7 @@ header {
     position: relative;
     font-size: 0.95rem;
     font-weight: 500;
-    color: var(--text-muted);
+    color: var(--text-main);
     padding-bottom: 4px;
 }
 .nav-links a::after {
@@ -81,7 +81,7 @@ header {
 }
 .nav-links a.active,
 .nav-links a:hover {
-    color: var(--primary-blue, #1877F2);
+    color: var(--text-main);
 }
 .nav-links a.active::after,
 .nav-links a:hover::after {

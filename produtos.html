@@ -4,33 +4,38 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Produto ELO - Pochete Inteligente</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="produtos.css">
+  <link rel="stylesheet" href="header.css">
+  <link rel="stylesheet" href="reveal.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="./produtos.js"></script>
+  <script src="./reveal.js" defer></script>
 </head>
 <body>
 
   <!-- Navegação -->
-  <header class="navbar">
-    <div class="nav-container">
-      <a href="#" class="logo">ELO</a>
-      
-      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">
-        <i class="fa-solid fa-bars"></i>
-      </button>
+  <header class="site-header">
+    <div class="logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+      ELO
+    </div>
 
-      <nav class="nav-links" id="navLinks">
-        <a href="#">Início</a>
-        <a href="#">Instruções</a>
-        <a href="#" class="active">Produto</a>
-        <a href="#">Quem Somos?</a>
-        <a href="#">Referências</a>
-        <a href="#">Jogo</a>
-      </nav>
+    <nav>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Início</a></li>
+        <li><a href="instrucoes.html">Instruções</a></li>
+        <li><a href="produtos.html" class="active">Produto</a></li>
+        <li><a href="quem-somos.html">Quem Somos?</a></li>
+        <li><a href="referencias.html">Referências</a></li>
+        <li><a href="jogo.html">Jogo</a></li>
+        <li><a href="eloa.html">eloá</a></li>
+      </ul>
+    </nav>
 
-      <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
-        <i class="fa-solid fa-moon"></i>
-      </button>
+    <div class="header-controls">
+      <button class="theme-toggle" id="themeToggle" aria-label="Alternar Tema">🌙</button>
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir Menu">☰</button>
     </div>
   </header>
 
@@ -145,15 +150,13 @@
           </tbody>
           <tfoot>
             <tr class="subtotal-row">
-              <td colspan="2" class="desktop-only"><strong>Subtotal Componentes:</strong></td>
-              <td class="mobile-only"><strong>Subtotal</strong></td>
-              <td class="mobile-only"></td>
+              <td colspan="3" class="desktop-only"><strong>Subtotal Componentes:</strong></td>
+              <td colspan="2" class="mobile-only"><strong>Subtotal</strong></td>
               <td class="price highlight">R$ 326,00</td>
             </tr>
             <tr class="subtotal-row">
-              <td colspan="2" class="desktop-only"><strong>Montagem, Embalagem e Logística:</strong></td>
-              <td class="mobile-only"><strong>Montagem & Logística</strong></td>
-              <td class="mobile-only"></td>
+              <td colspan="3" class="desktop-only"><strong>Montagem, Embalagem e Logística:</strong></td>
+              <td colspan="2" class="mobile-only"><strong>Montagem & Logística</strong></td>
               <td class="price highlight">R$ 120,00</td>
             </tr>
           </tfoot>
@@ -164,7 +167,8 @@
     <!-- Imagem do Produto -->
     <section class="product-preview">
       <div class="product-box-placeholder">
-        <img src="./assets/3e1e0826-1632-4bb2-a15d-59f2c905080a 1.png" alt="Caixa do Produto ELO e Pochete Inteligente">
+        <img class="product-image-front" src="./assets/3e1e0826-1632-4bb2-a15d-59f2c905080a 1.png" alt="Caixa do Produto ELO e Pochete Inteligente">
+        <img class="product-image-back" src="./assets/3e1e0826-1632-4bb2-a15d-59f2c905080a 1.png" alt="">
       </div>
     </section>
 
