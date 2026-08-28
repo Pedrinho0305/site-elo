@@ -9,8 +9,10 @@
   <link rel="stylesheet" href="header.css">
   <link rel="stylesheet" href="reveal.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="./produtos.js"></script>
+  <script src="./produtos.js" defer></script>
+  <script src="./header.js" defer></script>
   <script src="./reveal.js" defer></script>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
 </head>
 <body>
 
@@ -166,10 +168,19 @@
 
     <!-- Imagem do Produto -->
     <section class="product-preview">
-      <div class="product-box-placeholder">
-        <img class="product-image-front" src="./assets/3e1e0826-1632-4bb2-a15d-59f2c905080a 1.png" alt="Caixa do Produto ELO e Pochete Inteligente">
-        <img class="product-image-back" src="./assets/3e1e0826-1632-4bb2-a15d-59f2c905080a 1.png" alt="">
-      </div>
+      <model-viewer
+        class="product-model"
+        src="./assets/Hi3D_Untitled_allparts_20260827_204539.glb"
+        alt="Pochete inteligente ELO em 3D"
+        auto-rotate
+        rotation-per-second="18deg"
+        camera-controls
+        interaction-prompt="none"
+        camera-orbit="0deg 75deg auto"
+        shadow-intensity="0.35"
+        exposure="1.1"
+        aria-label="Modelo 3D giratório da pochete inteligente ELO">
+      </model-viewer>
     </section>
 
     <!-- O que está incluso -->
@@ -188,12 +199,12 @@
   </main>
 
   <!-- Rodapé -->
-  <footer class="footer">
-    <div class="footer-logo">
-      <i class="fa-solid fa-infinity"></i>
+  <footer>
+    <div class="logo" style="justify-content: center; margin-bottom: 1rem;">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l-1.71-1.71"></path></svg>
     </div>
-    <p>Conectando cuidadores e idosos com segurança e carinho</p>
-    <p class="copyright">&copy; 2026 ELO. Todos os direitos reservados.</p>
+    <p>Conectando cuidadores e idosos com segurança e carinho.</p>
+    <p>© 2025 ELO. Todos os direitos reservados.</p>
   </footer>
 
   <script src="script.js"></script>

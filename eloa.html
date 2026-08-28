@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="header.css">
     <link rel="stylesheet" href="reveal.css">
     <script src="reveal.js" defer></script>
+    <script src="header.js" defer></script>
 </head>
 <body class="eloa-page">
 
@@ -58,23 +59,6 @@
     </div>
 
     <script>
-        const themeToggle = document.getElementById('themeToggle');
-        const htmlElement = document.documentElement;
-        function updateThemeIcon(theme) { themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙'; }
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        htmlElement.setAttribute('data-theme', savedTheme);
-        updateThemeIcon(savedTheme);
-        themeToggle.addEventListener('click', () => {
-            const newTheme = htmlElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            htmlElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
-        });
-
-        const menuToggle = document.getElementById('menuToggle');
-        const navLinks = document.querySelector('.nav-links');
-        menuToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
-
         async function enviarMensagem() {
             const input = document.getElementById("user-input");
             const texto = input.value.trim();
@@ -123,6 +107,14 @@
             if (e.key === 'Enter') { e.preventDefault(); enviarMensagem(); }
         }
     </script>
+
+    <footer>
+        <div class="logo" style="justify-content: center; margin-bottom: 1rem;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+        </div>
+        <p>Conectando cuidadores e idosos com segurança e carinho.</p>
+        <p>© 2025 ELO. Todos os direitos reservados.</p>
+    </footer>
 
 </body>
 </html>

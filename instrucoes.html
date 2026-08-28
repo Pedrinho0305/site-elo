@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="header.css">
     <link rel="stylesheet" href="reveal.css">
     <script src="./instrucoes.js" defer></script>
+    <script src="./header.js" defer></script>
+    <script src="./video-player.js" defer></script>
     <script src="./reveal.js" defer></script>
     <link rel="shortcut icon" href="./assets/Vector.png" type="image/x-icon">
 </head>
@@ -117,12 +119,15 @@
                     <p>Assista ao guia completo de utilização do ELO</p>
                 </div>
                 <div class="video-player">
-                    <div class="play-button">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+                    <video id="instructionVideo" preload="metadata" aria-label="Vídeo demonstrativo do ELO"></video>
+                    <div class="video-controls" aria-label="Controles do vídeo">
+                        <button type="button" id="videoPlay" aria-label="Reproduzir vídeo">Reproduzir</button>
+                        <button type="button" id="videoBack" aria-label="Voltar 10 segundos">-10s</button>
+                        <button type="button" id="videoForward" aria-label="Avançar 10 segundos">+10s</button>
+                        <input type="range" id="videoProgress" min="0" max="100" value="0" aria-label="Progresso do vídeo">
+                        <span id="videoTime">00:00 / 00:00</span>
+                        <button type="button" id="videoFullscreen" aria-label="Alternar tela cheia">Tela cheia</button>
                     </div>
-                    <h3>Vídeo em Produção</h3>
-                    <p>Demonstração completa será inserida aqui</p>
-                    <span class="video-meta">Resolução: 1920x1080 | Duração: 5-7 minutos</span>
                 </div>
             </div>
         </section>
@@ -145,13 +150,11 @@
     </main>
 
     <footer>
-        <div class="footer-content">
-            <div class="logo-footer">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-            </div>
-            <p>Conectando cuidadores e idosos com segurança e carinho</p>
-            <p class="copyright">© 2026 ELO. Todos os direitos reservados.</p>
+        <div class="logo" style="justify-content: center; margin-bottom: 1rem;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
         </div>
+        <p>Conectando cuidadores e idosos com segurança e carinho.</p>
+        <p>© 2025 ELO. Todos os direitos reservados.</p>
     </footer>
 
     

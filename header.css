@@ -25,3 +25,35 @@ a {
     text-decoration: none;
     color: inherit;
 }
+
+.site-header .navigation a,
+.site-header .nav-links a,
+.site-header .navigation a:hover,
+.site-header .navigation .active,
+.site-header .nav-links a:hover,
+.site-header .nav-links a.active {
+    color: #000000;
+}
+
+[data-theme="dark"] .site-header .navigation a,
+[data-theme="dark"] .site-header .nav-links a,
+[data-theme="dark"] .site-header .navigation a:hover,
+[data-theme="dark"] .site-header .navigation .active,
+[data-theme="dark"] .site-header .nav-links a:hover,
+[data-theme="dark"] .site-header .nav-links a.active {
+    color: #ffffff;
+}
+
+footer {
+    background: linear-gradient(135deg, var(--primary-blue, #1877F2), var(--secondary-green, #2e8b57));
+    color: white;
+    text-align: center;
+    padding: 4rem 5% 2rem;
+    width: 100%;
+}
+
+footer p {
+    color: rgba(255, 255, 255, 0.9);
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
