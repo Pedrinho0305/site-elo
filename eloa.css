@@ -1,14 +1,14 @@
 :root {
-    --page: #0d1117;
-    --chat: #161b22;
+    --page: #0b132b;
+    --chat: #0b132b;
     --chat-soft: #21262d;
-    --input: #0d1117;
+    --input: #0b132b;
     --text: #f0f6fc;
     --muted: #8b949e;
     --line: #30363d;
     --green: #00e69a;
     --aqua: #32e7ea;
-    --header-bg: #161b22;
+    --header-bg: #0b132b;
     --text-muted: #8b949e;
     --text-main: #f0f6fc;
     --primary-blue: #00e69a;
@@ -135,7 +135,7 @@ body.eloa-page {
     flex-direction: column;
     overflow: hidden;
     background: var(--chat);
-    border: 1px solid var(--line);
+    border: none;
     border-radius: 20px;
     box-shadow: 0 18px 36px rgba(0, 0, .22);
     margin: 32px 0 48px;

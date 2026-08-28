@@ -28,7 +28,7 @@
 
 [data-theme="dark"] {
   /* Dark Theme */
-  --bg-main: #050c17;
+  --bg-main: #0b132b;
   --bg-card: #0b1321;
   --bg-banner: linear-gradient(135deg, #092138 0%, #064e3b 100%);
   --bg-table-header: #1f2b5c;
