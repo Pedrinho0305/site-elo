@@ -23,7 +23,7 @@
     --header-bg: #0b132b;
     --tips-bg: #064e3b;
     --tips-text: #a7f3d0;
-    --video-gradient: linear-gradient(135deg, #312e81, #065f46);
+    --video-gradient: linear-gradient(135deg, #0b132b 0%, #1d4ed8 40%, #0f766e 100%);
     --shadow: rgba(0, 0, 0, 0.3);
 }
 

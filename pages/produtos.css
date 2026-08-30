@@ -48,7 +48,7 @@
   --header-bg: #0b132b;
   --border-color: #1e293b;
 
-  --footer-bg: linear-gradient(135deg, #0d1e3a 0%, #064e3b 100%);
+  --footer-bg: linear-gradient(135deg, #0b132b 0%, #1d4ed8 40%, #0f766e 100%);
   --footer-text: #cbd5e1;
   --badge-bg: rgba(0, 0, 0, 0.3);
 }

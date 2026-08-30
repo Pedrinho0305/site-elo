@@ -11,6 +11,7 @@
     --card-bg: #f8f9fa;
     --card-border: #e2e8f0;
     --header-bg: #ffffff;
+    --footer-gradient: linear-gradient(135deg, var(--primary-blue), var(--secondary-green));
     --shadow-hover: rgba(0, 0, 0, 0.05);
     /* Chat-specific defaults */
     --chat-bg: #ffffff;
@@ -27,6 +28,7 @@
     --card-bg: #1c2541;
     --card-border: #2d3748;
     --header-bg: #0b132b;
+    --footer-gradient: linear-gradient(135deg, #0b132b 0%, #1d4ed8 40%, #0f766e 100%);
     --shadow-hover: rgba(0, 0, 0, 0.2);
     /* Chat-specific dark */
     --chat-bg: #161b22;
@@ -287,7 +289,7 @@ header {
 
 /* ================= CTA e Footer ================= */
 .cta-section { text-align: center; }
-footer { background: linear-gradient(135deg, var(--primary-blue), var(--secondary-green)); color: white; text-align: center; padding: 4rem 5% 2rem; width: 100%; }
+footer { background: var(--footer-gradient, linear-gradient(135deg, var(--primary-blue), var(--secondary-green))); color: white; text-align: center; padding: 4rem 5% 2rem; width: 100%; }
 footer p { color: rgba(255, 255, 255, 0.9); margin-top: 1rem; font-size: 0.9rem; }
 
 /* ================= Responsividade (Mobile e Tablet) ================= */

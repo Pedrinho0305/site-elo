@@ -6,12 +6,12 @@
     <title>Eloá - Assistente Virtual ELO</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="eloa.css?v=3">
-    <link rel="stylesheet" href="header.css">
-    <link rel="stylesheet" href="reveal.css">
-    <script src="reveal.js" defer></script>
-    <script src="header.js" defer></script>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="eloa.css?v=4">
+    <link rel="stylesheet" href="../header.css">
+    <link rel="stylesheet" href="../reveal.css">
+    <script src="../reveal.js" defer></script>
+    <script src="../header.js" defer></script>
 </head>
 <body class="eloa-page">
 
@@ -20,9 +20,10 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
             ELO
         </div>
+
         <nav>
-            <ul class="nav-links">
-                <li><a href="index.html">Início</a></li>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="../index.html">Início</a></li>
                 <li><a href="instrucoes.html">Instruções</a></li>
                 <li><a href="produtos.html">Produto</a></li>
                 <li><a href="quem-somos.html">Quem Somos?</a></li>
@@ -31,32 +32,29 @@
                 <li><a href="eloa.html" class="active">Eloá</a></li>
             </ul>
         </nav>
+
         <div class="header-controls">
-            <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema">🌙</button>
+            <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema">☀️</button>
             <button class="menu-toggle" id="menuToggle" type="button" aria-label="Abrir menu">☰</button>
         </div>
     </header>
 
-    <div class="chat-container">
-        <div class="chat-header">
-            <div class="avatar" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M4 22a8 8 0 0 1 16 0"/></svg></div>
-            <div class="header-info">
-                <h1>Eloá</h1>
-                <p>Online e pronta para ajudar</p>
+    <main class="ai-shell">
+        <div class="hero-text">Pergunte à Eloá</div>
+
+        <div class="chat-box" id="chat-box" aria-live="polite"></div>
+
+        <div class="composer-wrapper">
+            <div class="composer" role="form" aria-label="Conversar com a Eloá">
+                <button class="plus-btn" type="button" aria-label="Adicionar conteúdo">+</button>
+                <input type="text" id="user-input" placeholder="Pergunte à Eloá" aria-label="Sua mensagem" onkeydown="handleKeyPress(event)">
+                <button class="mic-btn" type="button" aria-label="Falar com a Eloá">◌</button>
+                <button class="send-btn" type="button" aria-label="Enviar mensagem" onclick="enviarMensagem()">
+                    <svg viewBox="0 0 24 24"><path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/></svg>
+                </button>
             </div>
         </div>
-
-        <div class="chat-box" id="chat-box">
-            <div class="message ai">Olá! Eu sou a Eloá, a assistente do projeto ELO. Como posso ajudar você hoje?</div>
-        </div>
-
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="Pergunte algo sobre o projeto..." aria-label="Sua mensagem" onkeydown="handleKeyPress(event)">
-            <button class="send-btn" type="button" aria-label="Enviar mensagem" onclick="enviarMensagem()">
-                <svg viewBox="0 0 24 24"><path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/></svg>
-            </button>
-        </div>
-    </div>
+    </main>
 
     <script>
         async function enviarMensagem() {
@@ -99,7 +97,9 @@
             div.className = `message ${remetente}`;
             div.innerText = texto;
             box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
+            requestAnimationFrame(() => {
+                box.scrollTop = box.scrollHeight;
+            });
             return div;
         }
 
