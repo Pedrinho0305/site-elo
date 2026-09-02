@@ -287,6 +287,30 @@ header {
     margin-bottom: 1rem; /* Dá espaço entre o título e o texto */
 }
 
+.card-objetivo .objective-icon {
+    width: 26px;
+    height: 26px;
+    margin-right: 0.45rem;
+    vertical-align: -0.35rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.info-card .audience-icon {
+    width: 26px;
+    height: 26px;
+    margin-right: 0.45rem;
+    vertical-align: -0.35rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 /* ================= CTA e Footer ================= */
 .cta-section { text-align: center; }
 footer { background: var(--footer-gradient, linear-gradient(135deg, var(--primary-blue), var(--secondary-green))); color: white; text-align: center; padding: 4rem 5% 2rem; width: 100%; }

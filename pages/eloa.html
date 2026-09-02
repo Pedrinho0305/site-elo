@@ -40,15 +40,20 @@
     </header>
 
     <main class="ai-shell">
-        <div class="hero-text">Pergunte à Eloá</div>
+        <div class="hero-text">Fale com a Eloá</div>
 
-        <div class="chat-box" id="chat-box" aria-live="polite"></div>
+        <div class="chat-box" id="chat-box" aria-live="polite">
+            <div class="ai-message-row eloa-welcome">
+                <img class="response-avatar" src="../assets/ChatGPT%20Image%201%20de%20set.%20de%202026,%2021_31_52.png" alt="Eloá acenando">
+                <div class="message ai">Olá! Eu sou a Eloá, a IA do projeto ELO.</div>
+            </div>
+        </div>
 
         <div class="composer-wrapper">
             <div class="composer" role="form" aria-label="Conversar com a Eloá">
-                <button class="plus-btn" type="button" aria-label="Adicionar conteúdo">+</button>
-                <input type="text" id="user-input" placeholder="Pergunte à Eloá" aria-label="Sua mensagem" onkeydown="handleKeyPress(event)">
-                <button class="mic-btn" type="button" aria-label="Falar com a Eloá">◌</button>
+                
+                <input type="text" id="user-input" placeholder="Fale com a Eloá" aria-label="Sua mensagem" onkeydown="handleKeyPress(event)">
+                
                 <button class="send-btn" type="button" aria-label="Enviar mensagem" onclick="enviarMensagem()">
                     <svg viewBox="0 0 24 24"><path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/></svg>
                 </button>
@@ -96,7 +101,20 @@
             const div = document.createElement("div");
             div.className = `message ${remetente}`;
             div.innerText = texto;
-            box.appendChild(div);
+            if (remetente === "ai") {
+                const row = document.createElement("div");
+                row.className = "ai-message-row";
+
+                const avatar = document.createElement("img");
+                avatar.className = "response-avatar";
+                avatar.src = "../assets/ChatGPT%20Image%201%20de%20set.%20de%202026,%2021_31_52.png";
+                avatar.alt = "Eloá acenando";
+
+                row.append(avatar, div);
+                box.appendChild(row);
+            } else {
+                box.appendChild(div);
+            }
             requestAnimationFrame(() => {
                 box.scrollTop = box.scrollHeight;
             });
