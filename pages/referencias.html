@@ -1,50 +1,292 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>ELO - Referências</title>
-	<link rel="stylesheet" href="../header.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELO - Referências Científicas</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="referencias.css">
-	<link rel="stylesheet" href="../reveal.css">
-	<script src="referencias.js" defer></script>
-	<script src="../header.js" defer></script>
-	<script src="../reveal.js" defer></script>
-	<link rel="shortcut icon" href="../assets/Vector.png" type="image/x-icon">
+    <link rel="stylesheet" href="referencias.css">
+    <link rel="stylesheet" href="../header.css">
+    <link rel="stylesheet" href="../reveal.css">
+    <script src="./referencias.js" defer></script>
+    <script src="../header.js" defer></script>
+    <script src="../reveal.js" defer></script>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
-	<header class="site-header">
-		<div class="brand">
-             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-            ELO</div>
-		<nav class="navigation">
-			<ul>
-				<li><a href="../index.html">Início</a></li>
-				<li><a href="instrucoes.html">Instruções</a></li>
-				<li><a href="produtos.html">Produto</a></li>
-				<li><a href="quem-somos.html">Quem Somos?</a></li>
-				<li><a href="referencias.html" class="active">Referências</a></li>
-				<li><a href="jogo.html">Jogo</a></li>
-				<li><a href="eloa.html">Eloá</a></li>
-			</ul>
-		</nav>
-		<div class="header-actions">
-			<button class="theme-toggle" title="Alternar tema">🌙</button>
-		</div>
-	</header>
 
-	<main style="padding:100px 20px;">
-		<h1>Referências</h1>
-		<p>Lista de referências usadas no projeto.</p>
-	</main>
+    <!-- Cabeçalho -->
+    <header class="site-header">
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            ELO
+        </div>
 
-	<footer>
-		<div class="logo" style="justify-content: center; margin-bottom: 1rem;">
-			<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-		</div>
-		<p>Conectando cuidadores e idosos com segurança e carinho.</p>
-		<p>© 2025 ELO. Todos os direitos reservados.</p>
-	</footer>
+        <nav>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="../index.html">Início</a></li>
+                <li><a href="instrucoes.html">Instruções</a></li>
+                <li><a href="produtos.html">Produto</a></li>
+                <li><a href="quem-somos.html">Quem Somos?</a></li>
+                <li><a href="referencias.html" class="active">Referências</a></li>
+                <li><a href="jogo.html">Jogo</a></li>
+                <li><a href="eloa.html">Eloá</a></li>
+            </ul>
+        </nav>
+
+        <div class="header-controls">
+            <button class="theme-toggle" id="themeToggle" aria-label="Alternar Tema">🌙</button>
+            <button class="menu-toggle" id="menuToggle" aria-label="Abrir Menu">☰</button>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-container">
+
+        <!-- Cabeçalho da página -->
+        <section class="page-header">
+            <div class="header-icon" aria-hidden="true">
+                <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3 2 8l10 5 10-5-10-5z"></path>
+                    <path d="M6 10.4V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-5.6"></path>
+                    <path d="M21 8.5V14"></path>
+                </svg>
+            </div>
+            <h1>Referências Científicas</h1>
+            <p class="page-subtitle">Embasamento científico e pesquisas que fundamentam o desenvolvimento do ELO</p>
+        </section>
+
+        <!-- Fundamentação teórica -->
+        <section class="foundation-card">
+            <div class="foundation-header">
+                <span class="foundation-icon" aria-hidden="true">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"></path>
+                        <path d="M14 3v5h5"></path>
+                    </svg>
+                </span>
+                <div class="foundation-heading">
+                    <span class="foundation-eyebrow">Base do projeto</span>
+                    <h2>Fundamentação Teórica</h2>
+                </div>
+            </div>
+
+            <p class="foundation-lead">O ELO foi desenvolvido a partir de pesquisas científicas rigorosas.
+                Cada decisão técnica e de produto foi guiada por <strong>evidências acadêmicas</strong>
+                e boas práticas da indústria.</p>
+
+            <ul class="foundation-topics">
+                <li>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="5" y="5" width="14" height="14" rx="2"></rect>
+                        <rect x="9.5" y="9.5" width="5" height="5"></rect>
+                        <path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"></path>
+                    </svg>
+                    Tecnologia assistiva
+                </li>
+                <li>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20.4 5.6a5 5 0 0 0-7.1 0L12 6.9l-1.3-1.3a5 5 0 1 0-7.1 7.1l8.4 8.4 8.4-8.4a5 5 0 0 0 0-7.1z"></path>
+                    </svg>
+                    Envelhecimento ativo
+                </li>
+                <li>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M5 12.5a11 11 0 0 1 14 0"></path>
+                        <path d="M8.5 16.2a6 6 0 0 1 7 0"></path>
+                        <path d="M12 19.8h.01"></path>
+                        <path d="M1.8 8.8a17 17 0 0 1 20.4 0"></path>
+                    </svg>
+                    Sistemas IoT para saúde
+                </li>
+                <li>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="8" r="3.5"></circle>
+                        <path d="M5 20a7 7 0 0 1 14 0"></path>
+                    </svg>
+                    Design centrado no usuário
+                </li>
+            </ul>
+
+            <dl class="foundation-stats">
+                <div class="foundation-stat">
+                    <dt>5</dt>
+                    <dd>artigos revisados por pares</dd>
+                </div>
+                <div class="foundation-stat">
+                    <dt>4</dt>
+                    <dd>áreas de pesquisa</dd>
+                </div>
+                <div class="foundation-stat">
+                    <dt>3</dt>
+                    <dd>fontes institucionais</dd>
+                </div>
+            </dl>
+        </section>
+
+        <!-- Artigos científicos -->
+        <section class="articles-section">
+            <h2 class="section-title">
+                <span class="section-icon" aria-hidden="true">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"></path>
+                        <path d="M14 3v5h5"></path>
+                    </svg>
+                </span>
+                Artigos Científicos
+            </h2>
+
+            <ol class="articles-list">
+                <li class="article-card reveal-item">
+                    <span class="article-number" aria-hidden="true">1</span>
+                    <div class="article-body">
+                        <h3>Tecnologia Assistiva para Idosos: Uma Revisão Sistemática</h3>
+                        <p class="article-author">Andrade, D. C. F.</p>
+                        <p class="article-source">Instituto de Estudos em Saúde Coletiva da Universidade Federal do Rio de Janeiro</p>
+                        <a class="article-link" href="#" target="_blank" rel="noopener noreferrer">
+                            Acessar artigo
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                        </a>
+                    </div>
+                </li>
+
+                <li class="article-card reveal-item">
+                    <span class="article-number" aria-hidden="true">2</span>
+                    <div class="article-body">
+                        <h3>Influência da tecnologia assistiva no desempenho funcional e na qualidade de vida de idosos comunitários frágeis</h3>
+                        <p class="article-author">Andrade, D. C. F.</p>
+                        <p class="article-source">Instituto de Estudos em Saúde Coletiva da Universidade Federal do Rio de Janeiro</p>
+                        <a class="article-link" href="#" target="_blank" rel="noopener noreferrer">
+                            Acessar artigo
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                        </a>
+                    </div>
+                </li>
+
+                <li class="article-card reveal-item">
+                    <span class="article-number" aria-hidden="true">3</span>
+                    <div class="article-body">
+                        <h3>O impacto do declínio cognitivo, da capacidade funcional e da mobilidade de idosos com doença de Alzheimer na sobrecarga dos cuidadores</h3>
+                        <p class="article-author">Borges, L. L.</p>
+                        <p class="article-source">Secretaria Municipal de Goiânia, Centro de Referência em Atenção à Saúde da Pessoa Idosa</p>
+                        <a class="article-link" href="#" target="_blank" rel="noopener noreferrer">
+                            Acessar artigo
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                        </a>
+                    </div>
+                </li>
+
+                <li class="article-card reveal-item">
+                    <span class="article-number" aria-hidden="true">4</span>
+                    <div class="article-body">
+                        <h3>Correlação entre funcionalidade, mobilidade e risco de quedas em idosos com doença de Alzheimer</h3>
+                        <p class="article-author">Pinheiro, A. H.</p>
+                        <p class="article-source">Federal District Health Department, Geriatrics and Gerontology Outpatient Clinic</p>
+                        <a class="article-link" href="#" target="_blank" rel="noopener noreferrer">
+                            Acessar artigo
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                        </a>
+                    </div>
+                </li>
+
+                <li class="article-card reveal-item">
+                    <span class="article-number" aria-hidden="true">5</span>
+                    <div class="article-body">
+                        <h3>Mobilidade a pé nas cidades: a percepção dos idosos sobre a segurança</h3>
+                        <p class="article-author">Hillesheim, D.</p>
+                        <p class="article-source">Universidade Federal de Santa Catarina</p>
+                        <a class="article-link" href="#" target="_blank" rel="noopener noreferrer">
+                            Acessar artigo
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                        </a>
+                    </div>
+                </li>
+            </ol>
+        </section>
+
+        <!-- Recursos adicionais -->
+        <section class="resources-section">
+            <h2 class="section-title section-title--centered">Recursos Adicionais</h2>
+
+            <div class="resources-grid">
+                <a class="resource-card reveal-item" href="https://www.who.int/health-topics/ageing" target="_blank" rel="noopener noreferrer">
+                    <span class="resource-icon" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </span>
+                    <h3>OMS — Envelhecimento e Saúde</h3>
+                    <p>Dados globais sobre envelhecimento populacional e desafios de saúde</p>
+                </a>
+
+                <a class="resource-card reveal-item" href="https://www.ibge.gov.br/estatisticas/sociais/populacao.html" target="_blank" rel="noopener noreferrer">
+                    <span class="resource-icon" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </span>
+                    <h3>IBGE — Projeções da População Idosa no Brasil</h3>
+                    <p>Estatísticas demográficas brasileiras sobre envelhecimento</p>
+                </a>
+
+                <a class="resource-card reveal-item" href="https://www.gov.br/saude/pt-br" target="_blank" rel="noopener noreferrer">
+                    <span class="resource-icon" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </span>
+                    <h3>Ministério da Saúde — Política Nacional da Saúde da Pessoa Idosa</h3>
+                    <p>Políticas públicas de saúde voltadas à terceira idade</p>
+                </a>
+            </div>
+        </section>
+
+        <!-- Nota metodológica -->
+        <section class="methodology-card">
+            <h2>Nota sobre Metodologia</h2>
+            <p>Todas as referências foram selecionadas por sua relevância para os aspectos técnicos, éticos e
+                sociais do projeto ELO. Foram priorizadas publicações recentes (2023–2024) de periódicos
+                revisados por pares com alto fator de impacto nas áreas de gerontologia, tecnologia assistiva,
+                Internet das Coisas e interação humano-computador. As pesquisas informaram decisões sobre
+                usabilidade, segurança de dados, design de interface e eficácia dos sistemas de alerta.</p>
+        </section>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer>
+        <div class="logo" style="justify-content: center; margin-bottom: 1rem;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+        </div>
+        <p>Conectando cuidadores e idosos com segurança e carinho.</p>
+        <p>© 2026 ELO. Todos os direitos reservados.</p>
+    </footer>
+
 </body>
 </html>

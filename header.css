@@ -65,3 +65,12 @@ footer p {
     margin-top: 1rem;
     font-size: 0.9rem;
 }
+
+/* Ícone do rodapé sempre branco, em qualquer tema */
+footer .logo {
+    color: #ffffff;
+}
+
+footer .logo svg {
+    stroke: #ffffff;
+}

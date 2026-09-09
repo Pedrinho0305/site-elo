@@ -1,0 +1,10 @@
+Coloque aqui as fotos da equipe, com estes nomes exatos:
+
+  geovana-ribeiro.jpg
+  guilherme-moraes.jpg
+  luiz-henrique.jpg
+  luiza-goncalves.jpg
+  pedro-henrique.jpg
+
+Enquanto o arquivo nao existir, o card mostra as iniciais do integrante.
+Formato sugerido: retrato (proporcao ~3:4), pelo menos 300x400px.
