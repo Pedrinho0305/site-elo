@@ -1,47 +1,264 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>ELO - Jogo</title>
-	<link rel="stylesheet" href="../header.css">
-	<link rel="stylesheet" href="jogo.css">
-	<link rel="stylesheet" href="../reveal.css">
-	<script src="jogo.js" defer></script>
-	<script src="../header.js" defer></script>
-	<script src="../reveal.js" defer></script>
-	<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELO - Jogo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="jogo.css">
+    <link rel="stylesheet" href="../header.css">
+    <link rel="stylesheet" href="../reveal.css">
+    <script src="./jogo.js" defer></script>
+    <script src="../header.js" defer></script>
+    <script src="../reveal.js" defer></script>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
-	<header class="site-header">
-		<div class="brand">ELO</div>
-		<nav class="navigation">
-			<ul>
-				<li><a href="../index.html">Início</a></li>
-				<li><a href="instrucoes.html">Instruções</a></li>
-				<li><a href="produtos.html">Produto</a></li>
-				<li><a href="quem-somos.html">Quem Somos?</a></li>
-				<li><a href="referencias.html">Referências</a></li>
-				<li><a href="jogo.html" class="active">Jogo</a></li>
-				<li><a href="eloa.html">Eloá</a></li>
-			</ul>
-		</nav>
-		<div class="header-actions">
-			<button class="theme-toggle" title="Alternar tema">🌙</button>
-		</div>
-	</header>
 
-	<main style="padding:100px 20px;">
-		<h1>Jogo</h1>
-		<p>Conteúdo do jogo aqui.</p>
-	</main>
+    <!--
+        CONTEUDO PROVISORIO - trocar quando o jogo tiver dados fechados.
+        Cada bloco a substituir esta marcado com um comentario "PROVISORIO"
+        logo acima dele. Sao cinco:
+          1. .game-banner   o conceito e os tres selos
+          2. .mechanics     os quatro cartoes de mecanica
+          3. .gallery       as tres molduras de captura, ainda vazias
+          4. .spec-list     plataforma, duracao e idioma
+          5. .roadmap       nomes e estados das quatro fases
 
-	<footer>
-		<div class="logo" style="justify-content: center; margin-bottom: 1rem;">
-			<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-		</div>
-		<p>Conectando cuidadores e idosos com segurança e carinho.</p>
-		<p>© 2025 ELO. Todos os direitos reservados.</p>
-	</footer>
+        O que NAO e provisorio, porque ja esta publicado em outras paginas:
+          . Guilherme Moraes na producao, Unreal e GDevelop (Quem Somos)
+          . Botao 192/SAMU, comandos de voz, corrida com aprovacao do
+            cuidador e app do cuidador (Inicio e Instrucoes)
+        Nao inventar recurso de produto aqui: o jogo so pode ensinar o que a
+        pochete faz de verdade.
+    -->
+
+    <!-- Cabeçalho -->
+    <header class="site-header">
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            ELO
+        </div>
+
+        <nav>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="../index.html">Início</a></li>
+                <li><a href="instrucoes.html">Instruções</a></li>
+                <li><a href="produtos.html">Produto</a></li>
+                <li><a href="quem-somos.html">Quem Somos?</a></li>
+                <li><a href="referencias.html">Referências</a></li>
+                <li><a href="jogo.html" class="active">Jogo</a></li>
+                <li><a href="eloa.html">Eloá</a></li>
+            </ul>
+        </nav>
+
+        <div class="header-controls">
+            <button class="theme-toggle" id="themeToggle" aria-label="Alternar Tema">🌙</button>
+            <button class="menu-toggle" id="menuToggle" aria-label="Abrir Menu">☰</button>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-container">
+
+        <!-- Abertura -->
+        <section class="page-header night">
+            <div class="header-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6.6 7.5h10.8a4 4 0 0 1 3.9 3.1l1 4.4a2.6 2.6 0 0 1-4.6 2.2l-1.4-1.8H7.7l-1.4 1.8a2.6 2.6 0 0 1-4.6-2.2l1-4.4a4 4 0 0 1 3.9-3.1Z"></path>
+                    <path d="M7.2 11.2v2.4M6 12.4h2.4"></path>
+                    <circle cx="15.8" cy="11.8" r=".9" fill="currentColor" stroke="none"></circle>
+                    <circle cx="17.9" cy="13.6" r=".9" fill="currentColor" stroke="none"></circle>
+                </svg>
+            </div>
+            <h1>O jogo da ELO</h1>
+            <p class="page-subtitle">Uma história curta e jogável em que a pochete resolve o problema antes de
+                você precisar dela de verdade. Feita para quem vai usar e para quem cuida.</p>
+
+            <p class="build-status">
+                <span class="build-dot" aria-hidden="true"></span>
+                Em desenvolvimento. Esta página é uma prévia, e os detalhes ainda podem mudar.
+            </p>
+        </section>
+
+        <!-- PROVISORIO 1 de 5: o conceito e os tres selos -->
+        <section class="game-banner">
+            <h2>Aprender usando, antes de precisar</h2>
+            <p>Ninguém lê o manual no dia da emergência. O jogo inverte a ordem: você vive uma tarde comum,
+                a padaria, a consulta, o caminho de volta, e aprende os gestos da pochete no momento em que
+                eles fazem diferença. Quando a situação real chegar, a mão já sabe onde ir.</p>
+
+            <ul class="badges">
+                <li class="badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.2"></circle><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0"></path></svg>
+                    Produção de Guilherme Moraes
+                </li>
+                <li class="badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2 20 7.6v8.8L12 20.8 4 16.4V7.6L12 3.2Z"></path><path d="M4 7.6 12 12l8-4.4M12 12v8.8"></path></svg>
+                    Unreal Engine e GDevelop
+                </li>
+                <li class="badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.2v5.1l3.2 1.9"></path></svg>
+                    Uma partida de poucos minutos
+                </li>
+            </ul>
+        </section>
+
+        <!-- PROVISORIO 2 de 5: os quatro cartoes de mecanica -->
+        <section class="mechanics">
+            <h2 class="section-title">O que você <span>faz</span> no jogo</h2>
+            <p class="section-lead">Cada situação treina um recurso que a pochete já tem. Nada no jogo depende
+                de função que a ELO não faça de verdade.</p>
+
+            <div class="mechanics-grid">
+                <article class="mechanic reveal-item">
+                    <span class="mechanic-icon icon-red" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.8a7.2 7.2 0 0 1 7.2 7.2v4.6l1.7 2.9a1 1 0 0 1-.9 1.5H4a1 1 0 0 1-.9-1.5l1.7-2.9V11A7.2 7.2 0 0 1 12 3.8Z"></path><path d="M10 18.5a2 2 0 0 0 4 0"></path><path d="M12 7.5v3.5M12 15.5h.01"></path></svg>
+                    </span>
+                    <h3>Chamar ajuda</h3>
+                    <p>Uma queda na calçada. Você tem segundos para achar o botão vermelho, o mesmo que aciona
+                        o SAMU e avisa o cuidador na vida real.</p>
+                </article>
+
+                <article class="mechanic reveal-item">
+                    <span class="mechanic-icon icon-orange" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.5h2l1.4-4.5a2 2 0 0 1 2-1.5h7.7a2 2 0 0 1 2 1.5l1.4 4.5h2"></path><path d="M7.5 12.5l1.8 4.2a1.5 1.5 0 0 0 1.4 1h3.8a1.5 1.5 0 0 0 1.4-1l1.8-4.2"></path><circle cx="8" cy="18" r="1.5"></circle><circle cx="16" cy="18" r="1.5"></circle></svg>
+                    </span>
+                    <h3>Pedir uma corrida</h3>
+                    <p>A consulta é do outro lado da cidade. Você chama o transporte pela pochete e espera o
+                        cuidador aprovar, a mesma troca que o app faz.</p>
+                </article>
+
+                <article class="mechanic reveal-item">
+                    <span class="mechanic-icon icon-green" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5a5 5 0 0 1 5 5v2.1A4.4 4.4 0 0 1 12.8 15h-1.6A4.4 4.4 0 0 1 7 10.6V8.5a5 5 0 0 1 5-5Z"></path><path d="M6 13a6 6 0 0 0 12 0"></path><path d="M9.5 17.5v2M14.5 17.5v2"></path></svg>
+                    </span>
+                    <h3>Falar com a pochete</h3>
+                    <p>Mãos ocupadas com as compras. Você resolve por voz, sem tirar nada do bolso, como os
+                        comandos de áudio da ELO permitem.</p>
+                </article>
+
+                <article class="mechanic reveal-item">
+                    <span class="mechanic-icon icon-blue" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.5"></rect><path d="M11 5.5h2M12 18.5v.01"></path><circle cx="12" cy="12" r="2.8"></circle></svg>
+                    </span>
+                    <h3>Cuidar de longe</h3>
+                    <p>Uma fase inteira vista do outro lado: você é quem recebe o alerta, olha o mapa e decide.
+                        Para o filho, a filha, quem acompanha.</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- PROVISORIO 3 de 5: as tres molduras de captura, ainda vazias.
+             Ao colocar a imagem, trocar .shot-frame pelo <img> e remover .shot-mark. -->
+        <section class="gallery night">
+            <h2 class="section-title">Como ele está ficando</h2>
+            <p class="section-lead">As telas abaixo ainda não foram publicadas. Assim que o protótipo jogável
+                fechar, elas entram aqui.</p>
+
+            <ul class="gallery-grid">
+                <li class="shot reveal-item">
+                    <div class="shot-frame"><span class="shot-mark">Imagem pendente</span></div>
+                    <p class="shot-caption">A tarde começa: a casa, a lista de compras e a pochete na cintura.</p>
+                </li>
+                <li class="shot reveal-item">
+                    <div class="shot-frame"><span class="shot-mark">Imagem pendente</span></div>
+                    <p class="shot-caption">O botão vermelho em close, no instante em que a ajuda é chamada.</p>
+                </li>
+                <li class="shot reveal-item">
+                    <div class="shot-frame"><span class="shot-mark">Imagem pendente</span></div>
+                    <p class="shot-caption">A tela do cuidador: o alerta chega, o mapa abre, a corrida aguarda resposta.</p>
+                </li>
+            </ul>
+        </section>
+
+        <!-- Ficha técnica e andamento -->
+        <section class="build">
+
+            <div class="spec-card">
+                <h2>Ficha técnica</h2>
+                <!-- PROVISORIO 4 de 5: plataforma, duracao e idioma ainda nao estao fechados -->
+                <dl class="spec-list">
+                    <div class="spec-row">
+                        <dt>Produção</dt>
+                        <dd>Guilherme Moraes, o designer de jogos da equipe</dd>
+                    </div>
+                    <div class="spec-row">
+                        <dt>Motor</dt>
+                        <dd>Unreal Engine e GDevelop</dd>
+                    </div>
+                    <div class="spec-row">
+                        <dt>Plataforma</dt>
+                        <dd>A definir</dd>
+                    </div>
+                    <div class="spec-row">
+                        <dt>Duração</dt>
+                        <dd>A definir</dd>
+                    </div>
+                    <div class="spec-row">
+                        <dt>Idioma</dt>
+                        <dd>Português do Brasil</dd>
+                    </div>
+                    <div class="spec-row">
+                        <dt>Preço</dt>
+                        <dd>Gratuito, dentro deste site</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <!-- PROVISORIO 5 de 5: nomes e estados das quatro fases.
+                 O estado vem da classe: .is-done, .is-current ou nenhuma. -->
+            <div class="roadmap-card">
+                <h2>Onde estamos</h2>
+                <ol class="roadmap">
+                    <li class="phase is-done">
+                        <h3>Conceito e roteiro</h3>
+                        <p>As situações do dia a dia que viram fase, e qual recurso da pochete cada uma ensina.</p>
+                        <p class="phase-state">Concluído</p>
+                    </li>
+                    <li class="phase is-current">
+                        <h3>Protótipo jogável</h3>
+                        <p>A primeira fase inteira, de ponta a ponta, para acertar o ritmo e a dificuldade.</p>
+                        <p class="phase-state">Em andamento</p>
+                    </li>
+                    <li class="phase">
+                        <h3>Testes com idosos e cuidadores</h3>
+                        <p>Sentar ao lado de quem vai jogar e ver onde a mão trava. É isso que define o que fica.</p>
+                        <p class="phase-state">Planejado</p>
+                    </li>
+                    <li class="phase">
+                        <h3>Publicação nesta página</h3>
+                        <p>O jogo roda aqui mesmo, no navegador, sem instalar nada.</p>
+                        <p class="phase-state">Planejado</p>
+                    </li>
+                </ol>
+            </div>
+
+        </section>
+
+        <!-- Acompanhar -->
+        <section class="follow night">
+            <div class="follow-card">
+                <h2>Quer saber quando ele sair?</h2>
+                <p>Fale com a equipe pelo formulário. Somos cinco pessoas e respondemos pessoalmente, inclusive
+                    se você quiser participar dos testes.</p>
+                <div class="follow-actions">
+                    <a class="follow-btn" href="quem-somos.html#contato">Falar com a equipe</a>
+                    <a class="follow-link" href="instrucoes.html">Enquanto isso, veja o manual da pochete</a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer>
+        <div class="logo" style="justify-content: center; margin-bottom: 1rem;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+        </div>
+        <p>Conectando cuidadores e idosos com segurança e carinho.</p>
+        <p>© 2026 ELO. Todos os direitos reservados.</p>
+    </footer>
+
 </body>
 </html>

@@ -386,10 +386,6 @@ strong { font-weight: 700; }
   .site-header .nav-links a { color: var(--on-band-soft); }
   .site-header .nav-links a.active { color: var(--on-band); background: var(--tint-band-strong); }
   .site-header .nav-links a.active::after { display: none; }
-
-  /* jogo.html usa outra marcação: a navegação vira faixa rolável */
-  .site-header .navigation { max-width: 46vw; overflow-x: auto; scrollbar-width: none; }
-  .site-header .navigation::-webkit-scrollbar { display: none; }
 }
 
 /* --------------------------------------------------------------------------

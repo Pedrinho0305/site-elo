@@ -1,45 +1,502 @@
 /* ==========================================================================
    ELO · Jogo
-   Tokens, cabeçalho e rodapé vêm de header.css.
-   Página ainda sem conteúdo: um convite claro, não um vazio.
+   Tokens, faixas dia/noite, cabeçalho e rodapé vêm de header.css.
+   Ritmo: noite (abertura) → dia (conceito e mecânicas) → noite (capturas) →
+   dia (ficha e andamento) → noite (acompanhar).
+
+   A página descreve um jogo que ainda não saiu. O elemento forte é o trilho
+   de fases: ele é o único lugar onde o estado da produção aparece desenhado,
+   e não escrito. O resto fica quieto, no mesmo tom das outras páginas.
    ========================================================================== */
 
-main {
-  flex: 1;
+.main-container { width: 100%; }
+
+/* Faixas: largura toda, conteúdo centrado em 1000px */
+.main-container > .page-header,
+.main-container > .mechanics,
+.main-container > .gallery,
+.main-container > .build,
+.main-container > .follow {
+  padding: clamp(3.5rem, 7vw, 6rem) max(var(--edge), calc((100% - 1000px) / 2));
+}
+
+.main-container > .page-header { padding-top: calc(var(--band-h) + clamp(3rem, 6vw, 5rem)); }
+
+/* Blocos: cartões com a mesma margem lateral das faixas */
+.main-container > .game-banner {
+  margin: clamp(3rem, 6vw, 5rem) max(var(--edge), calc((100% - 1000px) / 2)) 0;
+}
+
+/* --------------------------------------------------------------------------
+   1 · Abertura — noite
+   -------------------------------------------------------------------------- */
+.page-header { overflow: hidden; }
+
+.page-header::after {
+  content: '';
+  position: absolute;
+  inset: auto -10% -60% auto;
+  width: 60vw;
+  height: 60vw;
+  max-width: 800px;
+  max-height: 800px;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(24, 119, 242, .2), transparent 72%);
+  pointer-events: none;
+}
+
+.header-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--line-band);
+  border-radius: 20px;
+  background: var(--tint-band);
+  color: var(--blue-band);
+}
+
+.header-icon svg { width: 32px; height: 32px; }
+
+.page-header h1 {
+  max-width: 14ch;
+  margin-bottom: 1rem;
+  font-size: clamp(2.5rem, 5.4vw, 4.2rem);
+  letter-spacing: -.045em;
+  color: var(--on-band);
+}
+
+.page-subtitle {
+  max-width: 54ch;
+  font-size: clamp(1.05rem, 1.3vw, 1.2rem);
+  line-height: 1.65;
+  color: var(--on-band-soft);
+}
+
+/* O aviso de que nada aqui está fechado. Fica logo abaixo do subtítulo
+   porque é a primeira coisa que o visitante precisa saber. */
+.build-status {
+  display: inline-flex;
+  align-items: center;
+  gap: .65rem;
+  margin-top: 2rem;
+  padding: .7rem 1.2rem .7rem 1rem;
+  border: 1px solid var(--line-band);
+  border-radius: var(--r-tap);
+  background: var(--tint-band);
+  color: var(--on-band-soft);
+  font-size: .98rem;
+  line-height: 1.45;
+}
+
+.build-dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--green-band);
+  box-shadow: 0 0 0 0 rgba(46, 139, 87, .55);
+  animation: build-pulse 2.4s var(--ease) infinite;
+}
+
+@keyframes build-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(46, 139, 87, .5); }
+  70%  { box-shadow: 0 0 0 9px rgba(46, 139, 87, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(46, 139, 87, 0); }
+}
+
+/* --------------------------------------------------------------------------
+   2 · Conceito — o cartão da marca no dia
+   -------------------------------------------------------------------------- */
+.game-banner {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(2.4rem, 5vw, 3.5rem) clamp(1.5rem, 4vw, 3rem);
+  border-radius: var(--r-block);
+  background: linear-gradient(135deg, #1877f2 0%, #2e8b57 100%);
+  color: #ffffff;
+  box-shadow: 0 40px 80px -40px rgba(24, 119, 242, .75);
+}
+
+.game-banner::before {
+  content: '';
+  position: absolute;
+  inset: -55% -10% auto auto;
+  width: 440px;
+  height: 440px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, .24), transparent);
+  pointer-events: none;
+}
+
+.game-banner > * { position: relative; }
+
+.game-banner h2 {
+  max-width: 18ch;
+  margin-bottom: .9rem;
+  font-size: clamp(1.8rem, 3.8vw, 2.5rem);
+  color: #ffffff;
+}
+
+.game-banner p {
+  max-width: 58ch;
+  margin-bottom: 2rem;
+  font-size: 1.08rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, .9);
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .7rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .6rem 1.1rem;
+  border: 1px solid rgba(255, 255, 255, .3);
+  border-radius: var(--r-tap);
+  background: rgba(255, 255, 255, .14);
+  color: #ffffff;
+  font-size: .96rem;
+  font-weight: 500;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.badge svg { width: 18px; height: 18px; flex: none; }
+
+/* --------------------------------------------------------------------------
+   3 · Mecânicas — dia
+   -------------------------------------------------------------------------- */
+.section-title {
+  margin-bottom: .9rem;
+  font-size: clamp(2.1rem, 4.2vw, 3.2rem);
+  letter-spacing: -.04em;
+}
+
+.section-title span { color: var(--blue); }
+
+.gallery .section-title { color: var(--on-band); }
+.gallery .section-title span { color: var(--blue-band); }
+
+.section-lead {
+  max-width: 56ch;
+  margin-bottom: clamp(2.5rem, 5vw, 3.5rem);
+  font-size: 1.08rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+
+.gallery .section-lead { color: var(--on-band-soft); }
+
+.mechanics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: clamp(1.25rem, 2.5vw, 1.75rem);
+}
+
+.mechanic {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  width: 100%;
-  max-width: 720px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-main h1 {
-  font-size: clamp(2.4rem, 6vw, 4rem);
-  letter-spacing: -.045em;
-}
-
-main h1::after {
-  content: '';
-  display: block;
-  width: 56px;
-  height: 3px;
-  margin: 1.1rem auto 0;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #1877f2, #2e8b57);
-}
-
-main p {
-  max-width: 46ch;
-  padding: 2.5rem 2rem;
-  border: 1px dashed var(--line-day);
-  border-radius: var(--r-block);
+  padding: 2.25rem 2rem 2.1rem;
+  border: 1px solid var(--line-day);
+  border-radius: var(--r-card);
   background: var(--day-raised);
   box-shadow: var(--sh-day);
+}
+
+.mechanic h3 {
+  margin: 1.5rem 0 .6rem;
+  font-size: 1.3rem;
+  letter-spacing: -.025em;
+}
+
+.mechanic p {
+  max-width: 36ch;
+  font-size: 1rem;
   color: var(--ink-soft);
-  font-size: 1.05rem;
-  line-height: 1.7;
+}
+
+.mechanic-icon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: var(--r-chip);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 12px 24px -12px rgba(15, 23, 42, .4);
+}
+
+.mechanic-icon svg { width: 26px; height: 26px; }
+
+.mechanic-icon svg :is(circle, rect, path) { vector-effect: non-scaling-stroke; }
+
+/* Mesmas famílias de cor da grade de recursos da página inicial */
+.icon-red    { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+.icon-orange { background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); }
+.icon-green  { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+.icon-blue   { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+
+/* --------------------------------------------------------------------------
+   4 · Capturas — noite
+   As molduras estão vazias de propósito: prometer imagem que não existe é
+   pior do que assumir que ela ainda não foi feita.
+   -------------------------------------------------------------------------- */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.shot-frame {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  margin-bottom: 1.1rem;
+  border: 1px dashed var(--line-band);
+  border-radius: var(--r-card);
+  background:
+    repeating-linear-gradient(
+      135deg,
+      var(--tint-band) 0 10px,
+      transparent 10px 20px
+    );
+}
+
+.shot-mark {
+  padding: .45rem 1rem;
+  border-radius: var(--r-tap);
+  background: var(--tint-band-strong);
+  color: var(--on-band-soft);
+  font-size: .9rem;
+  font-weight: 600;
+}
+
+/* Quando a captura chegar, o <img> ocupa o lugar da moldura */
+.shot img {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  margin-bottom: 1.1rem;
+  border: 1px solid var(--line-band);
+  border-radius: var(--r-card);
+  object-fit: cover;
+}
+
+.shot-caption {
+  max-width: 34ch;
+  font-size: .98rem;
+  line-height: 1.6;
+  color: var(--on-band-soft);
+}
+
+/* --------------------------------------------------------------------------
+   5 · Ficha e andamento — dia
+   -------------------------------------------------------------------------- */
+.build {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  align-items: start;
+  gap: clamp(1.75rem, 4vw, 3rem);
+}
+
+.build h2 {
+  margin-bottom: 1.5rem;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  letter-spacing: -.035em;
+}
+
+.spec-card {
+  padding: clamp(1.75rem, 3.5vw, 2.4rem) clamp(1.5rem, 3vw, 2rem);
+  border: 1px solid var(--line-day);
+  border-radius: var(--r-block);
+  background: var(--day-soft);
+}
+
+.spec-row {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: .9rem 0;
+  border-top: 1px solid var(--line-day);
+}
+
+.spec-row:first-child { border-top: 0; padding-top: 0; }
+
+.spec-row dt {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.spec-row dd {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+/* --------------------------------------------------------------------------
+   6 · Trilho de fases
+   Sequência de verdade: a ordem importa, então a numeração é informação e
+   não enfeite. O estado vem da classe no <li>.
+   -------------------------------------------------------------------------- */
+/* A ficha tem moldura; o trilho fica solto no chão. A diferença é proposital:
+   o trilho é o elemento forte da página. O respiro acerta a altura dos dois
+   títulos, já que o cartão ao lado tem recuo interno. */
+.roadmap-card { padding-top: clamp(1.75rem, 3.5vw, 2.4rem); }
+
+.roadmap {
+  counter-reset: phase;
+  position: relative;
+  padding-left: 2.75rem;
+}
+
+/* O trilho que liga as fases */
+.roadmap::before {
+  content: '';
+  position: absolute;
+  top: .6rem;
+  bottom: .6rem;
+  left: 15px;
+  width: 2px;
+  border-radius: 999px;
+  background: var(--line-day);
+}
+
+.phase {
+  counter-increment: phase;
+  position: relative;
+  padding-bottom: 2rem;
+}
+
+.phase:last-child { padding-bottom: 0; }
+
+/* O marcador: número da fase, preenchido conforme o estado */
+.phase::before {
+  content: counter(phase);
+  position: absolute;
+  top: .1rem;
+  left: -2.75rem;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--line-day);
+  border-radius: 50%;
+  background: var(--day);
+  color: var(--ink-soft);
+  font-size: .92rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.phase.is-done::before {
+  border-color: var(--green);
+  background: var(--green);
+  color: #ffffff;
+}
+
+.phase.is-current::before {
+  border-color: var(--blue);
+  background: var(--day);
+  color: var(--blue);
+  box-shadow: 0 0 0 5px rgba(24, 119, 242, .16);
+}
+
+.phase h3 {
+  margin-bottom: .35rem;
+  font-size: 1.15rem;
+  letter-spacing: -.02em;
+}
+
+.phase p {
+  max-width: 44ch;
+  font-size: .99rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.phase-state {
+  margin-top: .5rem;
+  font-size: .92rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.phase.is-done .phase-state { color: var(--green); }
+.phase.is-current .phase-state { color: var(--blue); }
+
+/* --------------------------------------------------------------------------
+   7 · Acompanhar — noite
+   -------------------------------------------------------------------------- */
+.follow-card { max-width: 720px; }
+
+.follow-card h2 {
+  margin-bottom: .8rem;
+  font-size: clamp(2rem, 4vw, 2.9rem);
+  letter-spacing: -.04em;
+  color: var(--on-band);
+}
+
+.follow-card p {
+  max-width: 52ch;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+  line-height: 1.65;
+  color: var(--on-band-soft);
+}
+
+.follow-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.75rem;
+}
+
+.follow-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 58px;
+  padding: 1rem 2.2rem;
+  border-radius: var(--r-tap);
+  background: linear-gradient(135deg, #1877f2 0%, #2e8b57 100%);
+  color: #ffffff;
+  font-size: 1.04rem;
+  font-weight: 700;
+  box-shadow: var(--sh-cta);
+  transition: transform .22s var(--ease), box-shadow .22s var(--ease);
+}
+
+.follow-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 26px 48px -14px rgba(46, 139, 87, .75);
+}
+
+.follow-link {
+  color: var(--on-band);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: .3em;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--line-band);
+  transition: text-decoration-color .18s var(--ease);
+}
+
+.follow-link:hover { text-decoration-color: var(--green-band); }
+
+/* --------------------------------------------------------------------------
+   8 · Telas menores
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .build { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+  .page-header h1 { max-width: none; }
+  .build-status { align-items: flex-start; }
+  .build-dot { margin-top: .45rem; }
+  .spec-row { grid-template-columns: 1fr; gap: .2rem; }
 }

@@ -495,8 +495,8 @@
       fortes: ['video', 'jogo', 'game', 'manual', 'instrucoes', '3d', 'modelo 3d', 'onde vejo', 'onde encontro', 'onde esta a pagina', 'qual pagina', 'pagina de', 'menu', 'navegar', 'onde fica', 'tem um jogo', 'tem video'],
       fracas: ['pagina', 'site', 'ver', 'assistir', 'mostrar'],
       respostas: [
-        'O site tem estas páginas:\n• Início — a visão geral da ELO\n• Instruções — o manual, com a pochete em 3D anotada e o vídeo demonstrativo\n• Produto — componentes, custos, o modelo 3D, o que vem na caixa e o preço\n• Quem Somos — a equipe, a missão e o formulário de contato\n• Referências — os artigos científicos\n• Jogo — ainda em desenvolvimento\n• Eloá — eu!',
-        'Depende do que você procura: o vídeo e a pochete em 3D com cada parte explicada estão em Instruções; preço e componentes, em Produto; a equipe e o formulário, em Quem Somos; os artigos, em Referências. A página Jogo ainda está sendo feita.'
+        'O site tem estas páginas:\n• Início — a visão geral da ELO\n• Instruções — o manual, com a pochete em 3D anotada e o vídeo demonstrativo\n• Produto — componentes, custos, o modelo 3D, o que vem na caixa e o preço\n• Quem Somos — a equipe, a missão e o formulário de contato\n• Referências — os artigos científicos\n• Jogo — o conceito, as mecânicas e o andamento da produção\n• Eloá — eu!',
+        'Depende do que você procura: o vídeo e a pochete em 3D com cada parte explicada estão em Instruções; preço e componentes, em Produto; a equipe e o formulário, em Quem Somos; os artigos, em Referências. Em Jogo você acompanha a produção do jogo da ELO, que ainda não saiu.'
       ]
     },
 
