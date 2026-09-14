@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="../reveal.css">
     <script src="../reveal.js" defer></script>
     <script src="../header.js" defer></script>
+    <script src="../api/eloa-engine.js" defer></script>
+    <script src="./eloa.js" defer></script>
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 </head>
 <body class="eloa-page">
@@ -41,91 +43,46 @@
     </header>
 
     <main class="ai-shell">
-        <div class="hero-text">Fale com a Eloá</div>
-
-        <div class="chat-box" id="chat-box" aria-live="polite">
-            <div class="ai-message-row eloa-welcome">
-                <img class="response-avatar" src="../assets/ChatGPT%20Image%201%20de%20set.%20de%202026,%2021_31_52.png" alt="Eloá acenando">
-                <div class="message ai">Olá! Eu sou a Eloá, a IA do projeto ELO.</div>
+        <!-- Presença da Eloá: quem ela é e o que sabe fazer -->
+        <aside class="eloa-presence">
+            <div class="presence-avatar">
+                <img src="../assets/ChatGPT%20Image%201%20de%20set.%20de%202026,%2021_31_52.png" alt="Eloá, a assistente virtual do ELO">
+                <span class="presence-status"><span class="presence-dot" aria-hidden="true"></span>Online agora</span>
             </div>
-        </div>
 
-        <div class="composer-wrapper">
-            <div class="composer" role="form" aria-label="Conversar com a Eloá">
-                
-                <input type="text" id="user-input" placeholder="Fale com a Eloá" aria-label="Sua mensagem" onkeydown="handleKeyPress(event)">
-                
-                <button class="send-btn" type="button" aria-label="Enviar mensagem" onclick="enviarMensagem()">
-                    <svg viewBox="0 0 24 24"><path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/></svg>
-                </button>
+            <h1 class="hero-text">Fale com a Eloá</h1>
+            <p class="presence-lead">Eu sou a assistente do projeto ELO. Posso explicar como a pochete funciona, tirar dúvidas sobre o app do cuidador e ajudar a configurar tudo.</p>
+
+            <div class="suggestions" aria-label="Perguntas frequentes">
+                <p class="suggestions-title">Você pode começar por aqui</p>
+                <button type="button" data-prompt="Como funciona o botão de emergência?">Como funciona o botão de emergência?</button>
+                <button type="button" data-prompt="Quanto tempo dura a bateria da pochete?">Quanto tempo dura a bateria?</button>
+                <button type="button" data-prompt="Como o cuidador aprova uma corrida pelo app?">Como o cuidador aprova uma corrida?</button>
+                <button type="button" data-prompt="Quais comandos de voz a ELO entende?">Quais comandos de voz ela entende?</button>
             </div>
-        </div>
+        </aside>
+
+        <!-- Console da conversa -->
+        <section class="eloa-console" aria-label="Conversa com a Eloá">
+            <div class="chat-box" id="chat-box" aria-live="polite">
+                <div class="ai-message-row eloa-welcome">
+                    <img class="response-avatar" src="../assets/ChatGPT%20Image%201%20de%20set.%20de%202026,%2021_31_52.png" alt="">
+                    <div class="message ai">Olá! Eu sou a Eloá, a IA do projeto ELO.</div>
+                </div>
+            </div>
+
+            <div class="composer-wrapper">
+                <div class="composer" role="form" aria-label="Conversar com a Eloá">
+                    <input type="text" id="user-input" placeholder="Escreva sua pergunta" aria-label="Sua mensagem" autocomplete="off">
+                    <button class="send-btn" type="button" aria-label="Enviar mensagem">
+                        <svg viewBox="0 0 24 24"><path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/></svg>
+                    </button>
+                </div>
+                <p class="composer-hint">A Eloá responde em texto. Para emergências, use o botão vermelho da pochete.</p>
+            </div>
+        </section>
     </main>
 
-    <script>
-        async function enviarMensagem() {
-            const input = document.getElementById("user-input");
-            const texto = input.value.trim();
-            if (!texto) return;
-
-            addMessage(texto, "user");
-            input.value = "";
-
-            const msgCarregando = addMessage("Eloá está preparando uma resposta...", "ai");
-            msgCarregando.classList.add('is-loading');
-
-            try {
-                // AQUI ESTÁ A MUDANÇA: Coloque o seu IP no lugar de "SEU_IP_AQUI"
-                // Exemplo de como deve ficar: const response = await fetch("http://192.168.1.15:8000/perguntar", {
-                const response = await fetch("https://teste-ia-t66d.onrender.com/perguntar", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ pergunta: texto })
-                });
-
-                const data = await response.json();
-                
-                if (data.status === "sucesso") {
-                    msgCarregando.innerText = data.resposta_da_ia;
-                } else {
-                    msgCarregando.innerText = data.mensagem || "Ocorreu um erro ao consultar a Eloá.";
-                }
-            } catch (erro) {
-                console.error("Erro no envio:", erro);
-                msgCarregando.innerText = "Desculpe, perdi a conexão com o servidor central.";
-            }
-            msgCarregando.classList.remove('is-loading');
-        }
-
-        function addMessage(texto, remetente) {
-            const box = document.getElementById("chat-box");
-            const div = document.createElement("div");
-            div.className = `message ${remetente}`;
-            div.innerText = texto;
-            if (remetente === "ai") {
-                const row = document.createElement("div");
-                row.className = "ai-message-row";
-
-                const avatar = document.createElement("img");
-                avatar.className = "response-avatar";
-                avatar.src = "../assets/ChatGPT%20Image%201%20de%20set.%20de%202026,%2021_31_52.png";
-                avatar.alt = "Eloá acenando";
-
-                row.append(avatar, div);
-                box.appendChild(row);
-            } else {
-                box.appendChild(div);
-            }
-            requestAnimationFrame(() => {
-                box.scrollTop = box.scrollHeight;
-            });
-            return div;
-        }
-
-        function handleKeyPress(e) {
-            if (e.key === 'Enter') { e.preventDefault(); enviarMensagem(); }
-        }
-    </script>
 
     <footer>
         <div class="logo" style="justify-content: center; margin-bottom: 1rem;">

@@ -12,6 +12,7 @@
     <script src="../header.js" defer></script>
     <script src="./video-player.js" defer></script>
     <script src="../reveal.js" defer></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
@@ -41,15 +42,91 @@
     </header>
 
     <main>
-        <section class="page-header">
-            <div class="header-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <!-- Esquema: o produto explicando a si mesmo.
+             Os números do modelo e da legenda são o mesmo índice. -->
+        <section class="scheme-section night">
+            <div class="scheme-wrap">
+                <div class="scheme-intro">
+                    <h1>Manual de Instruções</h1>
+                    <p>Gire a pochete e toque nos pontos para ver o que cada parte faz. Depois, siga os seis passos para começar a usar.</p>
+                    <p class="scheme-hint">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 4.5a3.5 3.5 0 0 1 7 0"></path><path d="M6.8 8.3a6.3 6.3 0 0 1 10.4 0"></path><path d="M5 12.2a9 9 0 0 1 14 0"></path><path d="M12 15.5v3"></path></svg>
+                        Arraste para girar. Role para aproximar.
+                    </p>
+                </div>
+
+                <div class="scheme-stage">
+                    <model-viewer
+                        class="scheme-model"
+                        src="../assets/Hi3D_Untitled_allparts_20260827_204539.glb"
+                        alt="Modelo 3D da pochete ELO com marcações numeradas de cada função"
+                        camera-controls
+                        camera-orbit="-22deg 76deg 108%"
+                        min-camera-orbit="auto auto 70%"
+                        max-camera-orbit="auto auto 150%"
+                        interaction-prompt="auto"
+                        interaction-prompt-threshold="1500"
+                        shadow-intensity="0.45"
+                        exposure="1.15"
+                        aria-label="Modelo 3D interativo da pochete ELO">
+                        <button class="hotspot" slot="hotspot-1" data-position="0.17 0.05 0.36" data-normal="0 0 1" data-target="f1" type="button" aria-label="1: Botão de emergência"><span>1</span></button>
+                        <button class="hotspot" slot="hotspot-2" data-position="-0.17 0.05 0.36" data-normal="0 0 1" data-target="f2" type="button" aria-label="2: Botão de transporte"><span>2</span></button>
+                        <button class="hotspot" slot="hotspot-3" data-position="0 -0.09 0.35" data-normal="0 0 1" data-target="f3" type="button" aria-label="3: Microfone e alto-falante"><span>3</span></button>
+                        <button class="hotspot" slot="hotspot-4" data-position="0 0.15 0.24" data-normal="0 0.6 0.8" data-target="f4" type="button" aria-label="4: GPS e conexão com o app"><span>4</span></button>
+                        <button class="hotspot" slot="hotspot-5" data-position="0.46 -0.03 0.1" data-normal="1 0 0" data-target="f5" type="button" aria-label="5: Entrada USB-C e bateria"><span>5</span></button>
+                        <button class="hotspot" slot="hotspot-6" data-position="-0.47 0 -0.05" data-normal="-1 0 0" data-target="f6" type="button" aria-label="6: Cinto ajustável"><span>6</span></button>
+                    </model-viewer>
+                </div>
+
+                <ol class="scheme-legend">
+                    <li class="scheme-item" id="f1" data-hotspot="1">
+                        <span class="scheme-num scheme-num--signal">1</span>
+                        <div>
+                            <h3>Botão de emergência</h3>
+                            <p>Um toque aciona o SAMU (192) e avisa o cuidador na hora, com a localização.</p>
+                        </div>
+                    </li>
+                    <li class="scheme-item" id="f2" data-hotspot="2">
+                        <span class="scheme-num">2</span>
+                        <div>
+                            <h3>Botão de transporte</h3>
+                            <p>Pede um carro. O cuidador aprova ou recusa pelo app antes de a corrida ser chamada.</p>
+                        </div>
+                    </li>
+                    <li class="scheme-item" id="f3" data-hotspot="3">
+                        <span class="scheme-num">3</span>
+                        <div>
+                            <h3>Microfone e alto-falante</h3>
+                            <p>Diga "Oi ELO" para ligar para alguém, saber onde está ou chamar ajuda. A pochete responde em voz.</p>
+                        </div>
+                    </li>
+                    <li class="scheme-item" id="f4" data-hotspot="4">
+                        <span class="scheme-num">4</span>
+                        <div>
+                            <h3>GPS e conexão com o app</h3>
+                            <p>Por dentro, o módulo GPS envia a localização em tempo real e mantém a pochete ligada ao app do cuidador.</p>
+                        </div>
+                    </li>
+                    <li class="scheme-item" id="f5" data-hotspot="5">
+                        <span class="scheme-num">5</span>
+                        <div>
+                            <h3>Entrada USB-C e bateria</h3>
+                            <p>Uma carga de cerca de 2 horas dura até 48 horas de uso. Recarregue todo dia à noite.</p>
+                        </div>
+                    </li>
+                    <li class="scheme-item" id="f6" data-hotspot="6">
+                        <span class="scheme-num">6</span>
+                        <div>
+                            <h3>Cinto ajustável</h3>
+                            <p>Tecido resistente, com ajuste de cintura. Aguenta chuva e respingos (IP63), mas não mergulho.</p>
+                        </div>
+                    </li>
+                </ol>
             </div>
-            <h1>Manual de Instruções</h1>
-            <p>Guia completo para configurar e usar o ELO - passo a passo simplificado</p>
         </section>
 
         <section class="steps-section">
+            <h2 class="section-title">Comece em seis passos</h2>
             <div class="step-card">
                 <div class="step-icon icon-blue">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -111,7 +188,7 @@
             </div>
         </section>
 
-        <section class="video-section">
+        <section class="video-section night">
             <div class="video-container">
                 <div class="video-header">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
@@ -142,7 +219,7 @@
                     <li>Mantenha a pochete sempre carregada (carregador incluso na embalagem)</li>
                     <li>Teste os botões semanalmente em modo demonstração</li>
                     <li>Configure múltiplos contatos de emergência no app</li>
-                    <li>A pochete é resistente à água (IP65), mas não submergível</li>
+                    <li>A pochete é resistente à água (IP63), mas não submergível</li>
                     <li>Em caso de problemas, consulte o suporte 24/7 no app</li>
                 </ul>
             </div>

@@ -1,388 +1,207 @@
-/* Variáveis e mapeamento de temas */
-:root {
-  /* Tema claro */
-  --bg-main: #f8fafc;
-  --bg-card: #ffffff;
-  --bg-mission: linear-gradient(135deg, #3b82f6 0%, #0d9488 100%);
-  --bg-photo: linear-gradient(135deg, #e2e8f0 0%, #d7ece2 100%);
-  --bg-input: #ffffff;
-  --bg-contact: #f1f5f9;
+/* ==========================================================================
+   ELO · Quem somos
+   Tokens, faixas dia/noite, cabeçalho e rodapé vêm de header.css.
+   Ritmo: noite (abertura) → dia (missão e time) → noite (contato).
+   ========================================================================== */
 
-  --text-primary: #0f172a;
-  --text-secondary: #64748b;
-  --text-title: #1d1de0;
-  --text-role: #1877F2;
-  --text-main: #1a1a2e;
-  --text-muted: #666666;
-  --text-nav: #000000;
+.main-container { width: 100%; }
 
-  --primary-blue: #1877F2;
-  --primary-color: #4f46e5;
-  --card-border: #e2e8f0;
-  --border-color: #e2e8f0;
-  --header-bg: #ffffff;
-  --shadow-card: 0 4px 16px rgba(15, 23, 42, .08);
-  --shadow-card-hover: 0 14px 32px rgba(15, 23, 42, .14);
-  --shadow-mission: 0 18px 44px rgba(24, 119, 242, .28);
-
-  --footer-bg: linear-gradient(135deg, #1877F2 0%, #2e8b57 100%);
-  --footer-text: #ffffff;
+.main-container > .page-header,
+.main-container > .team-section,
+.main-container > .contact-section {
+  padding: clamp(3.5rem, 7vw, 6rem) max(var(--edge), calc((100% - var(--page)) / 2));
 }
 
-[data-theme="dark"] {
-  /* Tema escuro */
-  --bg-main: #0b1120;
-  --bg-card: #111a2e;
-  --bg-mission: linear-gradient(135deg, #092138 0%, #064e3b 100%);
-  --bg-photo: linear-gradient(135deg, #1b2438 0%, #14312a 100%);
-  --bg-input: #060b17;
-  --bg-contact: #0e1729;
+.main-container > .page-header { padding-top: calc(var(--band-h) + clamp(3rem, 6vw, 5rem)); }
+.main-container > .team-section { padding-top: clamp(3.5rem, 7vw, 6rem); }
 
-  --text-primary: #ffffff;
-  --text-secondary: #94a3b8;
-  --text-title: #3b82f6;
-  --text-role: #3b82f6;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --text-nav: #ffffff;
-
-  --primary-blue: #3b82f6;
-  --primary-color: #6366f1;
-  --card-border: #1e293b;
-  --border-color: #1e293b;
-  --header-bg: #0b1120;
-  --shadow-card: 0 4px 16px rgba(0, 0, 0, .4);
-  --shadow-card-hover: 0 16px 34px rgba(0, 0, 0, .55);
-  --shadow-mission: 0 18px 44px rgba(0, 0, 0, .5);
-
-  --footer-bg: linear-gradient(135deg, #0b132b 0%, #1d4ed8 40%, #0f766e 100%);
-  --footer-text: #cbd5e1;
+.main-container > .mission-card {
+  margin: clamp(3rem, 6vw, 5rem) max(var(--edge), calc((100% - var(--page)) / 2)) 0;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
-  transition: background-color .3s ease, color .3s ease, border-color .3s ease;
-}
+/* --------------------------------------------------------------------------
+   1 · Abertura — noite
+   -------------------------------------------------------------------------- */
+.page-header { overflow: hidden; }
 
-body {
-  background-color: var(--bg-main);
-  color: var(--text-primary);
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-/* Navegação (mesmo padrão das demais páginas) */
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  text-decoration: none;
-}
-
-.nav-links {
-  display: flex;
-  gap: 1.5rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.nav-links a {
-  position: relative;
-  text-decoration: none;
-  color: var(--text-nav);
-  font-size: .95rem;
-  font-weight: 500;
-  padding-bottom: 4px;
-}
-
-.nav-links a::after {
+.page-header::after {
   content: '';
   position: absolute;
-  width: 0;
-  height: 2px;
-  bottom: 0;
-  left: 0;
-  background-color: var(--primary-blue);
-  transition: width .3s ease;
-}
-
-.nav-links a.active,
-.nav-links a:hover {
-  color: var(--text-nav);
-}
-
-.nav-links a.active::after,
-.nav-links a:hover::after {
-  width: 100%;
-}
-
-.menu-toggle,
-.theme-toggle {
-  background: none;
-  border: none;
-  font-size: 1.25rem;
-  color: var(--text-primary);
-  cursor: pointer;
-}
-
-.header-controls {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.menu-toggle {
-  display: none;
-}
-
-/* Layout principal */
-.main-container {
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto 2rem;
-  padding: 112px 1.5rem 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4rem;
-}
-
-/* Cabeçalho da página */
-.page-header {
-  text-align: center;
-}
-
-.header-icon {
-  color: var(--text-role);
-  margin-bottom: .75rem;
-}
-
-.page-header h1 {
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 700;
-  color: var(--text-title);
-  margin-bottom: .75rem;
-}
-
-.page-subtitle {
-  max-width: 640px;
-  margin: 0 auto;
-  color: var(--text-secondary);
-  font-size: 1rem;
-  line-height: 1.6;
-}
-
-/* Missão */
-.mission-card {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  background: var(--bg-mission);
-  border: 1px solid rgba(255, 255, 255, .18);
-  border-radius: 22px;
-  padding: 3rem 2.5rem;
-  text-align: center;
-  color: #ffffff;
-  box-shadow: var(--shadow-mission);
-}
-
-/* Brilho decorativo que dá profundidade ao gradiente */
-.mission-card::before,
-.mission-card::after {
-  content: '';
-  position: absolute;
+  inset: auto -10% -60% auto;
+  width: 60vw;
+  height: 60vw;
+  max-width: 800px;
+  max-height: 800px;
   z-index: -1;
   border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(46, 139, 87, .2), transparent 72%);
   pointer-events: none;
 }
 
+.header-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--line-band);
+  border-radius: 20px;
+  background: var(--tint-band);
+  color: var(--green-band);
+}
+
+.header-icon svg { width: 32px; height: 32px; }
+
+.page-header h1 {
+  margin-bottom: 1rem;
+  font-size: clamp(2.5rem, 5.4vw, 4.2rem);
+  letter-spacing: -.045em;
+  color: var(--on-band);
+}
+
+.page-subtitle {
+  max-width: 54ch;
+  font-size: clamp(1.05rem, 1.3vw, 1.2rem);
+  line-height: 1.65;
+  color: var(--on-band-soft);
+}
+
+/* --------------------------------------------------------------------------
+   2 · Missão — bloco verde no dia
+   -------------------------------------------------------------------------- */
+.mission-card {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(2.4rem, 5vw, 3.5rem) clamp(1.5rem, 4vw, 3rem);
+  border-radius: var(--r-block);
+  background: var(--green);
+  color: #eaf5ee;
+  box-shadow: 0 40px 80px -40px rgba(46, 139, 87, .75);
+}
+
+[data-theme="dark"] .mission-card { background: #1f6b45; }
+
 .mission-card::before {
-  top: -45%;
-  right: -10%;
-  width: 420px;
-  height: 420px;
-  background: radial-gradient(circle, rgba(255, 255, 255, .28) 0%, rgba(255, 255, 255, 0) 68%);
+  content: '';
+  position: absolute;
+  inset: -50% -10% auto auto;
+  width: 460px;
+  height: 460px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, .22), transparent);
+  pointer-events: none;
 }
 
-.mission-card::after {
-  bottom: -55%;
-  left: -12%;
-  width: 380px;
-  height: 380px;
-  background: radial-gradient(circle, rgba(255, 255, 255, .16) 0%, rgba(255, 255, 255, 0) 70%);
-}
+.mission-card > * { position: relative; }
 
-.mission-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: .5rem;
-  margin-bottom: 1.25rem;
-}
+.mission-header { margin-bottom: 1.25rem; }
 
 .mission-icon {
-  display: grid;
+  display: inline-grid;
   place-items: center;
-  width: 62px;
-  height: 62px;
-  margin-bottom: .25rem;
-  border: 1px solid rgba(255, 255, 255, .28);
-  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 1.1rem;
+  border: 1px solid rgba(255, 255, 255, .3);
+  border-radius: 18px;
   background: rgba(255, 255, 255, .14);
-  box-shadow: 0 0 0 8px rgba(255, 255, 255, .06);
+  color: #ffffff;
 }
 
+/* O rótulo já existe na marcação; fica em texto normal, sem caixa alta */
 .mission-eyebrow {
-  font-size: .7rem;
-  font-weight: 600;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, .75);
+  display: block;
+  margin-bottom: .3rem;
+  color: rgba(255, 255, 255, .78);
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 .mission-card h2 {
-  font-size: clamp(1.5rem, 3.4vw, 2rem);
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: clamp(1.9rem, 4vw, 2.7rem);
+  color: #ffffff;
 }
 
 .mission-lead {
-  max-width: 700px;
-  margin: 0 auto 2.5rem;
-  font-size: 1.05rem;
-  line-height: 1.7;
-  color: rgba(255, 255, 255, .9);
+  max-width: 56ch;
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(1.1rem, 1.3vw, 1.22rem);
+  line-height: 1.6;
+  color: #eaf5ee;
 }
 
-.mission-lead strong {
-  font-weight: 700;
-  color: #ffffff;
-  white-space: nowrap;
-}
+.mission-lead strong { color: #ffffff; }
 
-/* Pilares da missão */
 .mission-pillars {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
 }
 
 .pillar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: .5rem;
-  padding: 1.5rem 1.25rem;
-  border: 1px solid rgba(255, 255, 255, .18);
-  border-radius: 14px;
+  padding: 1.5rem 1.4rem;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: var(--r-card);
   background: rgba(255, 255, 255, .1);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  transition: transform .3s ease, background-color .3s ease, border-color .3s ease;
-}
-
-.pillar:hover {
-  transform: translateY(-5px);
-  background: rgba(255, 255, 255, .17);
-  border-color: rgba(255, 255, 255, .35);
 }
 
 .pillar-icon {
-  display: grid;
+  display: inline-grid;
   place-items: center;
   width: 44px;
   height: 44px;
-  margin-bottom: .25rem;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, .16);
+  margin-bottom: .9rem;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, .18);
   color: #ffffff;
 }
 
 .pillar h3 {
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: .01em;
+  margin-bottom: .35rem;
+  font-size: 1.15rem;
+  color: #ffffff;
 }
 
-.pillar p {
-  font-size: .82rem;
-  line-height: 1.55;
-  color: rgba(255, 255, 255, .82);
-}
+.pillar p { font-size: .96rem; line-height: 1.55; color: rgba(255, 255, 255, .84); }
 
-/* Time */
+/* --------------------------------------------------------------------------
+   3 · Time — dia
+   As pessoas ficam direto no chão, sem cartão. Retrato grande, nome forte.
+   -------------------------------------------------------------------------- */
 .section-title {
-  text-align: center;
-  font-size: clamp(1.6rem, 4vw, 2.25rem);
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 2.5rem;
+  margin-bottom: clamp(2.5rem, 5vw, 3.5rem);
+  font-size: clamp(2.1rem, 4.2vw, 3.2rem);
+  letter-spacing: -.04em;
 }
 
-.section-title span {
-  color: var(--text-title);
-}
+.section-title span { color: var(--blue); }
 
 .team-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 1.75rem;
-}
-
-.team-card {
-  grid-column: span 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: .4rem;
-  padding: 1.25rem 1.25rem 1.5rem;
-  background-color: var(--bg-card);
-  border: 1px solid var(--card-border);
-  border-radius: 14px;
-  box-shadow: var(--shadow-card);
-  transition: transform .3s ease, box-shadow .3s ease;
-}
-
-/* Últimas duas fichas centralizadas (layout 3 + 2) */
-.team-card:nth-child(4) { grid-column: 2 / span 2; }
-.team-card:nth-child(5) { grid-column: 4 / span 2; }
-
-.team-card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-card-hover);
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: clamp(2.5rem, 5vw, 3.5rem) clamp(1.5rem, 3vw, 2.5rem);
 }
 
 .member-photo {
   position: relative;
-  width: 150px;
-  height: 165px;
-  margin-bottom: .75rem;
-  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: 200px;
+  aspect-ratio: 1;
+  margin-bottom: 1.25rem;
+  border-radius: 50%;
   overflow: hidden;
-  background: var(--bg-photo);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: var(--day-soft);
+  box-shadow: inset 0 0 0 1px var(--line-day), 0 0 0 6px rgba(24, 119, 242, .08);
 }
 
-/* Iniciais exibidas quando a foto ainda não existe */
 .member-photo::before {
   content: attr(data-initials);
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  opacity: .55;
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -.04em;
+  color: var(--ink-soft);
 }
 
 .member-photo img {
@@ -391,278 +210,136 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
 
-.member-photo.no-image img {
-  display: none;
-}
+.member-photo.no-image img { display: none; }
 
-.team-card h3 {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
+.team-card h3 { font-size: 1.3rem; letter-spacing: -.025em; }
 
 .member-role {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-role);
+  margin: .25rem 0 .6rem;
+  color: var(--blue);
+  font-weight: 700;
 }
 
-.member-bio {
-  font-size: .78rem;
-  line-height: 1.5;
-  color: var(--text-secondary);
-}
+.member-bio { font-size: .98rem; line-height: 1.55; color: var(--ink-soft); }
 
-.member-handle {
-  margin-top: .5rem;
-  font-size: .75rem;
-  color: var(--text-secondary);
-}
+.member-handle { margin-top: .6rem; font-size: .92rem; color: var(--ink-soft); }
 
-/* Contato */
+/* --------------------------------------------------------------------------
+   4 · Contato — noite
+   -------------------------------------------------------------------------- */
+#contato { scroll-margin-top: calc(var(--band-h) + 1rem); }
+
 .contact-card {
-  background-color: var(--bg-contact);
-  border: 1px solid var(--card-border);
-  border-radius: 18px;
-  padding: 3rem 2.5rem;
-  box-shadow: var(--shadow-card);
+  max-width: 820px;
+  margin: 0 auto;
 }
 
 .contact-card h2 {
-  text-align: center;
-  font-size: clamp(1.6rem, 4vw, 2.25rem);
-  font-weight: 700;
-  color: var(--text-primary);
   margin-bottom: .75rem;
+  font-size: clamp(2.1rem, 4.2vw, 3.2rem);
+  letter-spacing: -.04em;
+  color: var(--on-band);
 }
 
 .contact-subtitle {
-  text-align: center;
-  font-size: .85rem;
-  color: var(--text-secondary);
-  margin-bottom: 2.5rem;
+  max-width: 52ch;
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+  font-size: 1.1rem;
+  color: var(--on-band-soft);
 }
 
 .contact-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  max-width: 720px;
-  margin: 0 auto;
+  gap: 1.35rem;
 }
 
 .form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.35rem;
 }
 
-.form-field {
-  display: flex;
-  flex-direction: column;
-  gap: .5rem;
-}
+.form-field { display: flex; flex-direction: column; gap: .5rem; }
 
-.form-field label {
-  font-size: .8rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
+.form-field label { font-size: .96rem; font-weight: 600; color: var(--on-band); }
 
 .form-field input,
 .form-field textarea {
   width: 100%;
-  padding: .85rem 1rem;
-  font-size: .9rem;
-  color: var(--text-primary);
-  background-color: var(--bg-input);
-  border: 1px solid var(--card-border);
-  border-radius: 8px;
-  outline: none;
-  transition: border-color .25s ease, box-shadow .25s ease;
+  min-height: 56px;
+  padding: .9rem 1.1rem;
+  border: 1px solid var(--line-band);
+  border-radius: var(--r-field);
+  background: var(--tint-band);
+  color: var(--on-band);
+  font-size: 1.02rem;
+  transition: border-color .18s var(--ease), background-color .18s var(--ease), box-shadow .18s var(--ease);
 }
 
-.form-field textarea {
-  resize: vertical;
-  min-height: 130px;
-}
+.form-field textarea { min-height: 160px; resize: vertical; }
 
 .form-field input::placeholder,
-.form-field textarea::placeholder {
-  color: var(--text-secondary);
-  opacity: .8;
-}
+.form-field textarea::placeholder { color: var(--on-band-soft); opacity: .8; }
+
+.form-field input:hover,
+.form-field textarea:hover { border-color: var(--tint-band-strong); }
 
 .form-field input:focus,
 .form-field textarea:focus {
-  border-color: var(--primary-blue);
-  box-shadow: 0 0 0 3px rgba(24, 119, 242, .18);
+  outline: none;
+  border-color: var(--blue-band);
+  background: var(--tint-band);
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, .22);
 }
 
 .submit-button {
-  margin-top: .5rem;
-  padding: 1rem 1.5rem;
-  font-size: .95rem;
-  font-weight: 600;
+  align-self: flex-start;
+  min-height: 58px;
+  margin-top: .25rem;
+  padding: 1rem 2.2rem;
+  border: 0;
+  border-radius: var(--r-tap);
+  background: linear-gradient(135deg, #1877f2 0%, #2e8b57 100%);
   color: #ffffff;
-  background: var(--bg-mission);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: transform .25s ease, filter .25s ease;
+  font-size: 1.04rem;
+  font-weight: 700;
+  box-shadow: var(--sh-cta);
+  transition: transform .22s var(--ease), box-shadow .22s var(--ease);
 }
 
 .submit-button:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.08);
+  transform: translateY(-3px);
+  box-shadow: 0 26px 48px -14px rgba(46, 139, 87, .75);
 }
 
 .form-status {
-  min-height: 1.2rem;
-  text-align: center;
-  font-size: .85rem;
-  color: var(--text-role);
+  min-height: 1.5rem;
+  color: var(--green-band);
+  font-weight: 600;
 }
 
-/* Animação de entrada escalonada das fichas */
-.reveal-item {
-  opacity: 0;
-  transform: translateY(26px);
-  transition: opacity .6s ease, transform .6s cubic-bezier(.2, .8, .2, 1);
-}
+/* --------------------------------------------------------------------------
+   5 · Telas menores
+   -------------------------------------------------------------------------- */
+@media (max-width: 620px) {
+  .team-grid { grid-template-columns: 1fr; gap: 2rem; }
 
-.reveal-item.is-revealed {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Responsivo */
-@media (max-width: 992px) {
-  .team-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .team-card,
-  .team-card:nth-child(4) {
-    grid-column: span 2;
-  }
-
-  .team-card:nth-child(5) {
-    grid-column: 2 / span 2;
-  }
-}
-
-@media (max-width: 768px) {
-  .menu-toggle {
-    display: flex;
-  }
-
-  .nav-links {
-    position: fixed;
-    top: 72px;
-    left: -100%;
-    width: 100%;
-    height: calc(100vh - 72px);
-    background-color: var(--header-bg);
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    padding-top: 2rem;
-    border-bottom: 1px solid var(--border-color);
-    transition: left .3s ease-in-out;
-  }
-
-  .nav-links.active {
-    left: 0;
-  }
-
-  .nav-links a {
-    display: block;
-    font-size: 1.2rem;
-    width: 100%;
-    padding: 1.2rem;
-    text-align: center;
-    border-bottom: 1px solid var(--card-border);
-  }
-
-  .main-container {
-    padding: 96px 1rem 0;
-    gap: 3rem;
-  }
-
-  .mission-card {
-    padding: 2.25rem 1.25rem;
-    border-radius: 18px;
-  }
-
-  .mission-lead {
-    font-size: .95rem;
-    margin-bottom: 1.75rem;
-  }
-
-  .mission-pillars {
-    grid-template-columns: 1fr;
-    gap: .85rem;
-  }
-
-  /* No celular o pilar vira uma linha: ícone à esquerda, texto à direita */
-  .pillar {
+  .team-card {
     display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: center;
-    column-gap: 1rem;
+    grid-template-columns: 92px minmax(0, 1fr);
+    align-items: start;
+    column-gap: 1.25rem;
     row-gap: .15rem;
-    text-align: left;
-    padding: 1rem;
-  }
-
-  .pillar-icon {
-    grid-row: 1 / 3;
-    width: 40px;
-    height: 40px;
-    margin-bottom: 0;
-  }
-
-  .contact-card {
-    padding: 2rem 1.25rem;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .team-grid {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-  }
-
-  .team-card,
-  .team-card:nth-child(4),
-  .team-card:nth-child(5) {
-    grid-column: 1 / -1;
-    align-items: flex-start;
-    text-align: left;
   }
 
   .member-photo {
-    width: 100%;
-    height: 180px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  * {
-    transition: none !important;
-    animation: none !important;
+    grid-row: 1 / span 4;
+    width: 92px;
+    margin-bottom: 0;
   }
 
-  .reveal-item {
-    opacity: 1;
-    transform: none;
-  }
+  .member-photo::before { font-size: 1.5rem; }
 }

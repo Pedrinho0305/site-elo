@@ -1,318 +1,515 @@
-/* ================= Variáveis de Cores ================= */
-:root {
-    --bg-color: #fafbfd;
-    --text-main: #1a1a2e;
-    --text-muted: #64748b;
-    --primary-color: #4f46e5; /* Roxo/Azul do manual */
-    --card-bg: #ffffff;
-    --card-border: #e2e8f0;
-    --header-bg: #ffffff;
-    --tips-bg: #e2f4e8;
-    --tips-text: #166534;
-    --video-gradient: linear-gradient(135deg, #4f46e5, #0ea5e9);
-    --shadow: rgba(0, 0, 0, 0.05);
+/* ==========================================================================
+   ELO · Manual de instruções
+   Tokens, faixas dia/noite, cabeçalho e rodapé vêm de header.css.
+
+   Ritmo da página: noite (o esquema 3D) → dia (os seis passos) →
+   noite (o vídeo) → dia (as dicas).
+   ========================================================================== */
+
+main { width: 100%; }
+
+/* --------------------------------------------------------------------------
+   1 · Esquema — o produto explicando a si mesmo
+   O modelo 3D fica no centro, os números do modelo e da legenda são o
+   mesmo índice, e o item ativo acende dos dois lados.
+   -------------------------------------------------------------------------- */
+.scheme-section {
+  padding: calc(var(--band-h) + clamp(3rem, 6vw, 5rem)) var(--edge) clamp(4rem, 7vw, 6rem);
+  overflow: hidden;
 }
 
-[data-theme="dark"] {
-    --bg-color: #0b132b;
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --primary-color: #6366f1;
-    --card-bg: #111827;
-    --card-border: #1e293b;
-    --header-bg: #0b132b;
-    --tips-bg: #064e3b;
-    --tips-text: #a7f3d0;
-    --video-gradient: linear-gradient(135deg, #0b132b 0%, #1d4ed8 40%, #0f766e 100%);
-    --shadow: rgba(0, 0, 0, 0.3);
+/* Luz da marca atrás do modelo */
+.scheme-section::after {
+  content: '';
+  position: absolute;
+  inset: 10% auto auto 50%;
+  width: 70vw;
+  height: 70vw;
+  max-width: 980px;
+  max-height: 980px;
+  z-index: -1;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(24, 119, 242, .2), rgba(46, 139, 87, .08) 50%, transparent 72%);
+  pointer-events: none;
 }
 
-/* ================= Resets Básicos ================= */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+.scheme-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, .95fr);
+  grid-template-areas:
+    "intro intro"
+    "stage legend";
+  gap: clamp(1.5rem, 3vw, 2.5rem) clamp(2rem, 4vw, 3.5rem);
+  max-width: var(--page);
+  margin: 0 auto;
 }
 
-body {
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    line-height: 1.6;
+.scheme-intro {
+  grid-area: intro;
+  max-width: 62ch;
 }
 
-a { text-decoration: none; color: inherit; }
-ul { list-style: none; }
-
-/* ================= Header ================= */
-header {
-    background-color: var(--header-bg);
-    padding: 1rem 5%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 10px var(--shadow);
+.scheme-intro h1 {
+  margin-bottom: 1rem;
+  font-size: clamp(2.4rem, 5vw, 3.9rem);
+  letter-spacing: -.045em;
+  color: var(--on-band);
 }
 
-.logo { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-
-.nav-links { display: flex; gap: 1.5rem; align-items: center; }
-.nav-links a {
-    position: relative;
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: var(--text-main);
-    padding-bottom: 4px;
-}
-.nav-links a::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: 0;
-    left: 0;
-    background-color: var(--primary-blue, #1877F2);
-    transition: width 0.3s ease;
-}
-.nav-links a.active,
-.nav-links a:hover {
-    color: var(--text-main);
-}
-.nav-links a.active::after,
-.nav-links a:hover::after {
-    width: 100%;
+.scheme-intro > p {
+  font-size: clamp(1.05rem, 1.3vw, 1.2rem);
+  line-height: 1.65;
+  color: var(--on-band-soft);
 }
 
-.header-controls { display: flex; align-items: center; gap: 1rem; }
-.theme-toggle, .menu-toggle {
-    background: none; border: none; color: var(--text-main);
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    width: 40px; height: 40px; border-radius: 50%;
-}
-.theme-toggle:hover { background-color: var(--card-border); }
-.menu-toggle { display: none; } /* Esconde no desktop */
-
-/* ================= Estrutura Principal ================= */
-main {
-    max-width: 800px; /* Mantém o layout de "documento/manual" estreito */
-    margin: 100px auto 40px;
-    padding: 0 5%;
+.scheme-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  margin-top: 1.25rem;
+  padding: .55rem 1rem .55rem .8rem;
+  border: 1px solid var(--line-band);
+  border-radius: var(--r-tap);
+  background: var(--tint-band);
+  color: var(--on-band-soft);
+  font-size: .9rem;
+  font-weight: 500;
 }
 
-/* ================= Cabeçalho da Página (Título) ================= */
-.page-header {
-    text-align: center;
-    margin-bottom: 3rem;
-}
-.header-icon {
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-    display: flex;
-    justify-content: center;
-}
-.page-header h1 {
-    font-size: 2.2rem;
-    color: var(--primary-color);
-    margin-bottom: 0.5rem;
-}
-.page-header p {
-    color: var(--text-muted);
+.scheme-hint svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--green-band);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-/* ================= Lista de Passos ================= */
+.scheme-stage {
+  grid-area: stage;
+  position: relative;
+  min-height: 460px;
+  border: 1px solid var(--line-band);
+  border-radius: var(--r-block);
+  background:
+    radial-gradient(60% 60% at 50% 100%, rgba(24, 119, 242, .14), transparent 70%),
+    var(--tint-band);
+  overflow: hidden;
+}
+
+.scheme-model {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 460px;
+  --poster-color: transparent;
+  --progress-bar-color: var(--green-band);
+  --progress-bar-height: 3px;
+  background: transparent;
+}
+
+/* Pontos numerados sobre o modelo */
+.hotspot {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, .9);
+  border-radius: 50%;
+  background: var(--blue);
+  color: #ffffff;
+  font-size: .85rem;
+  font-weight: 800;
+  box-shadow: 0 0 0 6px rgba(24, 119, 242, .22), 0 10px 22px -8px rgba(0, 0, 0, .7);
+  transition: transform .2s var(--ease), box-shadow .2s var(--ease), background-color .2s var(--ease), opacity .3s;
+}
+
+.hotspot[slot="hotspot-1"] {
+  background: var(--signal);
+  box-shadow: 0 0 0 6px rgba(239, 68, 68, .24), 0 10px 22px -8px rgba(0, 0, 0, .7);
+}
+
+.hotspot:hover,
+.hotspot.is-active {
+  transform: scale(1.18);
+  box-shadow: 0 0 0 10px rgba(24, 119, 242, .28), 0 12px 26px -8px rgba(0, 0, 0, .75);
+}
+
+.hotspot[slot="hotspot-1"]:hover,
+.hotspot[slot="hotspot-1"].is-active {
+  box-shadow: 0 0 0 10px rgba(239, 68, 68, .3), 0 12px 26px -8px rgba(0, 0, 0, .75);
+}
+
+/* model-viewer esmaece pontos virados para trás; aqui só reduzimos */
+.hotspot:not([data-visible]) { opacity: .35; }
+
+.hotspot:focus-visible { outline-color: #ffffff; }
+
+/* Legenda */
+.scheme-legend {
+  grid-area: legend;
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  counter-reset: none;
+}
+
+.scheme-item {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1rem 1.1rem 1rem 1rem;
+  border: 1px solid transparent;
+  border-radius: var(--r-chip);
+  cursor: pointer;
+  transition: background-color .2s var(--ease), border-color .2s var(--ease);
+}
+
+.scheme-item:hover { background: var(--tint-band); }
+
+.scheme-item.is-active {
+  border-color: rgba(96, 165, 250, .4);
+  background: rgba(24, 119, 242, .12);
+}
+
+.scheme-item:focus-visible { outline-color: var(--green-band); }
+
+.scheme-num {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(96, 165, 250, .16);
+  color: var(--blue-band);
+  font-size: .95rem;
+  font-weight: 800;
+  transition: background-color .2s var(--ease), color .2s var(--ease);
+}
+
+.scheme-num--signal {
+  background: rgba(239, 68, 68, .18);
+  color: #fca5a5;
+}
+
+.scheme-item.is-active .scheme-num {
+  background: var(--blue);
+  color: #ffffff;
+}
+
+.scheme-item.is-active .scheme-num--signal {
+  background: var(--signal);
+  color: #ffffff;
+}
+
+.scheme-item h3 {
+  margin-bottom: .3rem;
+  font-size: 1.1rem;
+  letter-spacing: -.02em;
+  color: var(--on-band);
+}
+
+.scheme-item p {
+  font-size: .96rem;
+  line-height: 1.55;
+  color: var(--on-band-soft);
+}
+
+/* --------------------------------------------------------------------------
+   2 · Os seis passos — o dia
+   -------------------------------------------------------------------------- */
 .steps-section {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-bottom: 4rem;
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: clamp(4.5rem, 8vw, 7rem) var(--edge) clamp(3rem, 6vw, 5rem);
+}
+
+.section-title {
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(2rem, 4vw, 2.9rem);
+  letter-spacing: -.04em;
+}
+
+/* A trilha que costura os passos: é uma sequência de verdade */
+.steps-section::before {
+  content: '';
+  position: absolute;
+  top: calc(clamp(4.5rem, 8vw, 7rem) + clamp(2rem, 4vw, 3rem) + 5.5rem);
+  bottom: calc(clamp(3rem, 6vw, 5rem) + 3.5rem);
+  left: calc(var(--edge) + 27px);
+  width: 2px;
+  background: linear-gradient(180deg, transparent, var(--line-day) 8%, var(--line-day) 92%, transparent);
 }
 
 .step-card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    padding: 1.5rem;
-    display: flex;
-    gap: 1.5rem;
-    align-items: flex-start;
-    box-shadow: 0 4px 6px var(--shadow);
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 1.5rem;
+  padding: 1.75rem 0;
 }
+
+.step-card + .step-card { border-top: 1px solid var(--line-day); }
 
 .step-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-chip);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 12px 24px -12px rgba(15, 23, 42, .4);
 }
 
-/* Cores dos Ícones */
-.icon-blue { background-color: #3b82f6; }
-.icon-green { background-color: #22c55e; }
-.icon-red { background-color: #ef4444; }
-.icon-orange { background-color: #f97316; }
-.icon-purple { background-color: #8b5cf6; }
-.icon-teal { background-color: #14b8a6; }
+.step-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon-blue   { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+.icon-green  { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+.icon-red    { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+.icon-orange { background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); }
+.icon-purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+.icon-teal   { background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); }
 
 .step-content h3 {
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-    color: var(--text-main);
-}
-.step-content p {
-    font-size: 0.95rem;
-    color: var(--text-muted);
-    text-align: justify;
+  margin-bottom: .5rem;
+  font-size: 1.3rem;
+  letter-spacing: -.025em;
 }
 
-/* ================= Vídeo Demonstrativo ================= */
+.step-content p {
+  max-width: 62ch;
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+
+/* --------------------------------------------------------------------------
+   3 · Vídeo — a noite
+   -------------------------------------------------------------------------- */
 .video-section {
-    margin-bottom: 4rem;
+  padding: clamp(4.5rem, 8vw, 7rem) var(--edge);
 }
 
 .video-container {
-    background: var(--video-gradient);
-    border-radius: 16px;
-    overflow: hidden;
-    color: white;
-    text-align: center;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
-.video-header {
-    padding: 2rem 2rem 1.5rem;
+.video-header { margin-bottom: 1.75rem; }
+
+.video-header svg {
+  width: 28px;
+  height: 28px;
+  margin-bottom: 1rem;
+  fill: none;
+  stroke: var(--green-band);
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
-.video-header h2 { font-size: 1.5rem; margin: 0.5rem 0; }
-.video-header p { opacity: 0.9; font-size: 0.9rem; }
+
+.video-header h2 {
+  margin-bottom: .4rem;
+  font-size: clamp(1.8rem, 3.6vw, 2.5rem);
+  letter-spacing: -.035em;
+  color: var(--on-band);
+}
+
+.video-header p { font-size: 1.1rem; color: var(--on-band-soft); }
 
 .video-player {
-    background-color: #1e293b;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+  padding: .75rem;
+  border: 1px solid var(--line-band);
+  border-radius: var(--r-block);
+  background: var(--tint-band);
 }
-[data-theme="dark"] .video-player { background-color: #0f172a; }
 
 .video-player video {
-    display: block;
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    background: #020617;
-    object-fit: contain;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: calc(var(--r-block) - 8px);
+  background: #04070f;
+  object-fit: contain;
 }
 
 .video-controls {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .6rem;
+  padding: .9rem .4rem .35rem;
 }
 
 .video-controls button {
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 6px;
-    padding: 0.55rem 0.75rem;
-    color: white;
-    background: rgba(255, 255, 255, 0.1);
-    cursor: pointer;
+  min-height: 44px;
+  padding: .55rem 1.1rem;
+  border: 1px solid var(--line-band);
+  border-radius: var(--r-tap);
+  background: var(--tint-band);
+  color: var(--on-band);
+  font-size: .92rem;
+  font-weight: 600;
+  transition: background-color .18s var(--ease), border-color .18s var(--ease);
 }
 
-.video-controls button:hover { background: rgba(255, 255, 255, 0.2); }
+.video-controls button:hover {
+  background: var(--tint-band-strong);
+  border-color: var(--tint-band-strong);
+}
+
+#videoPlay {
+  border-color: transparent;
+  background: linear-gradient(135deg, #1877f2 0%, #2e8b57 100%);
+  box-shadow: 0 10px 24px -10px rgba(46, 139, 87, .8);
+}
 
 .video-controls input[type="range"] {
-    min-width: 140px;
-    flex: 1;
-    accent-color: var(--primary-color);
+  flex: 1 1 160px;
+  min-width: 140px;
+  height: 6px;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: var(--r-tap);
+  background: var(--tint-band-strong);
+  cursor: pointer;
+}
+
+.video-controls input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--green-band);
+  box-shadow: 0 0 0 4px rgba(52, 211, 153, .22);
+}
+
+.video-controls input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--green-band);
 }
 
 .video-controls span {
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 0.85rem;
-    white-space: nowrap;
+  color: var(--on-band-soft);
+  font-size: .88rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
-/* ================= Dicas Importantes ================= */
-.tips-section { margin-bottom: 4rem; }
+/* --------------------------------------------------------------------------
+   4 · Dicas — o dia
+   -------------------------------------------------------------------------- */
+.tips-section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: clamp(4.5rem, 8vw, 7rem) var(--edge);
+}
 
 .tips-box {
-    background-color: var(--tips-bg);
-    border-radius: 12px;
-    padding: 2rem;
-    color: var(--tips-text);
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.9rem, 4vw, 2.6rem);
+  border-radius: var(--r-block);
+  background: var(--green);
+  color: #eaf5ee;
+  box-shadow: 0 30px 60px -32px rgba(46, 139, 87, .7);
 }
 
-.tips-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
-.tips-header h3 { font-size: 1.2rem; }
+[data-theme="dark"] .tips-box { background: #1f6b45; }
 
-.tips-box ul { padding-left: 1.5rem; }
+.tips-box::after {
+  content: '';
+  position: absolute;
+  inset: -50% -20% auto auto;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, .22), transparent);
+  pointer-events: none;
+}
+
+.tips-box > * { position: relative; }
+
+.tips-header {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  margin-bottom: 1.25rem;
+}
+
+.tips-header svg {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  padding: 9px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, .18);
+  fill: none;
+  stroke: #ffffff;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tips-header h3 {
+  font-size: 1.45rem;
+  letter-spacing: -.025em;
+  color: #ffffff;
+}
+
 .tips-box ul li {
-    position: relative;
-    margin-bottom: 0.8rem;
-    font-size: 0.95rem;
+  position: relative;
+  padding: .9rem 0 .9rem 1.7rem;
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: #eaf5ee;
 }
+
+.tips-box ul li + li { border-top: 1px solid rgba(255, 255, 255, .18); }
+
 .tips-box ul li::before {
-    content: '•';
-    position: absolute;
-    left: -15px;
-    color: inherit;
-    font-weight: bold;
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 1.5rem;
+  width: 9px;
+  height: 9px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
 }
 
-/* ================= Footer ================= */
-footer {
-    background: var(--video-gradient);
-    color: white;
-    text-align: center;
-    padding: 3rem 5%;
-    width: 100%;
+/* --------------------------------------------------------------------------
+   5 · Telas menores
+   -------------------------------------------------------------------------- */
+@media (max-width: 960px) {
+  .scheme-wrap {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "intro"
+      "stage"
+      "legend";
+  }
+
+  .scheme-stage,
+  .scheme-model { min-height: 400px; }
 }
-.footer-content { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
-.copyright { font-size: 0.8rem; opacity: 0.7; }
 
-/* ================= Responsividade (Mobile) ================= */
-@media (max-width: 768px) {
-    .menu-toggle { display: flex; } /* Mostra botão menu */
-
-    /* Esconde nav links e prepara para o mobile menu */
-    .nav-links {
-        position: fixed;
-        top: 70px; /* Altura do header */
-        left: -100%;
-        width: 100%;
-        height: calc(100vh - 70px);
-        background-color: var(--header-bg);
-        flex-direction: column;
-        justify-content: flex-start;
-        padding-top: 2rem;
-        transition: left 0.3s ease-in-out;
-    }
-
-    .nav-links.active {
-        left: 0;
-    }
-
-    .nav-links a {
-        font-size: 1.2rem;
-        padding: 1.2rem;
-        width: 100%;
-        text-align: center;
-        border-bottom: 1px solid var(--card-border);
-    }
-
-    .step-card {
-        flex-direction: column; /* No celular, o ícone vai pra cima */
-        align-items: center;
-        text-align: center;
-    }
-    .tips-box ul { padding-left: 0; }
-    .tips-box ul li::before { display: none; }
-    .tips-box ul li { text-align: center; }
+@media (max-width: 620px) {
+  .steps-section::before { display: none; }
+  .step-card { grid-template-columns: 1fr; gap: 1rem; }
+  .scheme-stage, .scheme-model { min-height: 340px; }
+  .video-controls input[type="range"] { flex-basis: 100%; order: 4; }
+  .video-controls span { order: 5; }
 }

@@ -42,15 +42,32 @@
 
     <main>
         <!-- Seção Hero -->
-        <section class="hero animate-on-scroll">
+        <section class="hero night">
             <div class="hero-container">
                 <div class="hero-text">
                     <h1>Conecte-se com quem você ama, <span>onde quer que estejam</span></h1>
                     <p>A pochete inteligente ELO mantém idosos seguros e independentes, conectando cuidadores em tempo real com tecnologia de ponta.</p>
                     <div class="hero-buttons">
-                        <button class="btn btn-green">Conheça a ELO</button>
-                        <button class="btn btn-outline">Como Funciona</button>
+                        <a class="btn btn-green" href="pages/produtos.html">Conheça a ELO</a>
+                        <a class="btn btn-outline" href="pages/instrucoes.html">Como Funciona</a>
                     </div>
+
+                    <!-- Tranquilizadores: todos são fatos já descritos nas outras
+                         páginas (produto e manual). Não inventar nada aqui. -->
+                    <ul class="hero-trust">
+                        <li>
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 18.8 6v5.5c0 4.1-2.7 7.7-6.8 9.3-4.1-1.6-6.8-5.2-6.8-9.3V6L12 3.5Z"></path><path d="M9.5 12.3l1.7 1.8 3.4-4.2"></path></svg>
+                            Garantia de 12 meses
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.2v5.1l3.2 1.9"></path></svg>
+                            Suporte 24/7 em português
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2s5.2 5.6 5.2 9.2a5.2 5.2 0 0 1-10.4 0c0-3.6 5.2-9.2 5.2-9.2Z"></path></svg>
+                            Resistente à água (IP63)
+                        </li>
+                    </ul>
                 </div>
                 <div class="hero-image">
                     <img src="./assets/ChatGPT Image 4 de mai. de 2026, 16_10_10 2.png" class="img-clara" alt="Produto Claro">
@@ -66,7 +83,7 @@
                 <p class="animate-on-scroll" style="text-align: center;">Recursos desenvolvidos pensando na segurança e autonomia dos idosos</p>
                 
                 <div class="cards-grid">
-                    <div class="card animate-on-scroll">
+                    <div class="card card--featured animate-on-scroll">
                         <div class="icon-box icon-red" aria-hidden="true">
                             <svg viewBox="0 0 24 24">
                                 <path d="M12 3.8a7.2 7.2 0 0 1 7.2 7.2v4.6l1.7 2.9a1 1 0 0 1-.9 1.5H4a1 1 0 0 1-.9-1.5l1.7-2.9V11A7.2 7.2 0 0 1 12 3.8Z"></path>
@@ -149,7 +166,7 @@
         </section>
 
         <!-- Seção Diferencial -->
-        <section class="diferencial">
+        <section class="diferencial night">
             <div class="section-content">
                 <h2 class="animate-on-scroll">Nosso <span>Diferencial</span></h2>
                 <p class="diferencial-texto animate-on-scroll">A ELO é a única solução que combina pochete inteligente com app integrado, oferecendo comandos de voz, aprovação de transportes pelo cuidador e acionamento direto do SAMU. Não é apenas tecnologia - é cuidado humanizado em cada detalhe.</p>
@@ -207,7 +224,16 @@
         <section class="cta-section animate-on-scroll">
             <div class="section-content">
                 <h2>Pronto para fortalecer o elo com quem você ama?</h2>
-                <button class="btn btn-blue" style="margin-top: 1.5rem;">Conhecer a ELO agora</button>
+
+                <!-- PREÇO (1 de 2) — o outro fica em pages/produtos.html, no
+                     bloco .offer-card. Alterem os dois juntos. -->
+                <p class="cta-price">
+                    <span class="cta-price-value">R$ 997</span>
+                    <span class="cta-price-terms">à vista, ou 12× de R$ 89,90</span>
+                </p>
+
+                <a class="btn btn-blue" href="pages/produtos.html#oferta" style="margin-top: 1.5rem;">Conhecer a ELO agora</a>
+                <p class="cta-note">Garantia de 12 meses e suporte 24/7 inclusos</p>
             </div>
         </section>
     </main>
