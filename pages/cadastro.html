@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar conta - ELO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../header/header.css?v=6">
+    <link rel="stylesheet" href="auth.css?v=6">
+    <script src="../header/header.js" defer></script>
+    <script src="./auth.js" defer></script>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+</head>
+<body class="auth-page">
+
+    <header class="auth-header">
+        <a class="logo" href="../index.html">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            ELO
+        </a>
+        <div class="auth-help">
+            <span>Precisa de ajuda?</span>
+            <a class="btn btn-outline" href="quem-somos.html#contato">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 3.5V16A2.5 2.5 0 0 1 4 13.5v-7Z"/><path d="M8.5 9h7M8.5 12h4"/></svg>
+                Fale conosco
+            </a>
+            <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema">🌙</button>
+        </div>
+    </header>
+
+    <main class="auth-shell">
+        <section class="auth-welcome night">
+            <div class="welcome-text">
+                <h1>Bem-vindo!</h1>
+                <p>Crie sua conta de cuidador e comece a acompanhar quem você ama com tecnologia e segurança.</p>
+            </div>
+
+            <div class="welcome-visual" aria-hidden="true">
+                <img src="../assets/04c9d10c-390e-4b8d-86ed-7be4b5b1bba8.png" alt="">
+            </div>
+
+            <ul class="welcome-points">
+                <li>
+                    <span class="point-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5 18.8 6v5.5c0 4.1-2.7 7.7-6.8 9.3-4.1-1.6-6.8-5.2-6.8-9.3V6L12 3.5Z"/><path d="M9.5 12.3l1.7 1.8 3.4-4.2"/></svg></span>
+                    Segurança em tempo real
+                </li>
+                <li>
+                    <span class="point-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.8a7.2 7.2 0 0 1 7.2 7.2v4.6l1.7 2.9a1 1 0 0 1-.9 1.5H4a1 1 0 0 1-.9-1.5l1.7-2.9V11A7.2 7.2 0 0 1 12 3.8Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></svg></span>
+                    Alertas instantâneos
+                </li>
+                <li>
+                    <span class="point-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15 5.5a3 3 0 0 1 0 5.8M17 14a5.5 5.5 0 0 1 3.5 5"/></svg></span>
+                    Tecnologia que cuida
+                </li>
+            </ul>
+        </section>
+
+        <section class="auth-card">
+            <h2>Crie sua conta</h2>
+            <p class="auth-subtitle">Cadastre-se para acessar o painel do cuidador.</p>
+
+            <form class="auth-form" id="authForm" data-next="painel.html" novalidate>
+                <div class="photo-field">
+                    <label class="photo-picker" for="foto">
+                        <span class="photo-preview" id="photoPreview" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.6l1.2-2h5.4l1.2 2h1.6A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-8Z"/><circle cx="12" cy="12.5" r="3.2"/></svg>
+                        </span>
+                        <span class="photo-text">
+                            <strong id="photoLabel">Adicionar foto de perfil</strong>
+                            <span>Opcional. JPG ou PNG, até 5 MB.</span>
+                        </span>
+                        <input type="file" id="foto" name="foto" accept="image/*">
+                    </label>
+                </div>
+
+                <div class="form-field">
+                    <label for="nome">Nome completo</label>
+                    <input type="text" id="nome" name="nome" placeholder="Digite seu nome" autocomplete="name" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Digite seu email" autocomplete="email" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="senha">Senha</label>
+                        <div class="password-field">
+                            <input type="password" id="senha" name="senha" placeholder="Mínimo de 6 caracteres" autocomplete="new-password" minlength="6" required>
+                            <button type="button" class="password-toggle" data-toggle="senha" aria-label="Mostrar senha" aria-pressed="false">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label for="confirmar">Confirmar senha</label>
+                        <div class="password-field">
+                            <input type="password" id="confirmar" name="confirmar" placeholder="Repita a senha" autocomplete="new-password" minlength="6" required data-match="senha">
+                            <button type="button" class="password-toggle" data-toggle="confirmar" aria-label="Mostrar senha" aria-pressed="false">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label class="auth-check">
+                        <input type="checkbox" name="lembrar" checked>
+                        <span>Lembrar de mim</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-green auth-submit">Criar conta</button>
+                <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+            </form>
+
+            <p class="auth-switch">Já tem uma conta? <a href="login.html">Acessar conta</a></p>
+        </section>
+    </main>
+
+</body>
+</html>

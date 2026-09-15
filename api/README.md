@@ -1,84 +1,85 @@
 # API da Eloá
 
-Motor de respostas próprio da assistente do projeto ELO. Responde em milissegundos, sem depender de servidor nem de modelo externo, a partir de uma base de conhecimento com o conteúdo real do site — e conversa como uma pessoa: varia o jeito de falar, lembra do que foi dito, puxa o próximo assunto e reage ao tom de quem pergunta.
+A Eloá é a assistente do projeto ELO. Esta pasta tem a API em Python que responde por ela: um modelo de linguagem (Claude) conversando como uma pessoa, a partir da persona e dos fatos do site, com memória da conversa por sessão.
 
-## O que ela faz de "gente"
+Ela entende praticamente qualquer jeito de perguntar — gíria, abreviação, erro de digitação, duas perguntas de uma vez, ironia, aflição — e responde curto, no tom de quem conversa. O que o site não diz, ela não inventa: aponta a equipe.
 
-- **Varia a resposta.** Cada assunto tem mais de um jeito de ser dito; ela sorteia e não repete o último.
-- **Lembra.** Se você diz seu nome, ela usa de vez em quando. Se fala "minha mãe", as respostas passam a falar de "sua mãe". Se repete uma pergunta, ela avisa que já comentou.
-- **Puxa assunto.** Termina com uma pergunta ("Quer que eu explique como ligar pela primeira vez?") e entende "sim", "quero", "pode" como resposta a isso.
-- **Reage ao tom.** Se a pergunta traz aflição (medo, queda, sozinha, Alzheimer), ela acolhe antes de explicar.
-- **Responde duas coisas de uma vez.** "Quanto custa e quanto dura a bateria?" recebe as duas respostas.
-- **Confirma quando quase entende.** Se a pergunta chega perto de um assunto mas não bate de vez, ela pergunta "Você quer saber sobre a bateria?" em vez de dizer que não sabe. "Sim" responde; "não" pede para reformular.
-- **Reexplica.** "Não entendi" faz ela repetir o último assunto com outras palavras.
-- **Entende abreviação de internet.** "oq", "pq", "vc", "tb", "qnt", "qm", "msm"...
-- **É honesta.** Se perguntam se é uma pessoa, diz que é uma assistente — feita para conversar como uma. Se o site não traz a informação (detecção de queda, plano de chip, nota fiscal), ela diz o que se sabe e aponta a equipe para o resto. Não inventa.
+## Rodar
 
-## Cobertura
+```bash
+pip install -r api/requirements.txt
+```
 
-46 assuntos, cobrindo tudo que está no site: o que é a ELO, funcionalidades, diferencial, missão, comparação com celular e relógio; emergência (e seus limites), transporte, voz, bateria, localização, conectividade, privacidade; app (e cadastro de mais pessoas), configuração, uso no dia a dia, aparência, água; preço, compra e entrega, garantia, caixa, para quem é; equipe, referências, contato, componentes, páginas do site; e a própria Eloá (o que é, como funciona, que não chama o SAMU).
+Coloque a chave da API da Anthropic (crie em console.anthropic.com):
 
-Medido com duas baterias de perguntas de visitante (uma delas com perguntas que não foram usadas para ajustar): 90 de 91 e 65 de 66 reconhecidas. A que sobra em cada uma é fora do assunto ("capital da França"), e ela diz que não sabe — como deve.
+```bash
+# Windows (PowerShell)
+$env:ANTHROPIC_API_KEY = "sk-ant-..."
+# Linux / Mac
+export ANTHROPIC_API_KEY="sk-ant-..."
+```
+
+Ou copie `api/.env.example` para `api/.env` e preencha (o arquivo não vai para o git).
+
+```bash
+python api/eloa.py           # http://localhost:8000
+```
+
+Abra o site (por exemplo `python -m http.server 8765` na raiz) e vá em **Eloá**. A página já aponta para `http://localhost:8000/perguntar`; para outro endereço, defina `window.ELOA_API_URL` antes de carregar `pages/eloa.js`.
+
+## Dois modos
+
+| Modo | Quando | Como responde |
+|---|---|---|
+| **modelo** | há chave da API válida | Claude (`claude-opus-5`), com a persona e os fatos como contexto e o histórico da sessão. É o modo "gente". |
+| **local** | sem chave, chave inválida, limite de uso ou API fora | Reconhece o assunto por palavras-chave e responde com o fato correspondente. Menos natural, mas nunca inventa e nunca fica muda. |
+
+O servidor troca de modo sozinho e informa em `GET /saude` (`"modo": "modelo"` ou `"local"`). Se a API do modelo falhar no meio de uma conversa, aquela pergunta cai no modo local e a próxima tenta o modelo de novo.
+
+E se o servidor Python nem estiver no ar, a página usa o motor antigo no próprio navegador (`eloa-engine.js`) e tenta a API de novo a cada minuto.
+
+## Rotas
+
+```
+POST /perguntar   { "pergunta": "...", "sessao": "id-opcional" }
+                  → { status: "sucesso", resposta_da_ia, intencao, confianca, fonte, sessao }
+GET  /saude       → { ok, versao, modo, modelo, sessoes }
+```
+
+Mesmo contrato do servidor antigo. `fonte` diz de onde veio a resposta (`modelo` ou `local`). Mande o mesmo `sessao` em todas as perguntas de uma conversa; sem ele, o servidor cria um e devolve. Sessões paradas por 30 minutos são apagadas.
+
+## Configuração (variáveis de ambiente)
+
+| Variável | Padrão | O que faz |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | — | chave da API. Sem ela, modo local |
+| `ELOA_MODELO` | `claude-opus-5` | modelo usado |
+| `ELOA_ESFORCO` | `low` | `low`, `medium` ou `high`. Chat curto vai bem em `low`; suba se quiser respostas mais elaboradas |
+| `ELOA_ORIGENS` | `*` | origens permitidas no CORS, separadas por vírgula (em produção, coloque o domínio do site) |
+| `PORT` | `8000` | porta |
+
+O prefixo enviado ao modelo (persona + fatos) é o mesmo em todas as chamadas e fica em cache na API, então cada pergunta custa pouco.
 
 ## Arquivos
 
 | Arquivo | O que é |
 |---|---|
-| `eloa-engine.js` | O motor: base de conhecimento + reconhecimento da pergunta. Funciona no navegador e no Node. |
-| `server.js` | Servidor HTTP (Node, sem dependências) que expõe o motor com o mesmo contrato do servidor antigo. |
-| `../pages/eloa.js` | A conversa na página: usa o motor local e, só se ele não reconhecer a pergunta, consulta o servidor remoto com tempo limite. |
+| `eloa.py` | O servidor (FastAPI): sessões, chamada ao modelo, modo local, rotas. |
+| `conhecimento.py` | A persona da Eloá e os fatos sobre a ELO. **Para ensinar algo novo, edite aqui** — vale para os dois modos. |
+| `eloa-engine.js` | Motor antigo, só no navegador, usado quando o servidor está fora do ar. |
+| `../pages/eloa.js` | A conversa na página: fala com a API, guarda a sessão, mostra a resposta sendo digitada. |
+| `requirements.txt` | `anthropic`, `fastapi`, `uvicorn`. |
 
-## Como a página responde
+## Para ensinar a Eloá
 
-1. **Motor local** — reconhece o assunto e responde na hora.
-2. **Servidor remoto (reserva)** — só para perguntas fora da base, com limite de 6 s. Se demorar ou falhar, a Eloá responde com a lista do que sabe fazer.
+Abra `conhecimento.py` e adicione um item em `ASSUNTOS`:
 
-Para desligar a reserva, em `pages/eloa.js` troque `remoto.ativo` para `false`.
-
-## Ensinar uma resposta nova
-
-Em `eloa-engine.js`, seção 2, adicione um item em `BASE`:
-
-```js
+```python
 {
-  id: 'entrega',
-  fortes: ['entrega', 'frete', 'prazo de entrega', 'chega quando'],   // peso 3
-  fracas: ['correio', 'transportadora', 'dias'],                       // peso 1
-  resposta: 'A entrega leva de 5 a 10 dias úteis.\n\nO frete é calculado no pedido.'
-}
+    "id": "seguro", "nome": "o seguro",
+    "pistas": ["seguro", "roubo", "perdi a pochete"],
+    "fato": "Texto do que o site diz sobre isso. Se algo não estiver no site, escreva 'o site NÃO informa X'.",
+},
 ```
 
-- Escreva as pistas em minúsculas e **sem acento**.
-- Uma pista sem espaço casa pelo **começo da palavra**: `carreg` pega carregar, carregador, carregando. Pistas de até 3 letras (`sos`, `app`, `gps`) casam só por igualdade.
-- Uma pista com espaço casa como **trecho da frase**.
-- A resposta precisa somar pelo menos 3 pontos para ser usada; abaixo disso a Eloá diz que não sabe.
-- `\n` vira quebra de linha no chat.
-
-Para saudações e despedidas curtas, use `exatos` em vez de `fortes`/`fracas` (veja `saudacao` no arquivo).
-
-## Rodar o servidor
-
-```bash
-node api/server.js            # http://localhost:8000
-PORT=3000 node api/server.js  # outra porta
-```
-
-```
-POST /perguntar   { "pergunta": "quanto custa?", "sessao": "id-opcional" }
-                  → { "status": "sucesso", "resposta_da_ia": "...", "intencao": "preco", "confianca": 0.75, "fonte": "local", "sessao": "eloa-..." }
-GET  /saude       → { "ok": true, "versao": "3.0.0", "sessoes": 3 }
-```
-
-Mande o mesmo `sessao` em todas as perguntas de uma conversa para a Eloá lembrar do contexto. Sem o campo, o servidor cria uma sessão e devolve o id. Sessões paradas por 30 minutos são apagadas.
-
-O contrato de `POST /perguntar` é o mesmo do servidor antigo no Render, então qualquer cliente que falava com ele fala com este sem mudar nada. Precisa do Node 18 ou mais novo.
-
-## Testar o motor no terminal
-
-```bash
-node -e "
-const s = require('./api/eloa-engine.js').criarSessao();
-console.log(s.responder('minha mãe caiu, como aciono o samu?').resposta);
-console.log(s.responder('sim').resposta);
-"
-```
+O modelo passa a saber disso na próxima pergunta; o modo local reconhece pelas `pistas`. Para mudar o jeito de falar dela, edite `PERSONA` no mesmo arquivo.

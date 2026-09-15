@@ -1,4 +1,24 @@
-/* Entrada suave das seções conforme entram na área visível */
-.reveal-on-scroll { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
-.reveal-on-scroll.is-revealed { opacity: 1; transform: translateY(0); }
-@media (prefers-reduced-motion: reduce) { .reveal-on-scroll { opacity: 1; transform: none; transition: none; } }
+/* ==========================================================================
+   ELO · Chegada do conteúdo
+   reveal.js marca cada bloco de <main> com .reveal-on-scroll e, ao entrar
+   na tela, .is-revealed. O bloco chega como um sinal que se estabiliza:
+   sai do desfoque e ganha nitidez. Nada desliza.
+   ========================================================================== */
+.reveal-on-scroll, .reveal-item, .animate-on-scroll {
+  opacity: 0;
+  filter: blur(10px);
+  transition: opacity .8s var(--ease), filter .8s var(--ease);
+}
+
+.reveal-on-scroll.is-revealed, .reveal-item.is-revealed, .animate-on-scroll.visible {
+  opacity: 1;
+  filter: blur(0);
+}
+
+/* A primeira faixa já está na tela: não espera o observer */
+.hero.reveal-on-scroll, .scheme-section.reveal-on-scroll, .page-header.reveal-on-scroll,
+.eloa-presence.reveal-on-scroll, .eloa-console.reveal-on-scroll { opacity: 1; filter: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-on-scroll, .reveal-item, .animate-on-scroll { opacity: 1; filter: none; }
+}

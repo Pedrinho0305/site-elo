@@ -1,13 +1,12 @@
 /* ==========================================================================
    Eloá · Conversa
    ---------------------------------------------------------------------------
-   Liga a tela ao motor de respostas (../api/eloa-engine.js).
+   Liga a tela à API em Python (api/eloa.py), que responde com um modelo de
+   linguagem e memória da conversa. A sessão fica em sessionStorage, então
+   recarregar a página não faz a Eloá esquecer.
 
-   Ordem de resposta:
-     1. Motor local, com memória da conversa — responde na hora, sem rede.
-     2. Se o motor não reconhece a pergunta e o servidor remoto está ativo,
-        pergunta a ele com tempo limite. Se demorar ou falhar, a Eloá
-        responde com o que sabe fazer, em vez de deixar esperando.
+   Se a API estiver fora do ar, a Eloá responde com o motor local do
+   navegador (api/eloa-engine.js): mais simples, mas nunca muda.
 
    A resposta aparece sendo digitada, como numa conversa de verdade.
    ========================================================================== */
@@ -15,14 +14,13 @@
   'use strict';
 
   const CONFIG = {
-    // Servidor remoto (Gemini no Render) só como reserva. Para desligar de
-    // vez, troque `ativo` para false.
-    remoto: {
-      ativo: true,
-      url: 'https://teste-ia-t66d.onrender.com/perguntar',
-      timeoutMs: 6000
+    // Endereço da API em Python. Para apontar para outro servidor, defina
+    // window.ELOA_API_URL antes de carregar este arquivo.
+    api: {
+      url: window.ELOA_API_URL || 'http://localhost:8000/perguntar',
+      timeoutMs: 45000
     },
-    // Tempo "pensando" antes de começar a digitar, e ritmo da digitação
+    // Tempo "pensando" antes de digitar (só no modo local; o modelo já demora o seu)
     pensando: { base: 350, porCaractere: 3, maximo: 900 },
     digitacao: { msPorCaractere: 14, maximoMs: 2600 },
     avatar: '../assets/ChatGPT%20Image%201%20de%20set.%20de%202026,%2021_31_52.png'
@@ -31,29 +29,65 @@
   const reduzirMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ------------------------------------------------------------------------
+     Sessão: o mesmo id em todas as perguntas para a Eloá lembrar da conversa
+     ------------------------------------------------------------------------ */
+  const CHAVE_SESSAO = 'eloa-sessao';
+  let idSessao = sessionStorage.getItem(CHAVE_SESSAO) || null;
+
+  /* ------------------------------------------------------------------------
      API da Eloá: uma função, uma promessa, uma resposta.
      window.EloaAPI.perguntar(texto) → { resposta, fonte, intencao, confianca }
      ------------------------------------------------------------------------ */
-  const sessao = EloaEngine.criarSessao();
+  const local = window.EloaEngine ? EloaEngine.criarSessao() : null;
+  let apiForaDoAr = false;
 
   const EloaAPI = {
     async perguntar(texto) {
-      const local = sessao.responder(texto);
-
-      if (local.intencao !== 'desconhecido') {
-        await esperar(tempoPensando(local.resposta.length));
-        return local;
-      }
-
-      if (CONFIG.remoto.ativo) {
-        const remota = await perguntarRemoto(texto);
+      if (!apiForaDoAr) {
+        const remota = await perguntarApi(texto);
         if (remota) return remota;
       }
-
-      return local; // "não sei", com o que ela sabe fazer
-    },
-    memoria: sessao.memoria
+      return responderLocal(texto);
+    }
   };
+
+  async function perguntarApi(texto) {
+    const controle = new AbortController();
+    const relogio = setTimeout(() => controle.abort(), CONFIG.api.timeoutMs);
+    try {
+      const resposta = await fetch(CONFIG.api.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pergunta: texto, sessao: idSessao }),
+        signal: controle.signal
+      });
+      const dados = await resposta.json();
+      if (dados && dados.status === 'sucesso' && dados.resposta_da_ia) {
+        if (dados.sessao && dados.sessao !== idSessao) {
+          idSessao = dados.sessao;
+          sessionStorage.setItem(CHAVE_SESSAO, idSessao);
+        }
+        return { resposta: dados.resposta_da_ia, fonte: dados.fonte || 'api', intencao: dados.intencao, confianca: dados.confianca };
+      }
+    } catch (erro) {
+      // sem servidor, sem rede ou tempo esgotado: cai para o motor local e
+      // tenta a API de novo daqui a um minuto
+      apiForaDoAr = true;
+      setTimeout(() => { apiForaDoAr = false; }, 60000);
+    } finally {
+      clearTimeout(relogio);
+    }
+    return null;
+  }
+
+  async function responderLocal(texto) {
+    if (!local) {
+      return { resposta: 'Estou sem conexão com o meu servidor agora. Tenta de novo em instantes? Se for emergência, use o botão vermelho da pochete ou ligue 192.', fonte: 'offline', intencao: 'desconhecido', confianca: 0 };
+    }
+    const r = local.responder(texto);
+    await esperar(tempoPensando(r.resposta.length));
+    return r;
+  }
 
   function tempoPensando(tamanho) {
     const { base, porCaractere, maximo } = CONFIG.pensando;
@@ -62,28 +96,6 @@
 
   function esperar(ms) {
     return ms > 0 ? new Promise(r => setTimeout(r, ms)) : Promise.resolve();
-  }
-
-  async function perguntarRemoto(texto) {
-    const controle = new AbortController();
-    const relogio = setTimeout(() => controle.abort(), CONFIG.remoto.timeoutMs);
-    try {
-      const resposta = await fetch(CONFIG.remoto.url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pergunta: texto }),
-        signal: controle.signal
-      });
-      const dados = await resposta.json();
-      if (dados && dados.status === 'sucesso' && dados.resposta_da_ia) {
-        return { resposta: dados.resposta_da_ia, fonte: 'remoto', intencao: 'remoto', confianca: 1 };
-      }
-    } catch (erro) {
-      // tempo esgotado ou sem rede: segue para a resposta local
-    } finally {
-      clearTimeout(relogio);
-    }
-    return null;
   }
 
   /* ------------------------------------------------------------------------

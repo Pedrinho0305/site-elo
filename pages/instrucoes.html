@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ELO - Manual de Instruções</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="instrucoes.css">
-    <link rel="stylesheet" href="../header.css">
-    <link rel="stylesheet" href="../reveal.css">
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../header/header.css?v=6">
+    <link rel="stylesheet" href="instrucoes.css?v=6">
+    <link rel="stylesheet" href="../reveal.css?v=6">
     <script src="./instrucoes.js" defer></script>
-    <script src="../header.js" defer></script>
+    <script src="../header/header.js" defer></script>
     <script src="./video-player.js" defer></script>
     <script src="../reveal.js" defer></script>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
@@ -18,10 +18,10 @@
 <body>
 
     <header class="site-header">
-        <div class="logo">
+        <a class="logo" href="../index.html" aria-label="ELO, ir para o início">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
             ELO
-        </div>
+        </a>
         
         <nav>
             <ul class="nav-links" id="navLinks">
@@ -36,6 +36,7 @@
         </nav>
 
         <div class="header-controls">
+            <a class="header-login" data-profile-slot href="login.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5a7 7 0 0 1 14 0"/></svg><span>Entrar</span></a>
             <button class="theme-toggle" id="themeToggle" aria-label="Alternar Tema">🌙</button>
             <button class="menu-toggle" id="menuToggle" aria-label="Abrir Menu">☰</button>
         </div>
@@ -195,15 +196,31 @@
                     <h2>Vídeo Demonstrativo</h2>
                     <p>Assista ao guia completo de utilização do ELO</p>
                 </div>
-                <div class="video-player">
-                    <video id="instructionVideo" preload="metadata" aria-label="Vídeo demonstrativo do ELO" src="../assets/ELO - Conecte-se com quem você ama - Google Chrome 2026-08-28 09-30-17.mp4"></video>
+                <div class="video-player" id="videoPlayer">
+                    <!-- Sem src por enquanto: quando o vídeo novo estiver pronto, adicione
+                         src="../assets/nome-do-video.mp4" aqui e o player liga sozinho. -->
+                    <video id="instructionVideo" preload="metadata" aria-label="Vídeo demonstrativo do ELO" playsinline></video>
+                    <div class="video-empty" aria-hidden="true">
+                        <span class="video-empty-icon"><svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="14" height="14" rx="2.5"/><path d="M16.5 10l5-3v10l-5-3"/></svg></span>
+                        <h3>Vídeo em produção</h3>
+                        <p>O guia em vídeo será publicado aqui em breve.</p>
+                    </div>
                     <div class="video-controls" aria-label="Controles do vídeo">
-                        <button type="button" id="videoPlay" aria-label="Reproduzir vídeo">Reproduzir</button>
-                        <button type="button" id="videoBack" aria-label="Voltar 10 segundos">-10s</button>
-                        <button type="button" id="videoForward" aria-label="Avançar 10 segundos">+10s</button>
+                        <button type="button" id="videoPlay" aria-label="Reproduzir" title="Reproduzir">
+                            <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+                            <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4.5" height="14" rx="1.2"/><rect x="13.5" y="5" width="4.5" height="14" rx="1.2"/></svg>
+                        </button>
+                        <button type="button" id="videoBack" aria-label="Voltar 10 segundos" title="Voltar 10 segundos">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 3.5v3.5H8"/><text x="12" y="15.2" text-anchor="middle">10</text></svg>
+                        </button>
+                        <button type="button" id="videoForward" aria-label="Avançar 10 segundos" title="Avançar 10 segundos">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 3.5v3.5H16"/><text x="12" y="15.2" text-anchor="middle">10</text></svg>
+                        </button>
                         <input type="range" id="videoProgress" min="0" max="100" value="0" aria-label="Progresso do vídeo">
                         <span id="videoTime">00:00 / 00:00</span>
-                        <button type="button" id="videoFullscreen" aria-label="Alternar tela cheia">Tela cheia</button>
+                        <button type="button" id="videoFullscreen" aria-label="Tela cheia" title="Tela cheia">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V5.5A1.5 1.5 0 0 1 5.5 4H9M15 4h3.5A1.5 1.5 0 0 1 20 5.5V9M20 15v3.5a1.5 1.5 0 0 1-1.5 1.5H15M9 20H5.5A1.5 1.5 0 0 1 4 18.5V15"/></svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -227,7 +244,7 @@
     </main>
 
     <footer>
-        <div class="logo" style="justify-content: center; margin-bottom: 1rem;">
+        <div class="logo">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
         </div>
         <p>Conectando cuidadores e idosos com segurança e carinho.</p>

@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eloá - Assistente Virtual ELO</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../header/header.css?v=6">
 
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="eloa.css?v=4">
-    <link rel="stylesheet" href="../header.css">
-    <link rel="stylesheet" href="../reveal.css">
+    <link rel="stylesheet" href="../style.css?v=6">
+    <link rel="stylesheet" href="eloa.css?v=6">
+    <link rel="stylesheet" href="../reveal.css?v=6">
     <script src="../reveal.js" defer></script>
-    <script src="../header.js" defer></script>
+    <script src="../header/header.js" defer></script>
     <script src="../api/eloa-engine.js" defer></script>
     <script src="./eloa.js" defer></script>
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
@@ -19,10 +19,10 @@
 <body class="eloa-page">
 
     <header class="site-header">
-        <div class="logo">
+        <a class="logo" href="../index.html" aria-label="ELO, ir para o início">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
             ELO
-        </div>
+        </a>
 
         <nav>
             <ul class="nav-links" id="navLinks">
@@ -37,6 +37,7 @@
         </nav>
 
         <div class="header-controls">
+            <a class="header-login" data-profile-slot href="login.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5a7 7 0 0 1 14 0"/></svg><span>Entrar</span></a>
             <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema">☀️</button>
             <button class="menu-toggle" id="menuToggle" type="button" aria-label="Abrir menu">☰</button>
         </div>
@@ -85,7 +86,7 @@
 
 
     <footer>
-        <div class="logo" style="justify-content: center; margin-bottom: 1rem;">
+        <div class="logo">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
         </div>
         <p>Conectando cuidadores e idosos com segurança e carinho.</p>

@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ELO - Conecte-se com quem você ama</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="header.css">
-    <link rel="stylesheet" href="reveal.css">
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="header/header.css?v=6">
+    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="stylesheet" href="reveal.css?v=6">
     <script src="./index.js" defer></script>
-    <script src="./header.js" defer></script>
+    <script src="./header/header.js" defer></script>
     <script src="./reveal.js" defer></script>
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
 </head>
@@ -17,10 +17,10 @@
 
     <!-- Cabeçalho -->
     <header class="site-header">
-        <div class="logo">
+        <a class="logo" href="index.html" aria-label="ELO, ir para o início">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
             ELO
-        </div>
+        </a>
         
         <nav>
             <ul class="nav-links" id="navLinks">
@@ -35,6 +35,7 @@
         </nav>
 
         <div class="header-controls">
+            <a class="header-login" data-profile-slot href="pages/login.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5a7 7 0 0 1 14 0"/></svg><span>Entrar</span></a>
             <button class="theme-toggle" id="themeToggle" aria-label="Alternar Tema">🌙</button>
             <button class="menu-toggle" id="menuToggle" aria-label="Abrir Menu">☰</button>
         </div>
@@ -43,6 +44,18 @@
     <main>
         <!-- Seção Hero -->
         <section class="hero night">
+            <!-- A linha de sinal: liga o texto ao produto, um pulso de luz viaja por ela -->
+            <svg class="hero-signal" viewBox="0 0 1440 800" preserveAspectRatio="none" aria-hidden="true">
+                <defs>
+                    <linearGradient id="signalGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0" stop-color="#22c55e"/>
+                        <stop offset=".55" stop-color="#22d3ee"/>
+                        <stop offset="1" stop-color="#2f7ff7"/>
+                    </linearGradient>
+                </defs>
+                <path class="signal-track" d="M-40 640 C 200 640, 260 420, 520 450 S 860 700, 1080 430 S 1360 150, 1500 260"/>
+                <path class="signal-pulse" d="M-40 640 C 200 640, 260 420, 520 450 S 860 700, 1080 430 S 1360 150, 1500 260"/>
+            </svg>
             <div class="hero-container">
                 <div class="hero-text">
                     <h1>Conecte-se com quem você ama, <span>onde quer que estejam</span></h1>
@@ -72,6 +85,21 @@
                 <div class="hero-image">
                     <img src="./assets/ChatGPT Image 4 de mai. de 2026, 16_10_10 2.png" class="img-clara" alt="Produto Claro">
     <img src="./assets/04c9d10c-390e-4b8d-86ed-7be4b5b1bba8.png" class="img-escura" alt="Produto Escuro">
+                    <!-- O que o cuidador vê no app enquanto está tudo bem -->
+                    <ul class="hero-chips" aria-hidden="true">
+                        <li class="chip--ok">
+                            <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+                            Tudo certo por aqui
+                        </li>
+                        <li class="chip--ride">
+                            <svg viewBox="0 0 24 24"><path d="M4 13l1.5-4.5A2 2 0 0 1 7.4 7h9.2a2 2 0 0 1 1.9 1.5L20 13"/><rect x="3" y="13" width="18" height="5" rx="1.5"/><circle cx="7.5" cy="18.5" r="1.5"/><circle cx="16.5" cy="18.5" r="1.5"/></svg>
+                            Corrida aprovada pelo cuidador
+                        </li>
+                        <li class="chip--pin">
+                            <svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-10a6 6 0 0 0-12 0c0 4.8 6 10 6 10Z"/><circle cx="12" cy="11" r="2.2"/></svg>
+                            Localização atualizada há 2 min
+                        </li>
+                    </ul>
                 </div>
             </div>
         </section>
@@ -80,7 +108,7 @@
         <section class="tecnologia">
             <div class="section-content">
                 <h2 class="animate-on-scroll">Tecnologia que Cuida</h2>
-                <p class="animate-on-scroll" style="text-align: center;">Recursos desenvolvidos pensando na segurança e autonomia dos idosos</p>
+                <p class="animate-on-scroll">Recursos desenvolvidos pensando na segurança e autonomia dos idosos</p>
                 
                 <div class="cards-grid">
                     <div class="card card--featured animate-on-scroll">
@@ -170,6 +198,11 @@
             <div class="section-content">
                 <h2 class="animate-on-scroll">Nosso <span>Diferencial</span></h2>
                 <p class="diferencial-texto animate-on-scroll">A ELO é a única solução que combina pochete inteligente com app integrado, oferecendo comandos de voz, aprovação de transportes pelo cuidador e acionamento direto do SAMU. Não é apenas tecnologia - é cuidado humanizado em cada detalhe.</p>
+
+                <figure class="diferencial-visual animate-on-scroll">
+                    <img src="./assets/3e1e0826-1632-4bb2-a15d-59f2c905080a 1.png" alt="Pochete ELO ao lado da sua embalagem azul" loading="lazy">
+                    <figcaption>A pochete e a caixa que chega na sua casa</figcaption>
+                </figure>
                 
                 <div class="stats-grid">
                     <div class="stat-card animate-on-scroll">
@@ -232,7 +265,7 @@
                     <span class="cta-price-terms">à vista, ou 12× de R$ 89,90</span>
                 </p>
 
-                <a class="btn btn-blue" href="pages/produtos.html#oferta" style="margin-top: 1.5rem;">Conhecer a ELO agora</a>
+                <a class="btn btn-blue" href="pages/produtos.html#oferta">Conhecer a ELO agora</a>
                 <p class="cta-note">Garantia de 12 meses e suporte 24/7 inclusos</p>
             </div>
         </section>
@@ -240,7 +273,7 @@
 
     <!-- Footer -->
     <footer>
-        <div class="logo animate-on-scroll" style="justify-content: center; margin-bottom: 1rem;">
+        <div class="logo animate-on-scroll">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
         </div>
         <p class="animate-on-scroll">Conectando cuidadores e idosos com segurança e carinho.</p>

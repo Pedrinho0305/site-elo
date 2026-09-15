@@ -1,45 +1,321 @@
 /* ==========================================================================
-   ELO · Jogo
-   Tokens, cabeçalho e rodapé vêm de header.css.
-   Página ainda sem conteúdo: um convite claro, não um vazio.
+   ELO · O Jogo
+   Abertura cinematográfica com o personagem; a história ao lado dos
+   objetivos (o que o jogo ensina); a demonstração como uma tela de jogo
+   ainda apagada; e a chamada para jogar.
    ========================================================================== */
 
-main {
-  flex: 1;
+/* --------------------------------------------------------------------------
+   1 · Abertura
+   -------------------------------------------------------------------------- */
+.game-hero { padding-bottom: clamp(3rem, 7vw, 6rem); }
+
+.game-hero-wrap {
+  width: min(100% - 2 * var(--edge), var(--page));
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: .9fr 1.1fr;
+  align-items: center;
+  gap: clamp(2rem, 5vw, 5rem);
+}
+
+.game-hero h1 { font-size: clamp(2.4rem, 5.2vw, 4.2rem); font-weight: 700; letter-spacing: -.035em; }
+.game-lead { margin-top: 1rem; font-size: clamp(1.1rem, 1.6vw, 1.35rem); font-weight: 500; color: var(--text); }
+.game-sub { margin-top: 1rem; max-width: 46ch; color: var(--text-2); line-height: 1.55; }
+.game-hero-actions { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 2rem; }
+
+/* A arte é uma cena: moldura arredondada, brilho da cidade atrás, HUD do app por cima */
+.game-art {
+  position: relative;
+  margin: 0;
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  border: 1px solid var(--line-2);
+  box-shadow: var(--shadow-2);
+  animation: rise 1.1s .2s var(--ease) both;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: none; }
+}
+
+.game-art::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  z-index: -1;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--blue) 45%, transparent), transparent 70%);
+  filter: blur(40px);
+}
+
+.game-art img { width: 100%; aspect-ratio: 1227 / 679; object-fit: cover; }
+
+.game-art figcaption {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: .5rem;
+}
+
+.hud {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .9rem;
+  border-radius: var(--r-pill);
+  background: rgba(6, 11, 28, .7);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(160, 178, 235, .3);
+  color: #eef2ff;
+  font-size: .85rem;
+  font-weight: 600;
+}
+
+.hud-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 30%, transparent); }
+.hud--pin { color: #c7cfec; font-weight: 500; }
+
+/* --------------------------------------------------------------------------
+   2 · História + objetivos
+   -------------------------------------------------------------------------- */
+.game-story { width: min(100% - 2 * var(--edge), var(--page)); margin: var(--band-y) auto 0; }
+
+.story-grid {
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: clamp(2rem, 4vw, 4rem);
+  align-items: start;
+}
+
+.story-text h2 { font-size: clamp(1.8rem, 3.4vw, 2.6rem); }
+.story-text p { margin-top: 1.1rem; max-width: 60ch; color: var(--text-2); line-height: 1.65; text-wrap: pretty; }
+.story-text h2 + p { margin-top: 1.5rem; }
+.story-text strong { color: var(--text); font-weight: 600; }
+
+.story-objectives {
+  position: relative;
+  isolation: isolate;
+  padding: clamp(1.5rem, 3vw, 2.2rem);
+  border-radius: var(--r-lg);
+  background: linear-gradient(165deg, var(--bg-3), var(--bg-2));
+  border: 1px solid var(--line-2);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+
+.story-objectives::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--gloss); pointer-events: none; }
+.story-objectives h3 { font-size: 1.3rem; }
+
+.objectives { list-style: none; margin: 1.3rem 0 0; padding: 0; display: grid; gap: .6rem; counter-reset: obj; }
+
+.objective {
+  --c: var(--cyan);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: .9rem;
+  padding: .85rem 1rem;
+  border-radius: var(--r-md);
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  font-weight: 500;
+  line-height: 1.4;
+  transition: transform .35s var(--ease), border-color .25s;
+}
+
+.objective:hover { transform: translateX(4px); border-color: color-mix(in srgb, var(--c) 55%, var(--line)); }
+
+.objective-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--c);
+  background: color-mix(in srgb, var(--c) 14%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 7%, transparent);
+}
+
+.objective-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+.objective--red { --c: var(--red); }
+.objective--orange { --c: var(--orange); }
+.objective--green { --c: var(--green); }
+.objective--blue { --c: var(--blue-2); }
+.objective--cyan { --c: var(--cyan); }
+
+/* --------------------------------------------------------------------------
+   3 · Demonstração: uma tela de jogo apagada, esperando o vídeo
+   -------------------------------------------------------------------------- */
+.game-demo { margin-top: var(--band-y); padding-block: clamp(3.5rem, 7vw, 6rem); }
+
+.demo-wrap { width: min(100% - 2 * var(--edge), 1020px); margin-inline: auto; }
+.demo-header h2 { font-size: clamp(1.7rem, 3.2vw, 2.4rem); }
+.demo-header p { margin-top: .5rem; color: var(--text-2); }
+
+.demo-screen {
+  position: relative;
+  margin-top: 1.8rem;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  border: 1px solid var(--line-2);
+  background:
+    radial-gradient(60% 60% at 50% 100%, color-mix(in srgb, var(--cyan) 18%, transparent), transparent 70%),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(255, 255, 255, .025) 3px 4px),
+    var(--grad-panel);
+  box-shadow: var(--shadow-2);
+  display: grid;
+  place-items: center;
+  color: #eef2ff;
+}
+
+/* Cantos de mira: a tela sabe que é uma tela de jogo */
+.demo-screen::before, .demo-screen::after {
+  content: "";
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 2px solid color-mix(in srgb, var(--cyan) 70%, transparent);
+  pointer-events: none;
+}
+
+.demo-screen::before { top: 1.2rem; left: 1.2rem; border-right: 0; border-bottom: 0; border-radius: 6px 0 0 0; }
+.demo-screen::after { bottom: 1.2rem; right: 1.2rem; border-left: 0; border-top: 0; border-radius: 0 0 6px 0; }
+
+.demo-placeholder { text-align: center; padding: 1rem; }
+
+.demo-play {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  margin: 0 auto 1.2rem;
+  border-radius: 50%;
+  border: 2px solid rgba(238, 242, 255, .35);
+  background: rgba(238, 242, 255, .06);
+  animation: demo-pulse 3s ease-in-out infinite;
+}
+
+@keyframes demo-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, .35); }
+  50% { box-shadow: 0 0 0 18px rgba(34, 211, 238, 0); }
+}
+
+.demo-play svg { width: 34px; height: 34px; fill: #eef2ff; margin-left: 4px; }
+.demo-placeholder h3 { font-size: clamp(1.3rem, 2.4vw, 1.8rem); }
+.demo-placeholder p { margin-top: .5rem; color: #c7cfec; }
+.demo-specs { font-size: .9rem; color: #97a3cf !important; }
+
+/* --------------------------------------------------------------------------
+   4 · Palco do jogo: o iframe numa moldura de tela, com tela cheia
+   -------------------------------------------------------------------------- */
+.game-stage-section {
+  width: min(100% - 2 * var(--edge), var(--page));
+  margin: var(--band-y) auto 0;
+  scroll-margin-top: calc(var(--header-top) + var(--header-h) + 1rem);
+}
+
+.stage-head { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem; }
+.stage-head h2 { font-size: clamp(1.8rem, 3.4vw, 2.6rem); }
+.stage-hint { flex: 1; color: var(--text-2); font-size: .95rem; }
+
+.stage-fullscreen {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background-color .2s, border-color .2s;
+}
+
+.stage-fullscreen[hidden] { display: none; }
+.stage-fullscreen:hover { border-color: var(--cyan); background: color-mix(in srgb, var(--cyan) 10%, transparent); }
+.stage-fullscreen svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.game-stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  border: 1px solid var(--line-2);
+  background: #000;
+  box-shadow: var(--shadow-2);
+}
+
+.game-stage:fullscreen { border-radius: 0; border: 0; }
+
+.game-stage iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #000;
+  opacity: 0;
+  transition: opacity .6s var(--ease);
+}
+
+.game-stage.is-ready iframe { opacity: 1; }
+.game-stage.is-empty iframe { display: none; }
+
+.game-stage-empty {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  width: 100%;
-  max-width: 720px;
-  margin: 0 auto;
   text-align: center;
+  padding: 1.5rem;
+  color: #eef2ff;
+  background:
+    radial-gradient(60% 60% at 50% 100%, color-mix(in srgb, var(--cyan) 18%, transparent), transparent 70%),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(255, 255, 255, .025) 3px 4px),
+    var(--grad-panel);
 }
 
-main h1 {
-  font-size: clamp(2.4rem, 6vw, 4rem);
-  letter-spacing: -.045em;
+.game-stage-empty::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--elo-mark) 112% 50% / 480px no-repeat;
+  opacity: .3;
+  pointer-events: none;
 }
 
-main h1::after {
-  content: '';
-  display: block;
-  width: 56px;
-  height: 3px;
-  margin: 1.1rem auto 0;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #1877f2, #2e8b57);
+.game-stage-empty > * { position: relative; }
+.game-stage-empty h3 { font-size: clamp(1.3rem, 2.4vw, 1.8rem); max-width: 22ch; }
+.game-stage-empty p { margin-top: .5rem; max-width: 44ch; color: #c7cfec; }
+.game-stage-empty .btn { margin-top: 1.5rem; }
+
+/* --------------------------------------------------------------------------
+   5 · Responsivo
+   -------------------------------------------------------------------------- */
+@media (max-width: 960px) {
+  .game-hero-wrap { grid-template-columns: 1fr; }
+  .game-art { order: -1; }
+  .story-grid { grid-template-columns: 1fr; }
 }
 
-main p {
-  max-width: 46ch;
-  padding: 2.5rem 2rem;
-  border: 1px dashed var(--line-day);
-  border-radius: var(--r-block);
-  background: var(--day-raised);
-  box-shadow: var(--sh-day);
-  color: var(--ink-soft);
-  font-size: 1.05rem;
-  line-height: 1.7;
+@media (max-width: 560px) {
+  .game-hero-actions .btn { width: 100%; }
+  .stage-head { flex-wrap: wrap; }
+  .stage-hint { flex-basis: 100%; order: 3; }
+  .game-stage { aspect-ratio: 4 / 3; }
+  .game-stage-empty .btn { width: 100%; }
+  .game-art figcaption { position: static; margin-top: .8rem; padding: 0 1rem 1rem; }
+  .demo-play { width: 64px; height: 64px; }
 }
+
+.game-stage-empty .demo-play svg { fill: none; stroke: #eef2ff; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; margin-left: 0; }
+
+.game-stage-empty[hidden] { display: none; }

@@ -1,0 +1,579 @@
+/* ==========================================================================
+   ELO · Sistema compartilhado
+   Carregado por todas as páginas: tokens, base tipográfica, cabeçalho,
+   rodapé, botões e as faixas de destaque (.night).
+
+   Conceito: "O sinal." A pochete é um objeto preto com um anel de luz;
+   o logo é um infinito verde→azul; a embalagem é azul-marinho. O site
+   nasce disso: noite azul profunda, luz da marca em gradiente, anel
+   laranja só onde se aperta o botão. Vermelho só onde é emergência.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1 · Tokens
+   -------------------------------------------------------------------------- */
+:root {
+  color-scheme: dark;
+
+  /* Noite (padrão) */
+  --bg: #060b1c;
+  --bg-2: #0b1229;
+  --bg-3: #111a38;
+  --bg-4: #1a2552;
+  --glass: rgba(11, 18, 41, .66);
+  --line: rgba(160, 178, 235, .14);
+  --line-2: rgba(160, 178, 235, .30);
+  --text: #eef2ff;
+  --text-2: #b4bddc;
+  --text-3: #808cb5;
+
+  /* Luz da marca (do logo e do anel do botão) */
+  --green: #22c55e;
+  --green-2: #4ade80;
+  --cyan: #22d3ee;
+  --blue: #2f7ff7;
+  --blue-2: #6aa6ff;
+  --orange: #ff7a1a;
+  --red: #ff3b4e;
+  --purple: #a78bfa;
+  --teal: #2dd4bf;
+  --ink-on-brand: #05101f;
+
+  --grad-brand: linear-gradient(100deg, #22c55e 0%, #22d3ee 52%, #2f7ff7 100%);
+  --grad-panel: linear-gradient(160deg, #122051 0%, #08122f 100%);
+
+  --shadow-1: inset 0 1px 0 rgba(255, 255, 255, .05), 0 30px 60px -32px rgba(0, 0, 0, .75);
+  --shadow-2: 0 40px 90px -40px rgba(0, 0, 0, .85);
+  --gloss: linear-gradient(115deg, rgba(255, 255, 255, .09) 0%, rgba(255, 255, 255, 0) 38%);
+
+  /* Tipografia */
+  --font-display: "Unbounded", "Figtree", system-ui, sans-serif;
+  --font-text: "Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+  /* Forma */
+  --r-xl: 32px;
+  --r-lg: 22px;
+  --r-md: 14px;
+  --r-sm: 10px;
+  --r-pill: 999px;
+
+  /* Layout */
+  --page: 1200px;
+  --edge: clamp(1.1rem, 4.5vw, 3.5rem);
+  --header-h: 66px;
+  --header-top: 14px;
+  --band-y: clamp(4rem, 8vw, 7rem);
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --ease-io: cubic-bezier(.65, 0, .35, 1);
+
+  /* Marcas vetoriais reutilizadas em fundos e listas */
+  --elo-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2322d3ee' stroke-width='.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/%3E%3Cpath d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/%3E%3C/svg%3E");
+  --check-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Gelo (dia) — o azul pálido da foto clara do produto */
+  --bg: #eef3fb;
+  --bg-2: #ffffff;
+  --bg-3: #f5f8fe;
+  --bg-4: #e2eaf9;
+  --glass: rgba(255, 255, 255, .72);
+  --line: rgba(20, 40, 90, .10);
+  --line-2: rgba(20, 40, 90, .22);
+  --text: #0b1226;
+  --text-2: #414d72;
+  --text-3: #6e7997;
+
+  --green: #16a34a;
+  --green-2: #15803d;
+  --cyan: #0e9fbf;
+  --blue: #1d6ff2;
+  --blue-2: #1d6ff2;
+  --orange: #f26a0a;
+  --red: #e11d48;
+  --purple: #7c3aed;
+  --teal: #0d9488;
+
+  --grad-panel: linear-gradient(160deg, #132456 0%, #0a1740 100%);
+  --shadow-1: inset 0 1px 0 rgba(255, 255, 255, .8), 0 30px 60px -34px rgba(20, 40, 90, .35);
+  --shadow-2: 0 40px 90px -44px rgba(20, 40, 90, .45);
+  --gloss: linear-gradient(115deg, rgba(255, 255, 255, .9) 0%, rgba(255, 255, 255, 0) 40%);
+}
+
+/* --------------------------------------------------------------------------
+   2 · Base
+   -------------------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-text);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+@media (min-width: 900px) { body { font-size: 1.125rem; } }
+
+img, svg, video { display: block; max-width: 100%; }
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -.02em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+p { margin: 0; }
+a { color: inherit; }
+button { font: inherit; }
+
+:focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; border-radius: 6px; }
+::selection { background: var(--cyan); color: var(--ink-on-brand); }
+
+/* A primeira faixa de cada página passa por baixo do cabeçalho flutuante */
+main > :first-child { padding-top: calc(var(--header-top) + var(--header-h) + clamp(2.5rem, 6vw, 5rem)); }
+
+/* Texto em gradiente: a luz da marca como tinta */
+.brand-ink,
+.stat-card h3,
+.cta-price-value,
+.offer-value,
+.foundation-stat dt {
+  background: var(--grad-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   3 · Cabeçalho: pílula de vidro flutuante
+   -------------------------------------------------------------------------- */
+.site-header {
+  position: fixed;
+  top: var(--header-top);
+  left: var(--edge);
+  right: var(--edge);
+  z-index: 100;
+  max-width: var(--page);
+  margin-inline: auto;
+  height: var(--header-h);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 .55rem 0 1rem;
+  border-radius: var(--r-pill);
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  backdrop-filter: blur(20px) saturate(170%);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 50px -30px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .06);
+  animation: header-in .8s var(--ease) both;
+}
+
+@keyframes header-in {
+  from { opacity: 0; transform: translateY(-14px); }
+  to { opacity: 1; transform: none; }
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: .08em;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.logo svg {
+  width: 38px;
+  height: 38px;
+  padding: 8px;
+  border-radius: 50%;
+  background: var(--grad-brand);
+  color: #fff;
+  stroke-width: 2.4;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .12) inset, 0 8px 22px -8px rgba(34, 211, 238, .8);
+}
+
+.site-header nav { min-width: 0; }
+
+.nav-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  gap: .1rem;
+}
+
+.nav-links a {
+  position: relative;
+  display: block;
+  padding: .55rem .85rem;
+  border-radius: var(--r-pill);
+  font-weight: 500;
+  font-size: .95rem;
+  color: var(--text-2);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color .2s, background-color .2s;
+}
+
+.nav-links a:hover { color: var(--text); background: color-mix(in srgb, var(--text) 7%, transparent); }
+
+.nav-links a.active { color: var(--text); background: color-mix(in srgb, var(--cyan) 12%, transparent); }
+
+.nav-links a.active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  width: 16px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--grad-brand);
+  transform: translateX(-50%);
+}
+
+.header-controls { display: flex; align-items: center; gap: .35rem; }
+
+.theme-toggle, .menu-toggle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+  color: var(--text);
+  font-size: 1.15rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background-color .2s, transform .3s var(--ease);
+}
+
+.theme-toggle:hover, .menu-toggle:hover { background: color-mix(in srgb, var(--text) 12%, transparent); }
+.theme-toggle:active, .menu-toggle:active { transform: scale(.92); }
+.menu-toggle { display: none; }
+
+/* Entrar: pílula contornada ao lado do tema; vira o chip de perfil após o login */
+.header-login {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  min-height: 44px;
+  padding: 0 1rem 0 .8rem;
+  margin-right: .2rem;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-2);
+  color: var(--text);
+  font-weight: 600;
+  font-size: .92rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color .2s, border-color .2s;
+}
+
+.header-login:hover { border-color: var(--cyan); background: color-mix(in srgb, var(--cyan) 10%, transparent); }
+.header-login svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+/* --------------------------------------------------------------------------
+   Perfil (montado pelo header.js quando há sessão)
+   -------------------------------------------------------------------------- */
+.profile { position: relative; margin-right: .2rem; }
+
+.profile-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  min-height: 44px;
+  padding: .25rem .7rem .25rem .25rem;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-2);
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+  color: var(--text);
+  font-weight: 600;
+  font-size: .92rem;
+  cursor: pointer;
+  transition: background-color .2s, border-color .2s;
+}
+
+.profile-chip:hover, .profile.is-open .profile-chip { border-color: var(--cyan); background: color-mix(in srgb, var(--cyan) 10%, transparent); }
+.profile-chip > svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; color: var(--text-3); transition: transform .3s var(--ease); }
+.profile.is-open .profile-chip > svg { transform: rotate(180deg); }
+
+.profile-avatar {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: var(--grad-brand);
+  color: var(--ink-on-brand);
+  font-family: var(--font-display);
+  font-size: .72rem;
+  font-weight: 700;
+  box-shadow: 0 0 0 2px var(--bg-2);
+}
+
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile-avatar--lg { width: 48px; height: 48px; font-size: .95rem; }
+
+.profile-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  min-width: 260px;
+  padding: .5rem;
+  border-radius: var(--r-lg);
+  background: var(--bg-2);
+  border: 1px solid var(--line-2);
+  box-shadow: var(--shadow-2);
+  z-index: 20;
+  animation: menu-in .25s var(--ease);
+}
+
+@keyframes menu-in {
+  from { opacity: 0; transform: translateY(-6px) scale(.98); }
+  to { opacity: 1; transform: none; }
+}
+
+.profile-head {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: .7rem .8rem .9rem;
+  margin-bottom: .4rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.profile-head strong { display: block; font-size: .98rem; line-height: 1.25; }
+.profile-head span { display: block; color: var(--text-3); font-size: .82rem; overflow-wrap: anywhere; }
+
+.profile-menu a, .profile-menu button {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  width: 100%;
+  padding: .65rem .8rem;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--text);
+  font-weight: 500;
+  font-size: .95rem;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color .15s;
+}
+
+.profile-menu a:hover, .profile-menu button:hover { background: color-mix(in srgb, var(--text) 7%, transparent); }
+.profile-menu svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; color: var(--text-2); }
+.profile-logout { margin-top: .3rem; border-top: 1px solid var(--line) !important; border-radius: 0 0 var(--r-sm) var(--r-sm) !important; color: var(--red) !important; }
+.profile-logout svg { color: var(--red); }
+
+@media (max-width: 960px) {
+  .site-header { grid-template-columns: auto 1fr; }
+  .site-header nav { display: contents; }
+  .menu-toggle { display: grid; }
+  .header-controls { justify-self: end; }
+
+  /* O backdrop-filter do cabeçalho o torna o bloco de contenção do menu:
+     por isso ele é posicionado a partir do próprio cabeçalho e é sólido. */
+  .nav-links {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 10px);
+    flex-direction: column;
+    gap: .15rem;
+    padding: .7rem;
+    border-radius: var(--r-lg);
+    background: var(--bg-2);
+    border: 1px solid var(--line-2);
+    box-shadow: var(--shadow-2);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px) scale(.98);
+    transform-origin: top center;
+    transition: opacity .3s var(--ease), transform .35s var(--ease), visibility 0s .35s;
+  }
+
+  .nav-links.active { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+
+  .nav-links li { opacity: 0; transform: translateY(8px); transition: opacity .4s var(--ease), transform .4s var(--ease); }
+  .nav-links.active li { opacity: 1; transform: none; }
+  .nav-links.active li:nth-child(1) { transition-delay: .04s; }
+  .nav-links.active li:nth-child(2) { transition-delay: .08s; }
+  .nav-links.active li:nth-child(3) { transition-delay: .12s; }
+  .nav-links.active li:nth-child(4) { transition-delay: .16s; }
+  .nav-links.active li:nth-child(5) { transition-delay: .20s; }
+  .nav-links.active li:nth-child(6) { transition-delay: .24s; }
+  .nav-links.active li:nth-child(7) { transition-delay: .28s; }
+
+  .nav-links a { font-size: 1.15rem; padding: .9rem 1.1rem; border-radius: var(--r-md); }
+  .header-login span, .profile-name { display: none; }
+  .header-login { width: 44px; padding: 0; justify-content: center; }
+  .profile-chip { padding-right: .4rem; }
+  .nav-links a.active::after { left: auto; right: 1.1rem; top: 50%; bottom: auto; transform: translateY(-50%); width: 22px; }
+}
+
+/* --------------------------------------------------------------------------
+   4 · Botões: pílulas; o hover acende um anel ao redor, como o botão físico
+   -------------------------------------------------------------------------- */
+.btn, .offer-btn, .submit-button {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-height: 54px;
+  padding: 0 1.6rem;
+  border: 0;
+  border-radius: var(--r-pill);
+  font-family: var(--font-text);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease), background-color .2s;
+}
+
+.btn::before, .offer-btn::before, .submit-button::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 2px;
+  background: var(--grad-brand);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transform: scale(.9);
+  transition: opacity .3s var(--ease), transform .4s var(--ease);
+}
+
+.btn:hover::before, .offer-btn:hover::before, .submit-button:hover::before { opacity: 1; transform: none; }
+.btn:hover, .offer-btn:hover, .submit-button:hover { transform: translateY(-2px); }
+.btn:active, .offer-btn:active, .submit-button:active { transform: translateY(0) scale(.98); }
+
+.btn-green, .btn-blue, .submit-button {
+  background: var(--grad-brand);
+  color: var(--ink-on-brand);
+  box-shadow: 0 14px 34px -14px rgba(34, 211, 238, .7);
+}
+
+.btn-outline {
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1.5px var(--line-2);
+}
+
+.btn-outline:hover { background: color-mix(in srgb, var(--text) 10%, transparent); }
+
+/* O botão de compra é laranja como o anel da pochete: é o botão que se aperta */
+.offer-btn {
+  background: var(--orange);
+  color: #1d0a00;
+  min-height: 60px;
+  padding: 0 2.1rem;
+  font-size: 1.05rem;
+  box-shadow: 0 16px 40px -14px rgba(255, 122, 26, .75);
+}
+
+.offer-btn::before { background: linear-gradient(100deg, #ffb070, #ff7a1a); }
+
+/* --------------------------------------------------------------------------
+   5 · Faixas de destaque (.night): fundo mais profundo, luz difusa, pontos
+   -------------------------------------------------------------------------- */
+.night {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  background: var(--bg-2);
+}
+
+.night::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(55% 60% at 82% 8%, color-mix(in srgb, var(--blue) 26%, transparent), transparent 62%),
+    radial-gradient(45% 50% at 8% 95%, color-mix(in srgb, var(--green) 18%, transparent), transparent 60%),
+    radial-gradient(color-mix(in srgb, var(--text) 14%, transparent) 1px, transparent 1.4px) 0 0 / 30px 30px;
+}
+
+[data-theme="light"] .night { background: #e5edfa; }
+
+/* --------------------------------------------------------------------------
+   6 · Rodapé
+   -------------------------------------------------------------------------- */
+footer {
+  position: relative;
+  max-width: calc(var(--page) + 2 * var(--edge));
+  margin: var(--band-y) auto 0;
+  padding: 2.6rem var(--edge) 2.4rem;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  border-top: 1px solid var(--line);
+  color: var(--text-2);
+  font-size: .95rem;
+}
+
+footer::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  width: min(60%, 520px);
+  height: 2px;
+  border-radius: 2px;
+  background: var(--grad-brand);
+  transform: translateX(-50%);
+}
+
+footer .logo svg { width: 36px; height: 36px; }
+footer p:last-child { color: var(--text-3); justify-self: end; }
+
+@media (max-width: 700px) {
+  footer { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+  footer p:last-child { justify-self: center; }
+}
+
+/* --------------------------------------------------------------------------
+   7 · Movimento reduzido
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; transition-duration: .001s !important; }
+  html { scroll-behavior: auto; }
+}

@@ -1,0 +1,11 @@
+Coloque aqui a versao HTML5 do jogo (por exemplo, a pasta exportada
+pelo GDevelop ou por outra engine), com o arquivo principal chamado:
+
+  index.html
+
+A pagina pages/jogo.html abre esse arquivo num iframe. Enquanto ele
+nao existir, a pagina mostra "O jogo ainda esta em desenvolvimento".
+
+Se o jogo estiver hospedado fora do site (gd.games, itch.io etc.),
+troque o atributo data-src do iframe em pages/jogo.html pelo link
+de "embed" do jogo.

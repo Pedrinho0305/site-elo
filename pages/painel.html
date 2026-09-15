@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do cuidador - ELO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../header/header.css?v=6">
+    <link rel="stylesheet" href="painel.css?v=6">
+    <link rel="stylesheet" href="../reveal.css?v=6">
+    <script src="../header/header.js" defer></script>
+    <script src="../reveal.js" defer></script>
+    <script src="./painel.js" defer></script>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+</head>
+<body class="app-page">
+
+    <header class="app-header">
+        <a class="logo" href="../index.html">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            ELO
+        </a>
+
+        <nav class="app-nav" aria-label="Painel">
+            <a href="painel.html" class="active">Painel</a>
+            <a href="relatorios.html">Relatórios</a>
+        </nav>
+
+        <div class="app-controls">
+            <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema">🌙</button>
+            <button class="app-bell" type="button" aria-label="Notificações: nenhuma nova">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.8a7.2 7.2 0 0 1 7.2 7.2v4.6l1.7 2.9a1 1 0 0 1-.9 1.5H4a1 1 0 0 1-.9-1.5l1.7-2.9V11A7.2 7.2 0 0 1 12 3.8Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></svg>
+            </button>
+            <a class="app-user" data-profile-slot href="login.html">
+                <span class="app-user-avatar" aria-hidden="true">AS</span>
+                <span class="app-user-name">Antônio Silva</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </a>
+        </div>
+    </header>
+
+    <main class="app-shell">
+        <!-- Saudação + estado da pochete -->
+        <section class="app-hero">
+            <div class="app-greeting">
+                <h1>Olá, <span id="greetingName">Antônio</span>!</h1>
+                <p>Bem-vindo ao seu painel ELO. Acompanhe e cuide de quem você ama.</p>
+            </div>
+
+            <div class="device-card">
+                <span class="device-thumb" aria-hidden="true"><img src="../assets/ChatGPT Image 4 de mai. de 2026, 16_10_10 4.png" alt=""></span>
+                <div>
+                    <h2>Pochete ELO</h2>
+                    <p class="device-status"><span class="status-dot"></span>Online</p>
+                    <p class="device-note">Conectada via Bluetooth</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Estado agora -->
+        <section class="tiles" aria-label="Estado da pochete agora">
+            <article class="tile tile--green">
+                <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.4 5.6a5 5 0 0 0-7.1 0L12 6.9l-1.3-1.3a5 5 0 1 0-7.1 7.1l8.4 8.4 8.4-8.4a5 5 0 0 0 0-7.1z"/><path d="M6 12h3l1.5-3 3 6 1.5-3h3"/></svg></span>
+                <h3>Status da pochete</h3>
+                <p class="tile-value">100%</p>
+                <p class="tile-note">Tudo funcionando</p>
+                <div class="tile-bar" aria-hidden="true"><span style="--v: 100%"></span></div>
+            </article>
+
+            <article class="tile tile--blue">
+                <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="6" y="3.5" width="12" height="17" rx="2.5"/><path d="M10 2v1.5M14 2v1.5"/><rect x="8.5" y="11" width="7" height="7" rx="1"/></svg></span>
+                <h3>Bateria</h3>
+                <p class="tile-value">78%</p>
+                <p class="tile-note">Carga restante</p>
+                <div class="tile-bar" aria-hidden="true"><span style="--v: 78%"></span></div>
+            </article>
+
+            <article class="tile tile--orange">
+                <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.8a7.2 7.2 0 0 1 7.2 7.2v4.6l1.7 2.9a1 1 0 0 1-.9 1.5H4a1 1 0 0 1-.9-1.5l1.7-2.9V11A7.2 7.2 0 0 1 12 3.8Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></svg></span>
+                <h3>Último alerta</h3>
+                <p class="tile-value tile-value--text">Nenhum</p>
+                <p class="tile-note">Tudo tranquilo</p>
+            </article>
+
+            <article class="tile tile--purple">
+                <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-10a6 6 0 0 0-12 0c0 4.8 6 10 6 10Z"/><circle cx="12" cy="11" r="2.2"/></svg></span>
+                <h3>Localização</h3>
+                <p class="tile-value tile-value--text">Atualizada</p>
+                <p class="tile-note">Agora há pouco</p>
+            </article>
+        </section>
+
+        <!-- Ações rápidas -->
+        <section class="actions-section">
+            <h2>Ações rápidas</h2>
+            <div class="actions-grid">
+                <button type="button" class="action action--green" data-feedback="Chamando o Sr. Antônio pela pochete">
+                    <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h3.5l1.7 4.3-2.2 1.4a11 11 0 0 0 6.3 6.3l1.4-2.2L20 15.5V19a1.5 1.5 0 0 1-1.6 1.5C10.4 20 4 13.6 3.5 5.6A1.5 1.5 0 0 1 5 4Z"/></svg></span>
+                    <span class="action-title">Ligar para idoso</span>
+                    <span class="action-note">Iniciar chamada</span>
+                </button>
+
+                <button type="button" class="action action--blue" data-feedback="Mensagem enviada. Ela será lida em voz pela pochete">
+                    <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 3.5V16A2.5 2.5 0 0 1 4 13.5v-7Z"/><path d="M8.5 9h7M8.5 12h4"/></svg></span>
+                    <span class="action-title">Enviar mensagem</span>
+                    <span class="action-note">Mandar mensagem</span>
+                </button>
+
+                <button type="button" class="action action--red" data-feedback="Alerta de emergência enviado ao SAMU (192) com a localização">
+                    <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.8a7.2 7.2 0 0 1 7.2 7.2v4.6l1.7 2.9a1 1 0 0 1-.9 1.5H4a1 1 0 0 1-.9-1.5l1.7-2.9V11A7.2 7.2 0 0 1 12 3.8Z"/><path d="M12 8v4M12 15h.01"/></svg></span>
+                    <span class="action-title">Enviar emergência</span>
+                    <span class="action-note">Acionar alerta</span>
+                </button>
+
+                <button type="button" class="action action--purple" data-feedback="Comando de voz enviado à pochete">
+                    <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5a4 4 0 0 1 4 4v4a4 4 0 0 1-8 0v-4a4 4 0 0 1 4-4Z"/><path d="M6 11.5a6 6 0 0 0 12 0"/><path d="M12 17.5v3"/></svg></span>
+                    <span class="action-title">Comando de voz</span>
+                    <span class="action-note">Enviar comando</span>
+                </button>
+
+                <button type="button" class="action action--orange" data-feedback="3 familiares com acesso ao painel">
+                    <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15 5.5a3 3 0 0 1 0 5.8M17 14a5.5 5.5 0 0 1 3.5 5"/></svg></span>
+                    <span class="action-title">Ver familiares</span>
+                    <span class="action-note">Gerenciar acessos</span>
+                </button>
+            </div>
+            <p class="action-status" id="actionStatus" role="status" aria-live="polite"></p>
+        </section>
+
+        <!-- Meu perfil -->
+        <section class="profile-section" id="perfil">
+            <h2>Meu perfil</h2>
+            <div class="profile-card">
+                <label class="profile-photo" for="perfilFoto" title="Trocar foto">
+                    <span class="profile-avatar profile-avatar--xl" id="perfilAvatar"></span>
+                    <span class="profile-photo-edit" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.6l1.2-2h5.4l1.2 2h1.6A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-8Z"/><circle cx="12" cy="12.5" r="3.2"/></svg></span>
+                    <input type="file" id="perfilFoto" accept="image/*" aria-label="Trocar foto de perfil">
+                </label>
+                <div class="profile-info">
+                    <h3 id="perfilNome"></h3>
+                    <p id="perfilEmail"></p>
+                    <p class="profile-role">Cuidador responsável</p>
+                    <div class="profile-actions">
+                        <label class="btn btn-outline" for="perfilFoto">Trocar foto</label>
+                        <button type="button" class="btn btn-outline profile-logout-btn" id="perfilSair">Sair da conta</button>
+                    </div>
+                    <p class="action-status" id="perfilStatus" role="status" aria-live="polite"></p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="logo">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+        </div>
+        <p>Painel de demonstração. Os dados mostrados são ilustrativos.</p>
+        <p>© 2026 ELO. Todos os direitos reservados.</p>
+    </footer>
+
+</body>
+</html>

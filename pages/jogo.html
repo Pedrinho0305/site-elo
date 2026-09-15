@@ -1,22 +1,27 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>ELO - Jogo</title>
-	<link rel="stylesheet" href="../header.css">
-	<link rel="stylesheet" href="jogo.css">
-	<link rel="stylesheet" href="../reveal.css">
+	<title>ELO: O Jogo</title>
+	<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="../header/header.css?v=6">
+	<link rel="stylesheet" href="jogo.css?v=6">
+	<link rel="stylesheet" href="../reveal.css?v=6">
 	<script src="jogo.js" defer></script>
-	<script src="../header.js" defer></script>
+	<script src="../header/header.js" defer></script>
 	<script src="../reveal.js" defer></script>
 	<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
 	<header class="site-header">
-		<div class="brand">ELO</div>
-		<nav class="navigation">
-			<ul>
+		<a class="logo" href="../index.html" aria-label="ELO, ir para o início">
+			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+			ELO
+		</a>
+
+		<nav>
+			<ul class="nav-links" id="navLinks">
 				<li><a href="../index.html">Início</a></li>
 				<li><a href="instrucoes.html">Instruções</a></li>
 				<li><a href="produtos.html">Produto</a></li>
@@ -26,22 +31,125 @@
 				<li><a href="eloa.html">Eloá</a></li>
 			</ul>
 		</nav>
-		<div class="header-actions">
-			<button class="theme-toggle" title="Alternar tema">🌙</button>
+
+		<div class="header-controls">
+			<a class="header-login" data-profile-slot href="login.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5a7 7 0 0 1 14 0"/></svg><span>Entrar</span></a>
+			<button class="theme-toggle" id="themeToggle" aria-label="Alternar Tema">🌙</button>
+			<button class="menu-toggle" id="menuToggle" aria-label="Abrir Menu">☰</button>
 		</div>
 	</header>
 
-	<main style="padding:100px 20px;">
-		<h1>Jogo</h1>
-		<p>Conteúdo do jogo aqui.</p>
+	<main>
+		<!-- Abertura: o personagem e o convite -->
+		<section class="game-hero night">
+			<div class="game-hero-wrap">
+				<div class="game-hero-text">
+					<h1>ELO: O Jogo</h1>
+					<p class="game-lead">Uma jornada interativa sobre cuidado, conexão e tecnologia.</p>
+					<p class="game-sub">Você é o cuidador. A cidade é grande, a noite chegou e o Sr. João saiu para caminhar com a pochete. Tudo certo por aqui?</p>
+					<div class="game-hero-actions">
+						<a class="btn btn-green" href="#jogar">Jogar agora</a>
+						<a class="btn btn-outline" href="#historia">Conhecer a história</a>
+					</div>
+				</div>
+
+				<figure class="game-art">
+					<img src="../assets/jogo-cuidador.png" alt="Sr. João, personagem do jogo, caminhando à noite pelo parque com a pochete ELO na cintura">
+					<figcaption>
+						<span class="hud hud--ok"><span class="hud-dot"></span>Sr. João conectado</span>
+						<span class="hud hud--pin">Parque Central, 21h40</span>
+					</figcaption>
+				</figure>
+			</div>
+		</section>
+
+		<!-- O jogo roda aqui dentro. Coloque a versão HTML5 exportada em /jogo/index.html
+		     (ou troque data-src por um link externo, como o do gd.games). -->
+		<section class="game-stage-section" id="jogar">
+			<div class="stage-head">
+				<h2>Jogar</h2>
+				<p class="stage-hint" id="gameHint">Carregando o jogo</p>
+				<button type="button" class="stage-fullscreen" id="gameFullscreen" aria-label="Jogar em tela cheia" title="Tela cheia" hidden>
+					<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V5.5A1.5 1.5 0 0 1 5.5 4H9M15 4h3.5A1.5 1.5 0 0 1 20 5.5V9M20 15v3.5a1.5 1.5 0 0 1-1.5 1.5H15M9 20H5.5A1.5 1.5 0 0 1 4 18.5V15"/></svg>
+				</button>
+			</div>
+
+			<div class="game-stage" id="gameStage">
+				<iframe id="gameFrame" data-src="../jogo/index.html" title="ELO: O Jogo" allow="fullscreen; autoplay; gamepad" allowfullscreen loading="lazy"></iframe>
+				<div class="game-stage-empty" id="gameEmpty" hidden>
+					<span class="demo-play" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2.5" y="7" width="19" height="11" rx="4"/><path d="M7 11v3M5.5 12.5h3"/><circle cx="16" cy="11.5" r=".9"/><circle cx="18" cy="13.5" r=".9"/></svg></span>
+					<h3>O jogo ainda está em desenvolvimento</h3>
+					<p>Assim que a equipe publicar a versão jogável, ela abre aqui mesmo, dentro do site.</p>
+					<a class="btn btn-outline" href="produtos.html">Conhecer a pochete enquanto isso</a>
+				</div>
+			</div>
+		</section>
+
+		<!-- História: o que o jogador vive e o que aprende -->
+		<section class="game-story" id="historia">
+			<div class="story-grid">
+				<div class="story-text">
+					<h2>História do jogo</h2>
+					<p>Você é um <strong>cuidador tecnológico</strong> responsável por garantir a segurança e o bem-estar de idosos em uma cidade moderna. Equipado com a tecnologia ELO, você precisa monitorar, responder a emergências e tomar decisões rápidas para manter todos seguros.</p>
+					<p>Em cada fase, você enfrentará diferentes cenários: desde ajudar dona Maria a chamar um Uber para sua consulta médica até responder a alertas de emergência do Sr. João, que se perdeu no parque. O jogo simula situações reais do dia a dia.</p>
+					<p>À medida que você avança, desbloqueia novos recursos da pochete ELO e enfrenta desafios mais complexos. Será que você consegue manter o elo forte com todos sob seus cuidados?</p>
+				</div>
+
+				<aside class="story-objectives" aria-labelledby="objetivos-titulo">
+					<h3 id="objetivos-titulo">O que o jogo ensina</h3>
+					<ol class="objectives">
+						<li class="objective objective--red">
+							<span class="objective-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.8a7.2 7.2 0 0 1 7.2 7.2v4.6l1.7 2.9a1 1 0 0 1-.9 1.5H4a1 1 0 0 1-.9-1.5l1.7-2.9V11A7.2 7.2 0 0 1 12 3.8Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></svg></span>
+							<span>Como funcionam os alertas de emergência 192</span>
+						</li>
+						<li class="objective objective--orange">
+							<span class="objective-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 13l1.5-4.5A2 2 0 0 1 7.4 7h9.2a2 2 0 0 1 1.9 1.5L20 13"/><rect x="3" y="13" width="18" height="5" rx="1.5"/><circle cx="7.5" cy="18.5" r="1.5"/><circle cx="16.5" cy="18.5" r="1.5"/></svg></span>
+							<span>Aprovação inteligente de transportes</span>
+						</li>
+						<li class="objective objective--green">
+							<span class="objective-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5a4 4 0 0 1 4 4v4a4 4 0 0 1-8 0v-4a4 4 0 0 1 4-4Z"/><path d="M6 11.5a6 6 0 0 0 12 0"/><path d="M12 17.5v3"/></svg></span>
+							<span>Uso de comandos de voz para auxiliar idosos</span>
+						</li>
+						<li class="objective objective--blue">
+							<span class="objective-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-10a6 6 0 0 0-12 0c0 4.8 6 10 6 10Z"/><circle cx="12" cy="11" r="2.2"/></svg></span>
+							<span>Localização em tempo real e zonas de segurança</span>
+						</li>
+						<li class="objective objective--cyan">
+							<span class="objective-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 3.5V16A2.5 2.5 0 0 1 4 13.5v-7Z"/><path d="M8.5 9h7M8.5 12h4"/></svg></span>
+							<span>Comunicação efetiva entre cuidador e idoso</span>
+						</li>
+					</ol>
+				</aside>
+			</div>
+		</section>
+
+		<!-- Demonstração: vídeo ainda em produção -->
+		<section class="game-demo night" id="demo">
+			<div class="demo-wrap">
+				<div class="demo-header">
+					<h2>Demonstração do jogo</h2>
+					<p>Veja o jogo em ação: gameplay e mecânicas principais.</p>
+				</div>
+
+				<div class="demo-screen" role="img" aria-label="Espaço reservado para o vídeo de demonstração, ainda em produção">
+					<div class="demo-placeholder">
+						<span class="demo-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg></span>
+						<h3>Vídeo em produção</h3>
+						<p>A demonstração completa será inserida aqui.</p>
+						<p class="demo-specs">1920×1080, entre 5 e 7 minutos</p>
+					</div>
+				</div>
+			</div>
+		</section>
+
 	</main>
 
 	<footer>
-		<div class="logo" style="justify-content: center; margin-bottom: 1rem;">
+		<div class="logo">
 			<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
 		</div>
 		<p>Conectando cuidadores e idosos com segurança e carinho.</p>
-		<p>© 2025 ELO. Todos os direitos reservados.</p>
+		<p>© 2026 ELO. Todos os direitos reservados.</p>
 	</footer>
 </body>
 </html>
