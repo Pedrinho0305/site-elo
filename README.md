@@ -228,6 +228,7 @@ Documentação completa em [backend/README.md](backend/README.md), incluindo o *
 - **Telegram:** `telegram.js` (Bot API `sendMessage` + polling `getUpdates`). O cuidador manda `/start CÓDIGO` ao bot. Sem `TELEGRAM_BOT_TOKEN`, simulado (mensagens no terminal, vínculo por `chat_id` digitado).
 - **Tempo real:** `eventos.js` é um canal SSE por cuidador (`GET /api/eventos/stream?token=`); o painel usa `EventSource`. Payload `{ tipo, dados, em }`.
 - **Painel** (`pages/painel-pochete.js`): toasts, tile "Último alerta", painel de corrida com Aprovar/Recusar/Cancelar, vínculo de pochete (mostra a chave uma vez), Telegram e botões de simulação. Sem token (demonstração local), a seção explica que precisa do servidor.
+- **`GET /`** é a página do backend (rotas, estado, ambiente). **Vercel:** `backend/api/index.js` + `vercel.json`; Root Directory = `backend`, variáveis do `.env` no painel da Vercel. Em serverless o SSE, o polling do Telegram e a sincronização automática ficam desligados (o app detecta `process.env.VERCEL`); o resto funciona.
 
 ---
 

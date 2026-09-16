@@ -14,6 +14,8 @@
      npm start                      (porta 3000)
    As tabelas são criadas sozinhas na primeira execução.
 
+   GET /            página com todas as rotas e o estado do servidor (JSON com Accept: application/json)
+
    ROTAS DO CUIDADOR (Authorization: Bearer <token>)
      POST   /api/cadastro                { nome, email, senha, foto? }      → 201 { token, cuidador }
      POST   /api/login                   { email, senha }                   → { token, cuidador }
@@ -41,6 +43,11 @@
      GET    /api/pochete/estado          → { pochete, corrida }   (para ela anunciar "corrida aprovada")
 
    Erros: { erro: "mensagem em português" } com o status HTTP certo.
+
+   VERCEL: o app é exportado (export default) e api/index.js o entrega como
+   função serverless; vercel.json manda todas as rotas para lá. Na Vercel não
+   há processo contínuo, então o stream SSE, o polling do Telegram e a
+   sincronização periódica com a Uber ficam desligados (veja a rota /).
    ========================================================================== */
 import crypto from 'node:crypto';
 import { promisify } from 'node:util';
@@ -54,6 +61,9 @@ import * as sse from './eventos.js';
 /* ------------------------------------------------------------------------
    Configuração
    ------------------------------------------------------------------------ */
+const NA_VERCEL = Boolean(process.env.VERCEL);
+const INICIO = Date.now();
+
 const CONFIG = {
   porta: Number(process.env.PORT) || 3000,
   origens: (process.env.ALLOWED_ORIGINS || '*').split(',').map(o => o.trim()),
@@ -379,6 +389,116 @@ async function corridaDoCuidador(req) {
   return linhas[0];
 }
 
+/* ---- página inicial: o backend inteiro numa tela ---- */
+const ROTAS = [
+  ['Servidor', [
+    ['GET', '/', 'Esta página. Com Accept: application/json, devolve o mesmo em JSON.'],
+    ['GET', '/api/saude', 'Estado do banco, da Uber e do Telegram.'],
+  ]],
+  ['Contas do cuidador', [
+    ['POST', '/api/cadastro', '{ nome, email, senha, foto? } → 201 { token, cuidador }. 409 se o email já existe.'],
+    ['POST', '/api/login', '{ email, senha } → { token, cuidador }. 401 se errado.'],
+    ['GET', '/api/me', 'Bearer → { cuidador }'],
+    ['PATCH', '/api/me', 'Bearer { nome?, foto?, telefone? } → { cuidador }'],
+    ['POST', '/api/logout', 'Bearer → { ok }'],
+  ]],
+  ['Pochetes (cuidador)', [
+    ['GET', '/api/pochetes', 'Bearer → { pochetes }'],
+    ['POST', '/api/pochetes', 'Bearer { nome_idoso, telefone_idoso?, casa? } → 201 { pochete, chave }. A chave só aparece aqui.'],
+    ['POST', '/api/pochetes/:id/chave', 'Bearer → { chave } nova; a antiga para de funcionar.'],
+    ['PATCH', '/api/pochetes/:id', 'Bearer { nome_idoso?, telefone_idoso?, casa? }'],
+    ['DELETE', '/api/pochetes/:id', 'Bearer → { ok }'],
+    ['POST', '/api/pochetes/:id/simular', 'Bearer { tipo, lat?, lng?, bateria?, destino? } — aperta um botão como se fosse a pochete.'],
+  ]],
+  ['A pochete fala com o servidor (X-Pochete-Key)', [
+    ['POST', '/api/pochete/evento', '{ tipo: emergencia | transporte | bateria | localizacao | teste, lat?, lng?, bateria?, destino? } → 201 { evento, corrida? }'],
+    ['GET', '/api/pochete/estado', '→ { pochete, cuidador, corrida } — para ela anunciar a corrida por voz.'],
+  ]],
+  ['Eventos e corridas (cuidador)', [
+    ['GET', '/api/eventos?limite=20', 'Bearer → { eventos }'],
+    ['GET', '/api/eventos/stream?token=', 'SSE: emergencia, transporte, bateria, localizacao, teste, corrida, telegram. Não funciona em serverless.'],
+    ['GET', '/api/corridas', 'Bearer → { corridas } (consulta a Uber e atualiza)'],
+    ['GET', '/api/corridas/:id', 'Bearer → { corrida }'],
+    ['POST', '/api/corridas/:id/aprovar', 'Bearer → estima e pede o carro na Uber → { corrida }'],
+    ['POST', '/api/corridas/:id/recusar', 'Bearer → { corrida }'],
+    ['POST', '/api/corridas/:id/cancelar', 'Bearer → cancela na Uber → { corrida }'],
+  ]],
+  ['Telegram (cuidador)', [
+    ['POST', '/api/telegram/codigo', 'Bearer → { codigo, bot, simulado, vinculado }'],
+    ['POST', '/api/telegram/vincular', 'Bearer { chat_id } (só no modo simulado)'],
+    ['DELETE', '/api/telegram', 'Bearer → { ok }'],
+    ['POST', '/api/telegram/teste', 'Bearer → manda uma mensagem de teste'],
+  ]],
+];
+
+async function estadoServidor() {
+  let banco = 'conectado';
+  try { await pool.query('SELECT 1'); } catch (e) { banco = 'indisponível: ' + (e.code || e.message); }
+  return {
+    nome: 'ELO backend',
+    versao: '1.1.0',
+    ambiente: NA_VERCEL ? 'vercel' : 'servidor',
+    banco, host_banco: `${CONFIG.banco.user}@${CONFIG.banco.host}/${CONFIG.banco.database}`,
+    uber: uber.simulado ? 'simulado' : 'real',
+    telegram: telegram.simulado ? 'simulado' : 'bot @' + telegram.botUsername,
+    tempo_real: NA_VERCEL ? 'desligado (serverless)' : 'SSE ativo',
+    ativo_ha_s: Math.round((Date.now() - INICIO) / 1000),
+    node: process.version,
+  };
+}
+
+const escapar = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+app.get('/', async (req, res, next) => {
+  try {
+    const estado = await estadoServidor();
+    if (req.accepts(['html', 'json']) === 'json') return res.json({ ...estado, rotas: ROTAS });
+
+    const ok = estado.banco === 'conectado';
+    const chip = (rotulo, valor, cor) => `<span class="chip chip--${cor}"><b>${rotulo}</b> ${escapar(valor)}</span>`;
+    const grupos = ROTAS.map(([titulo, rotas]) => `
+      <section>
+        <h2>${escapar(titulo)}</h2>
+        <table>${rotas.map(([m, r, d]) => `<tr><td><code class="m m-${m.toLowerCase()}">${m}</code></td><td><code>${escapar(r)}</code></td><td>${escapar(d)}</td></tr>`).join('')}</table>
+      </section>`).join('');
+
+    res.type('html').send(`<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ELO backend</title>
+<style>
+  :root{--bg:#060b1c;--bg2:#0b1229;--bg3:#111a38;--line:rgba(160,178,235,.16);--t:#eef2ff;--t2:#b4bddc;--t3:#808cb5;--g:#22c55e;--c:#22d3ee;--b:#2f7ff7;--o:#ff7a1a;--r:#ff3b4e}
+  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:16px/1.55 system-ui,Segoe UI,sans-serif}
+  main{max-width:1040px;margin:0 auto;padding:40px 24px 64px}
+  h1{font-size:34px;margin:0;letter-spacing:-.02em}h1 span{background:linear-gradient(100deg,var(--g),var(--c) 52%,var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--t2);margin:8px 0 22px;max-width:70ch}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:34px}
+  .chip{display:inline-flex;gap:6px;align-items:center;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg2);font-size:14px;color:var(--t2)}.chip b{color:var(--t);font-weight:600}
+  .chip--ok{border-color:rgba(34,197,94,.5)}.chip--warn{border-color:rgba(255,122,26,.5)}.chip--bad{border-color:rgba(255,59,78,.6)}
+  section{margin-top:26px;padding:18px 20px;border-radius:18px;background:var(--bg2);border:1px solid var(--line)}
+  h2{font-size:17px;margin:0 0 10px}table{width:100%;border-collapse:collapse}td{padding:9px 8px;border-top:1px solid var(--line);vertical-align:top;font-size:14.5px;color:var(--t2)}td:first-child{width:74px}td:nth-child(2){width:270px;color:var(--t)}
+  code{font:13px ui-monospace,Consolas,monospace}.m{display:inline-block;padding:2px 8px;border-radius:6px;font-weight:700;color:#05101f}
+  .m-get{background:var(--c)}.m-post{background:var(--g)}.m-patch{background:var(--o)}.m-delete{background:var(--r);color:#fff}
+  .aviso{margin-top:26px;padding:16px 20px;border-radius:14px;background:rgba(255,122,26,.1);border:1px solid rgba(255,122,26,.45);color:var(--t2)}
+  footer{margin-top:34px;color:var(--t3);font-size:14px}a{color:var(--c)}
+</style></head><body><main>
+  <h1><span>ELO</span> backend</h1>
+  <p class="lead">Servidor das contas dos cuidadores, das pochetes, das corridas de Uber e dos avisos por Telegram. Todas as rotas respondem JSON; erros vêm como <code>{ "erro": "mensagem" }</code>.</p>
+  <div class="chips">
+    ${chip('Banco', estado.banco, ok ? 'ok' : 'bad')}
+    ${chip('Uber', estado.uber, estado.uber === 'real' ? 'ok' : 'warn')}
+    ${chip('Telegram', estado.telegram, estado.telegram === 'simulado' ? 'warn' : 'ok')}
+    ${chip('Tempo real', estado.tempo_real, NA_VERCEL ? 'warn' : 'ok')}
+    ${chip('Ambiente', estado.ambiente, 'ok')}
+    ${chip('Ativo há', estado.ativo_ha_s + ' s', 'ok')}
+    ${chip('Node', estado.node, 'ok')}
+  </div>
+  ${grupos}
+  ${NA_VERCEL ? `<div class="aviso"><b>Rodando na Vercel.</b> Funções serverless não mantêm processo aberto: o stream em tempo real (<code>/api/eventos/stream</code>), o bot do Telegram (que precisa ficar ouvindo o <code>/start</code>) e a sincronização automática das corridas ficam desligados. Cadastro, login, pochetes, eventos, corridas e o envio de mensagens funcionam normalmente. Para o tempo real, rode o servidor num lugar com processo contínuo (Render, Railway, servidor da escola).</div>` : ''}
+  <footer>Mesmo contrato em <code>backend/README.md</code>. Saúde em <a href="/api/saude">/api/saude</a>. Esta página em JSON: <code>curl -H "Accept: application/json" /</code></footer>
+</main></body></html>`);
+  } catch (e) { next(e); }
+});
+
 /* ---- saúde ---- */
 app.get('/api/saude', async (_req, res, next) => {
   try {
@@ -561,6 +681,7 @@ app.get('/api/eventos', autenticar, async (req, res, next) => {
 app.get('/api/eventos/stream', async (req, res, next) => {
   try {
     const cuidador = await carregarPorToken(String(req.query.token || ''));
+    if (NA_VERCEL) throw erro(501, 'O stream em tempo real não funciona em serverless. Use GET /api/eventos e /api/corridas para consultar.');
     sse.assinar(cuidador.id, res);
   } catch (e) { next(e); }
 });
@@ -676,6 +797,7 @@ app.post('/api/telegram/teste', autenticar, async (req, res, next) => {
 app.use((req, res) => res.status(404).json({ erro: `Rota não encontrada: ${req.method} ${req.path}` }));
 
 app.use((e, _req, res, _next) => {
+  if (e instanceof TypeError && /pool/.test(e.message) && !pool) return res.status(503).json({ erro: 'O banco de dados não está configurado neste servidor.' });
   if (e.type === 'entity.parse.failed') return res.status(400).json({ erro: 'Envie um JSON válido.' });
   if (e.type === 'entity.too.large') return res.status(413).json({ erro: 'Pedido grande demais.' });
   if (e.status) return res.status(e.status).json({ erro: e.message });
@@ -690,24 +812,32 @@ app.use((e, _req, res, _next) => {
 /* ------------------------------------------------------------------------
    Sobe
    ------------------------------------------------------------------------ */
-setInterval(() => pool?.query('DELETE FROM sessoes WHERE expira_em < NOW()').catch(() => {}), 60 * 60 * 1000).unref();
-
-// corridas ativas: sincroniza com a Uber a cada 10 s para o painel ver o status mudar
-setInterval(async () => {
-  if (!pool) return;
-  try {
-    const [ativas] = await pool.query(
-      `SELECT c.*, p.cuidador_id FROM corridas c JOIN pochetes p ON p.id = c.pochete_id
-       WHERE c.status IN ('solicitada', 'a_caminho', 'em_andamento') AND c.uber_request_id IS NOT NULL`);
-    for (const c of ativas) await sincronizarCorrida(c, c.cuidador_id);
-  } catch (e) { console.error('[sincronizar corridas]', e.message); }
-}, 10_000).unref();
-
 try {
   await conectarBanco();
+} catch (e) {
+  console.error('Não consegui conectar ao MySQL:', e.code || '', e.message);
+  console.error('Confira DB_HOST, DB_USER, DB_PASSWORD e DB_NAME no backend/.env e se o MySQL está rodando.');
+  if (!NA_VERCEL) process.exit(1);
+  // na Vercel o app segue no ar para a rota / mostrar o erro do banco
+}
+
+// Tarefas contínuas: só onde existe um processo de verdade (não na Vercel)
+if (!NA_VERCEL) {
+  setInterval(() => pool?.query('DELETE FROM sessoes WHERE expira_em < NOW()').catch(() => {}), 60 * 60 * 1000).unref();
+
+  // corridas ativas: sincroniza com a Uber a cada 10 s para o painel ver o status mudar
+  setInterval(async () => {
+    if (!pool) return;
+    try {
+      const [ativas] = await pool.query(
+        `SELECT c.*, p.cuidador_id FROM corridas c JOIN pochetes p ON p.id = c.pochete_id
+         WHERE c.status IN ('solicitada', 'a_caminho', 'em_andamento') AND c.uber_request_id IS NOT NULL`);
+      for (const c of ativas) await sincronizarCorrida(c, c.cuidador_id);
+    } catch (e) { console.error('[sincronizar corridas]', e.message); }
+  }, 10_000).unref();
 
   // Telegram: quem manda "/start CÓDIGO" para o bot fica vinculado
-  telegram.iniciarPolling(async (codigo, chat) => {
+  if (pool) telegram.iniciarPolling(async (codigo, chat) => {
     const [linhas] = await pool.query('SELECT id, nome FROM cuidadores WHERE telegram_codigo = ?', [codigo]);
     if (!linhas.length) return null;
     await pool.query('UPDATE cuidadores SET telegram_chat_id = ?, telegram_codigo = NULL WHERE id = ?', [chat.id, linhas[0].id]);
@@ -716,13 +846,12 @@ try {
   });
 
   app.listen(CONFIG.porta, () => {
-    console.log(`ELO backend em http://localhost:${CONFIG.porta}/api`);
+    console.log(`ELO backend em http://localhost:${CONFIG.porta}  (rotas em /api, resumo em /)`);
     console.log(`  MySQL: ${CONFIG.banco.user}@${CONFIG.banco.host}/${CONFIG.banco.database}`);
     console.log(`  Uber: ${uber.simulado ? 'SIMULADO (defina UBER_CLIENT_ID e UBER_CLIENT_SECRET)' : 'real' + (process.env.UBER_SANDBOX === '1' ? ' (sandbox)' : '')}`);
     console.log(`  Telegram: ${telegram.simulado ? 'SIMULADO (defina TELEGRAM_BOT_TOKEN)' : 'bot @' + telegram.botUsername}`);
   });
-} catch (e) {
-  console.error('Não consegui conectar ao MySQL:', e.code || '', e.message);
-  console.error('Confira DB_HOST, DB_USER, DB_PASSWORD e DB_NAME no backend/.env e se o MySQL está rodando.');
-  process.exit(1);
 }
+
+// Vercel (backend/api/index.js) importa o app daqui
+export default app;

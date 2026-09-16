@@ -26,6 +26,19 @@ O banco e as tabelas são criados sozinhos. Confira em `http://localhost:3000/ap
 
 **Servidor da escola:** o usuário `alunos` só pode criar bancos com prefixo `alunos_`; por isso `DB_NAME=alunos_elo`.
 
+Abra `http://localhost:3000/` no navegador: é a **página do backend**, com todas as rotas, o estado do banco/Uber/Telegram e o ambiente. Com `Accept: application/json` ela devolve o mesmo em JSON.
+
+## Deploy na Vercel
+
+A pasta `backend` já está preparada: `api/index.js` exporta o app Express como função serverless e `vercel.json` manda todas as rotas para ela.
+
+1. Na Vercel, **Add New → Project**, importe o repositório e defina **Root Directory = `backend`**.
+2. Em *Environment Variables*, copie as do `.env` (`DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `ALLOWED_ORIGINS` com o domínio do site e, se tiver, as da Uber e do Telegram). O `.env` não sobe (`.vercelignore`).
+3. Deploy. A URL raiz mostra a página do backend; as rotas ficam em `https://seu-projeto.vercel.app/api/...`.
+4. No site, aponte o front para lá: antes de `header/header.js`, adicione `<script>window.ELO_API_URL = 'https://seu-projeto.vercel.app/api';</script>` em cada página (ou troque o padrão em `header.js`).
+
+**O que não funciona em serverless** (a página raiz avisa): o stream em tempo real (`/api/eventos/stream` responde 501), o bot do Telegram ouvindo `/start` e a sincronização automática das corridas — porque a Vercel não mantém um processo aberto. Tudo o resto (contas, pochetes, eventos, corridas com aprovação, envio de mensagens no Telegram) funciona. Para o tempo real, hospede em um lugar com processo contínuo (Render, Railway ou o servidor da escola) com `npm start`; o código é o mesmo.
+
 ## Uber e Telegram: real ou simulado
 
 Os dois funcionam sem credencial nenhuma, em **modo simulado**, para o projeto ser testado inteiro:
@@ -136,7 +149,8 @@ Senhas com `scrypt` nativo (`scrypt$sal$chave`). A chave da pochete é guardada 
 
 | Arquivo | O que é |
 |---|---|
-| `server.js` | rotas, banco, regras (o "coração" é `tratarEvento`) |
+| `server.js` | rotas, banco, regras (o "coração" é `tratarEvento`); exporta o app |
+| `api/index.js` + `vercel.json` | deploy na Vercel (função serverless) |
 | `uber.js` | cliente da Guest Rides API + simulação |
 | `telegram.js` | envio de mensagens + polling do `/start CÓDIGO` + simulação |
 | `eventos.js` | canal SSE por cuidador |
