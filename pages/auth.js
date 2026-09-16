@@ -1,6 +1,7 @@
-// Login e cadastro. Sem back-end: valida os campos, guarda o perfil do
-// cuidador no navegador ('elo-perfil'), abre a sessão ('elo-sessao') e
-// vai para o painel. A foto é reduzida antes de guardar.
+// Login e cadastro. Fala com o backend (backend/server.js); se ele estiver
+// fora do ar, cai na demonstração local, só no navegador ('elo-perfil').
+// Em qualquer caso abre a sessão ('elo-sessao') e vai para o painel.
+// A foto é recortada e reduzida antes de enviar.
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('authForm');
   const status = document.getElementById('formStatus');
@@ -70,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
   confirm && document.getElementById(confirm.dataset.match)?.addEventListener('input', checkMatch);
 
   /* ---- Envio ---- */
-  form.addEventListener('submit', event => {
+  form.addEventListener('submit', async event => {
     event.preventDefault();
     checkMatch();
 
@@ -82,31 +83,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const email = form.querySelector('#email').value.trim().toLowerCase();
+    const senha = form.querySelector('#senha').value;
     const nomeDigitado = form.querySelector('#nome')?.value.trim();
-    const perfilSalvo = lerPerfil();
+    const cadastro = Boolean(nomeDigitado);
+
+    const button = form.querySelector('.auth-submit');
+    const rotulo = button.textContent;
+    button.disabled = true;
+    button.textContent = cadastro ? 'Criando conta' : 'Entrando';
+    if (status) status.textContent = '';
 
     let perfil;
-    if (nomeDigitado) {
-      // Cadastro: cria (ou substitui) o perfil
-      perfil = { nome: nomeDigitado, email, foto };
-      localStorage.setItem('elo-perfil', JSON.stringify(perfil));
-    } else if (perfilSalvo && perfilSalvo.email === email) {
-      // Login de quem já se cadastrou aqui: recupera nome e foto
-      perfil = perfilSalvo;
-    } else {
-      // Login sem cadastro prévio: usa o começo do email como nome
-      const nome = email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      perfil = { nome, email, foto: null };
+    try {
+      // 1. Backend (backend/server.js)
+      const dados = await window.EloSessao.api(cadastro ? 'cadastro' : 'login', {
+        method: 'POST',
+        body: cadastro ? { nome: nomeDigitado, email, senha, foto } : { email, senha }
+      });
+      perfil = { ...dados.cuidador, token: dados.token };
+    } catch (e) {
+      if (e.status) {
+        // o backend respondeu: email já usado, senha errada, dado inválido...
+        if (status) status.textContent = e.message;
+        button.disabled = false;
+        button.textContent = rotulo;
+        (e.status === 401 ? form.querySelector('#senha') : form.querySelector('#email'))?.focus();
+        return;
+      }
+      // 2. Backend fora do ar: demonstração local, só no navegador
+      console.warn('Backend indisponível; usando a sessão local de demonstração.', e);
+      perfil = perfilLocal(cadastro, nomeDigitado, email);
     }
 
     window.EloSessao.entrar(perfil);
     localStorage.setItem('elo-cuidador', perfil.nome.split(' ')[0]);
-
-    const button = form.querySelector('.auth-submit');
-    button.disabled = true;
-    button.textContent = 'Entrando';
-    if (status) status.textContent = '';
-
-    setTimeout(() => { window.location.href = form.dataset.next || 'painel.html'; }, 500);
+    setTimeout(() => { window.location.href = form.dataset.next || 'painel.html'; }, 400);
   });
+
+  // Sem backend: guarda o perfil no navegador (comportamento de demonstração)
+  function perfilLocal(cadastro, nomeDigitado, email) {
+    const salvo = lerPerfil();
+    if (cadastro) {
+      const p = { nome: nomeDigitado, email, foto };
+      localStorage.setItem('elo-perfil', JSON.stringify(p));
+      return p;
+    }
+    if (salvo && salvo.email === email) return salvo;
+    const nome = email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    return { nome, email, foto: null };
+  }
 });

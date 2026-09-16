@@ -11,6 +11,7 @@
     <script src="../header/header.js" defer></script>
     <script src="../reveal.js" defer></script>
     <script src="./painel.js" defer></script>
+    <script src="./painel-pochete.js" defer></script>
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 </head>
 <body class="app-page">
@@ -57,36 +58,39 @@
             </div>
         </section>
 
+        <!-- Corrida: aparece quando a pochete pede transporte -->
+        <section class="ride-panel" id="corridaPanel" hidden aria-live="polite"></section>
+
         <!-- Estado agora -->
         <section class="tiles" aria-label="Estado da pochete agora">
             <article class="tile tile--green">
                 <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.4 5.6a5 5 0 0 0-7.1 0L12 6.9l-1.3-1.3a5 5 0 1 0-7.1 7.1l8.4 8.4 8.4-8.4a5 5 0 0 0 0-7.1z"/><path d="M6 12h3l1.5-3 3 6 1.5-3h3"/></svg></span>
                 <h3>Status da pochete</h3>
-                <p class="tile-value">100%</p>
-                <p class="tile-note">Tudo funcionando</p>
-                <div class="tile-bar" aria-hidden="true"><span style="--v: 100%"></span></div>
+                <p class="tile-value" id="tileStatus">100%</p>
+                <p class="tile-note" id="tileStatusNota">Tudo funcionando</p>
+                <div class="tile-bar" aria-hidden="true"><span id="tileStatusBarra" style="--v: 100%"></span></div>
             </article>
 
             <article class="tile tile--blue">
                 <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="6" y="3.5" width="12" height="17" rx="2.5"/><path d="M10 2v1.5M14 2v1.5"/><rect x="8.5" y="11" width="7" height="7" rx="1"/></svg></span>
                 <h3>Bateria</h3>
-                <p class="tile-value">78%</p>
-                <p class="tile-note">Carga restante</p>
-                <div class="tile-bar" aria-hidden="true"><span style="--v: 78%"></span></div>
+                <p class="tile-value" id="tileBateria">78%</p>
+                <p class="tile-note" id="tileBateriaNota">Carga restante</p>
+                <div class="tile-bar" aria-hidden="true"><span id="tileBateriaBarra" style="--v: 78%"></span></div>
             </article>
 
-            <article class="tile tile--orange">
+            <article class="tile tile--orange" id="tileAlertaCard">
                 <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.8a7.2 7.2 0 0 1 7.2 7.2v4.6l1.7 2.9a1 1 0 0 1-.9 1.5H4a1 1 0 0 1-.9-1.5l1.7-2.9V11A7.2 7.2 0 0 1 12 3.8Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></svg></span>
                 <h3>Último alerta</h3>
-                <p class="tile-value tile-value--text">Nenhum</p>
-                <p class="tile-note">Tudo tranquilo</p>
+                <p class="tile-value tile-value--text" id="tileAlerta">Nenhum</p>
+                <p class="tile-note" id="tileAlertaNota">Tudo tranquilo</p>
             </article>
 
             <article class="tile tile--purple">
                 <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-10a6 6 0 0 0-12 0c0 4.8 6 10 6 10Z"/><circle cx="12" cy="11" r="2.2"/></svg></span>
                 <h3>Localização</h3>
-                <p class="tile-value tile-value--text">Atualizada</p>
-                <p class="tile-note">Agora há pouco</p>
+                <p class="tile-value tile-value--text" id="tileLocal">Atualizada</p>
+                <p class="tile-note" id="tileLocalNota">Agora há pouco</p>
             </article>
         </section>
 
@@ -127,6 +131,75 @@
             <p class="action-status" id="actionStatus" role="status" aria-live="polite"></p>
         </section>
 
+        <!-- Pochete e avisos: vínculo do dispositivo, Telegram e simulação -->
+        <section class="pochete-section" id="pochete">
+            <h2>Pochete e avisos</h2>
+            <p class="section-lead">Vincule a pochete de quem você cuida, escolha onde receber os avisos e teste os botões sem sair daqui.</p>
+
+            <div class="pochete-grid">
+                <div class="panel" id="pochetePanel">
+                    <h3>Pochetes vinculadas</h3>
+                    <div class="pochete-lista" id="pocheteLista"><p class="muted">Carregando</p></div>
+
+                    <form class="pochete-form" id="pocheteForm" novalidate>
+                        <h4>Vincular uma pochete</h4>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="pIdoso">Quem vai usar</label>
+                                <input type="text" id="pIdoso" placeholder="Nome da pessoa idosa" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="pTelefone">Telefone dela (para o motorista)</label>
+                                <input type="tel" id="pTelefone" placeholder="+55 11 99999-0000">
+                            </div>
+                        </div>
+                        <div class="form-row form-row--3">
+                            <div class="form-field">
+                                <label for="pCasaNome">Endereço de casa</label>
+                                <input type="text" id="pCasaNome" placeholder="Rua das Flores, 123" value="Casa">
+                            </div>
+                            <div class="form-field">
+                                <label for="pCasaLat">Latitude</label>
+                                <input type="text" id="pCasaLat" placeholder="-23.5505" inputmode="decimal">
+                            </div>
+                            <div class="form-field">
+                                <label for="pCasaLng">Longitude</label>
+                                <input type="text" id="pCasaLng" placeholder="-46.6333" inputmode="decimal">
+                            </div>
+                        </div>
+                        <p class="muted">Casa é o destino padrão quando o botão de transporte é apertado. Pegue as coordenadas no Google Maps (clique com o botão direito no lugar) ou <button type="button" class="link-btn" id="pUsarLocal">use a minha localização</button>.</p>
+                        <button type="submit" class="btn btn-green">Vincular pochete</button>
+                        <p class="action-status" id="pocheteStatus" role="status" aria-live="polite"></p>
+                    </form>
+
+                    <div class="key-box" id="keyBox" hidden>
+                        <h4>Chave da pochete</h4>
+                        <p>Copie e grave no código da pochete (cabeçalho <code>X-Pochete-Key</code>). Ela aparece <strong>só agora</strong>; depois dá para gerar outra.</p>
+                        <code class="key-value" id="keyValue"></code>
+                        <button type="button" class="btn btn-outline" id="keyCopy">Copiar</button>
+                    </div>
+                </div>
+
+                <div class="panel" id="telegramPanel">
+                    <h3>Avisos no Telegram</h3>
+                    <p class="muted">Emergência, pedido de transporte e bateria baixa chegam como mensagem no seu Telegram, além de aparecerem aqui.</p>
+                    <div id="telegramEstado"><p class="muted">Carregando</p></div>
+                </div>
+
+                <div class="panel" id="simularPanel">
+                    <h3>Testar sem a pochete</h3>
+                    <p class="muted">Aperta os botões como se fosse a pochete. Serve para ver os avisos chegando e treinar a aprovação da corrida.</p>
+                    <div class="simular-grid">
+                        <button type="button" class="action action--red" data-simular="emergencia"><span class="action-title">Botão vermelho</span><span class="action-note">Emergência</span></button>
+                        <button type="button" class="action action--orange" data-simular="transporte"><span class="action-title">Botão amarelo</span><span class="action-note">Pedir carro</span></button>
+                        <button type="button" class="action action--blue" data-simular="bateria" data-bateria="12"><span class="action-title">Bateria baixa</span><span class="action-note">12% de carga</span></button>
+                        <button type="button" class="action action--green" data-simular="localizacao"><span class="action-title">Localização</span><span class="action-note">Atualizar posição</span></button>
+                    </div>
+                    <p class="action-status" id="simularStatus" role="status" aria-live="polite"></p>
+                </div>
+            </div>
+        </section>
+
         <!-- Meu perfil -->
         <section class="profile-section" id="perfil">
             <h2>Meu perfil</h2>
@@ -149,6 +222,8 @@
             </div>
         </section>
     </main>
+
+    <div class="toasts" id="toasts" aria-live="assertive"></div>
 
     <footer>
         <div class="logo">

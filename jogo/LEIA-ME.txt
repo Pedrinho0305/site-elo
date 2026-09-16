@@ -1,11 +1,22 @@
-Coloque aqui a versao HTML5 do jogo (por exemplo, a pasta exportada
-pelo GDevelop ou por outra engine), com o arquivo principal chamado:
+COMO DEIXAR SO O JOGO NA PAGINA (sem a interface do gd.games)
+=============================================================
 
-  index.html
+A pagina pages/jogo.html tenta primeiro abrir o jogo desta pasta. Se nao
+existir, ela usa a pagina do gd.games, que vem com o menu e os anuncios
+deles (o gd.games nao permite embutir so o jogo).
 
-A pagina pages/jogo.html abre esse arquivo num iframe. Enquanto ele
-nao existir, a pagina mostra "O jogo ainda esta em desenvolvimento".
+Passo a passo no GDevelop (quem publicou: Guilherme):
 
-Se o jogo estiver hospedado fora do site (gd.games, itch.io etc.),
-troque o atributo data-src do iframe em pages/jogo.html pelo link
-de "embed" do jogo.
+  1. Abra o projeto no GDevelop.
+  2. Menu  Arquivo > Exportar  (ou o botao "Publicar").
+  3. Escolha  "Web (HTML5)"  >  "Exportar para uma pasta local".
+  4. Exporte para uma pasta qualquer (ex.: Area de Trabalho/jogo-elo).
+  5. Copie TODO o conteudo dessa pasta para ca (backend/../jogo), de modo
+     que fique  jogo/index.html  ao lado deste LEIA-ME.
+  6. Abra pages/jogo.html: o jogo aparece sozinho, sem interface externa.
+
+Republicou o jogo? Repita os passos e substitua os arquivos.
+
+Link atual do gd.games (usado so como reserva):
+  https://gd.games/games/15184de8-d773-4b90-b41d-5c0a2c104402
+Para trocar o reserva, edite data-fallback do iframe em pages/jogo.html.

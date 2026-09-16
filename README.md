@@ -133,6 +133,8 @@ pages/
 api/
   eloa.py · conhecimento.py · requirements.txt · .env.example · README.md    API da Eloá em Python
   eloa-engine.js                                                             motor antigo, fallback no navegador
+backend/
+  server.js · package.json · .env.example · README.md                        login e cadastro (Express 5 + MySQL)
 jogo/LEIA-ME.txt                         onde colocar a exportação HTML5 do jogo (jogo/index.html)
 assets/                                  imagens, favicon, modelo 3D (.glb, 60 MB), vídeo antigo (77 MB), team/ (fotos da equipe)
 ```
@@ -183,7 +185,7 @@ Toda página tem `<html lang="pt-BR" data-theme="dark">` para não piscar claro 
 
 ### Jogo (`pages/jogo.*`) — construído depois do redesign, a partir do Figma
 - **Abertura** (`.game-hero.night`): texto + `.game-art` com a ilustração do Sr. João (`assets/jogo-cuidador.png`, baixada do Figma) e HUD.
-- **Jogar** (`.game-stage-section#jogar`): `<iframe id="gameFrame" data-src="../jogo/index.html">`. `jogo.js` faz um `HEAD` no `data-src`: se existir, carrega o iframe (`.is-ready`) e mostra o botão de tela cheia; se não, mostra `.game-stage-empty` ("em desenvolvimento"). URL externa (`https://…`) carrega direto. **Para publicar o jogo: coloque a exportação HTML5 em `jogo/index.html`** ou troque `data-src`.
+- **Jogar** (`.game-stage-section#jogar`): `<iframe id="gameFrame" data-src="../jogo/index.html" data-fallback="https://gd.games/games/15184de8-…">`. `jogo.js` tenta primeiro a exportação HTML5 local (`HEAD` em `jogo/index.html`) — é a única forma de mostrar **só o jogo**; se não existir, usa a página do gd.games, que vem com a interface deles (o build do GDevelop redireciona qualquer embed para o gd.games, não há como esconder). Passo a passo da exportação em `jogo/LEIA-ME.txt`.
 - **História** (`.game-story`): texto + `.story-objectives` (5 objetivos com ícone e cor).
 - **Demonstração** (`.game-demo.night`): `.demo-screen` com cantos de mira e "Vídeo em produção" (placeholder até haver vídeo).
 
@@ -196,12 +198,12 @@ Toda página tem `<html lang="pt-BR" data-theme="dark">` para não piscar claro 
 ### Login e Cadastro (`pages/login.html`, `cadastro.html`, `auth.*`)
 - Cabeçalho próprio (`.auth-header`: logo, "Precisa de ajuda? Fale conosco", tema). Sem rodapé.
 - `.auth-shell`: `.auth-welcome.night` (título, foto do produto flutuando, 3 pontos) + `.auth-card` (formulário). Campos com `.password-field` + `.password-toggle`, checkbox customizado `.auth-check`, `.photo-picker` no cadastro (recorta a foto em quadrado 160 px e guarda como data-URL).
-- `auth.js`: valida (senhas iguais via `setCustomValidity`), salva `elo-perfil` {nome, email, foto} no cadastro, abre a sessão (`window.EloSessao.entrar`) e vai para `painel.html`. Login sem cadastro prévio usa o começo do email como nome. Quem já está logado é redirecionado. **Não há back-end**: tudo em `localStorage`.
+- `auth.js`: valida (senhas iguais via `setCustomValidity`) e chama o **backend** (`POST /api/cadastro` ou `/api/login`, ver §6b). Se o backend responder com erro (409 email já usado, 401 senha errada), mostra a mensagem. Se o backend não estiver no ar, cai na **demonstração local** (`elo-perfil` em `localStorage`, nome derivado do email). Em qualquer caso abre a sessão (`window.EloSessao.entrar`) e vai para `painel.html`. Quem já está logado é redirecionado.
 
 ### Painel e Relatórios (`pages/painel.html`, `relatorios.html`, `painel.*`) — telas do app do cuidador, do Figma
 - `.app-header` **sticky** (não flutuante), com `.app-nav` (Painel / Relatórios), sino e o chip de perfil (slot `data-profile-slot`).
 - `.app-hero` (saudação com nome da sessão + `.device-card` com a pochete recortada por `.device-thumb`), `.tiles` (4 `.tile` coloridos por `--c`, com `.tile-bar` animada), `.actions-grid` (5 `.action` que mostram uma confirmação em `#actionStatus`), `.profile-section#perfil` (foto grande, nome, email, trocar foto, sair). Relatórios: `.date-range`, tiles com `.tile-delta`, `.log-card` com tabela e `.log-type` coloridos.
-- `painel.js` **exige sessão**: sem `elo-sessao`, redireciona para `login.html`. Os dados são ilustrativos (o rodapé avisa).
+- `painel.js` **exige sessão**: sem `elo-sessao`, redireciona para `login.html`. Trocar a foto faz `PATCH /api/me` quando há token. Os dados dos tiles e do registro são ilustrativos (o rodapé avisa).
 
 ---
 
@@ -211,10 +213,21 @@ Toda página tem `<html lang="pt-BR" data-theme="dark">` para não piscar claro 
 
 1. **Tema:** lê `localStorage.theme` (padrão **dark**), aplica em `<html data-theme>`, troca o ícone do botão.
 2. **Menu mobile:** `#menuToggle` alterna `.nav-links.active`; fecha ao clicar num link.
-3. **Sessão:** expõe `window.EloSessao = { ler(), entrar(dados), sair() }` sobre `localStorage['elo-sessao']` = `{ nome, email, foto }`.
+3. **Sessão:** expõe `window.EloSessao = { ler(), entrar(dados), sair(), api(rota, opções) }` sobre `localStorage['elo-sessao']` = `{ nome, email, foto, token? }`. `token` existe quando o login foi feito no backend; `api()` já manda `Authorization: Bearer`. `sair()` avisa o backend (`POST /api/logout`). Com token, cada página confirma a sessão em `GET /api/me` e a derruba se vier 401. `window.ELO_API_URL` (padrão `http://localhost:3000/api`) define o endereço.
 4. **Perfil:** se há sessão e existe um elemento `[data-profile-slot]`, substitui-o pelo `.profile` (chip + menu). Os links do menu são calculados a partir do `href` do slot (`pages/login.html` na home, `login.html` nas páginas), então **mantenha o `href` do slot correto** em cada página. "Sair" limpa a sessão e volta à home.
 
-Chaves usadas no `localStorage`: `theme`, `elo-sessao`, `elo-perfil`, `elo-cuidador` (legado, primeiro nome). No `sessionStorage`: `eloa-sessao` (id da conversa com a Eloá).
+Chaves usadas no `localStorage`: `theme`, `elo-sessao`, `elo-perfil` (só na demonstração local), `elo-cuidador` (legado, primeiro nome). No `sessionStorage`: `eloa-sessao` (id da conversa com a Eloá).
+
+### 6b. Backend (`backend/`)
+
+Documentação completa em [backend/README.md](backend/README.md), incluindo o **contrato da pochete** (o que o firmware precisa mandar). O essencial: Express 5 + MySQL (`mysql2`), ESM, `npm start` em `http://localhost:3000/api`, banco `alunos_elo` no servidor da escola (o usuário `alunos` só cria bancos com prefixo `alunos_`). Tabelas criadas sozinhas: `cuidadores`, `sessoes`, `pochetes`, `eventos`, `corridas`.
+
+- **Contas:** `scrypt` nativo, sessão por token de 64 hex (30 dias).
+- **Pochete:** cada uma tem uma chave `elo_…` (guardada como SHA-256) enviada em `X-Pochete-Key`. `POST /api/pochete/evento` com `tipo` `emergencia | transporte | bateria | localizacao | teste`; `GET /api/pochete/estado` devolve a corrida ativa para ela anunciar por voz.
+- **Uber:** `uber.js` implementa a Guest Rides API (token `client_credentials`, estimativa, pedido, consulta, cancelamento). Sem `UBER_CLIENT_ID/SECRET` roda **simulado** (corrida fictícia que avança sozinha). Fluxo: botão amarelo → corrida `pendente` → cuidador aprova no painel → estimativa + pedido → status sincronizado a cada 10 s.
+- **Telegram:** `telegram.js` (Bot API `sendMessage` + polling `getUpdates`). O cuidador manda `/start CÓDIGO` ao bot. Sem `TELEGRAM_BOT_TOKEN`, simulado (mensagens no terminal, vínculo por `chat_id` digitado).
+- **Tempo real:** `eventos.js` é um canal SSE por cuidador (`GET /api/eventos/stream?token=`); o painel usa `EventSource`. Payload `{ tipo, dados, em }`.
+- **Painel** (`pages/painel-pochete.js`): toasts, tile "Último alerta", painel de corrida com Aprovar/Recusar/Cancelar, vínculo de pochete (mostra a chave uma vez), Telegram e botões de simulação. Sem token (demonstração local), a seção explica que precisa do servidor.
 
 ---
 
@@ -241,7 +254,7 @@ Documentação completa em [api/README.md](api/README.md). O essencial:
 6. **Header flutuante ≠ header do app.** Páginas do site usam `.site-header` (fixo, pílula). Painel/Relatórios usam `.app-header` (sticky, largura total). Login/Cadastro usam `.auth-header` (simples, sem menu).
 7. **Especificidade:** as páginas usam seletores de uma classe; o sistema usa `main > :first-child` (0,1,1). Se precisar sobrescrever, use `.pagina > .secao` (0,2,0), não `!important`. Os poucos `!important` existentes (`.scheme-hint`, `.demo-specs`, `.profile-logout`, `.profile-role`) são conscientes.
 8. **Acessibilidade mínima:** todo ícone-botão tem `aria-label`; `:focus-visible` é o anel ciano do sistema; contraste dos textos sobre gradiente usa `--ink-on-brand`.
-9. **Sem dependências novas no front.** O site é HTML/CSS/JS puro. Externos: Google Fonts, `model-viewer` (Instruções e Produto), Font Awesome (só Produto). A Eloá é a única parte com back-end.
+9. **Sem dependências novas no front.** O site é HTML/CSS/JS puro. Externos: Google Fonts, `model-viewer` (Instruções e Produto), Font Awesome (só Produto). Back-ends: `api/` (Eloá, Python) e `backend/` (login/cadastro, Node) — ambos opcionais para o site abrir; sem eles, Eloá e login funcionam em modo local.
 10. **Antes de entregar, olhe.** O fluxo usado neste projeto: subir `python -m http.server 8765` na raiz, abrir cada página em 1440×900, 1000×700 e 390×844 nos dois temas, rolar até o fim (para os reveals dispararem) e conferir. Fluxos a testar sempre que tocar em sessão: cadastro → painel → menu de perfil → sair; painel sem sessão → login.
 
 ---
@@ -251,11 +264,14 @@ Documentação completa em [api/README.md](api/README.md). O essencial:
 | Item | Onde | O que falta |
 |---|---|---|
 | Vídeo demonstrativo | `pages/instrucoes.html` `<video>` | Gravar o vídeo novo e colocar `src`. O antigo mostrava o site velho e foi retirado. |
-| Jogo | `jogo/index.html` | Exportar o jogo em HTML5 e colocar na pasta (ou `data-src` externo). |
 | Fotos da equipe | `assets/team/` | 5 arquivos `.jpg` com os nomes do `LEIA-ME.txt`. Até lá, iniciais. |
 | Links dos artigos | `pages/referencias.html` `.article-link` | Todos `href="#"`. |
 | Chave da API | `api/.env` | Sem ela a Eloá responde no modo local. |
-| Login/painel reais | `auth.js`, `painel.js` | Hoje é demonstração em `localStorage`. Um back-end real substitui `window.EloSessao` e os dados dos tiles. |
+| Jogo sem a interface do gd.games | `jogo/index.html` | Exportar o jogo em HTML5 no GDevelop e copiar para a pasta `jogo/` (passo a passo no `LEIA-ME`). A página troca sozinha. |
+| Firmware da pochete | — | O backend já aceita os eventos (contrato em `backend/README.md`); falta o dispositivo mandar. Até lá, "Testar sem a pochete" no painel. |
+| Credenciais Uber e Telegram | `backend/.env` | Sem elas, os dois rodam simulados. Uber exige app aprovado (Guest Rides); Telegram é só criar o bot no @BotFather. |
+| Relatórios reais | `relatorios.html` | Os tiles e o registro ainda são ilustrativos; `GET /api/eventos` e `/api/corridas` já devolvem os dados reais para ligar. |
+| MySQL configurado | `backend/.env` | Sem ele, o backend não sobe e o front cai na demonstração local. |
 | Modelo 3D pesado | `assets/*.glb` (60 MB) | Por isso não está na home. Comprimir (Draco) se quiser usar em mais lugares. |
 | Vídeo antigo | `assets/*.mp4` (77 MB) | Não é mais referenciado; pode ser apagado do repositório. |
 
@@ -268,5 +284,7 @@ Documentação completa em [api/README.md](api/README.md). O essencial:
 3. **Ajustes pedidos:** logo vira link; player sem vídeo e com ícones; iframe do jogo; "Entrar" ao lado do tema; chip de perfil com foto e menu após login; seção "Meu perfil"; painel exige sessão.
 4. **Eloá em Python:** API FastAPI com Claude + modo local; persona e base em `conhecimento.py`; front com sessão persistente; Node e Gemini removidos.
 5. **Reorganização (feita pela equipe):** `header.css`/`header.js` movidos para `header/`.
+6. **Backend de login e cadastro:** `backend/server.js` (Express + MySQL, scrypt, sessões por token); `auth.js`, `painel.js` e `header.js` integrados, com a demonstração local como fallback quando o servidor está fora.
+7. **Jogo no gd.games** dentro do iframe; **backend da pochete**: chaves por dispositivo, eventos, corridas Uber (Guest Rides API, com simulação), avisos por Telegram e stream SSE; painel ao vivo com aprovação de corrida, vínculo de pochete/Telegram e simulação dos botões.
 
 Commits relevantes começam em `093e664 Redesign do CSS do site inteiro`.

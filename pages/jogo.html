@@ -63,8 +63,9 @@
 			</div>
 		</section>
 
-		<!-- O jogo roda aqui dentro. Coloque a versão HTML5 exportada em /jogo/index.html
-		     (ou troque data-src por um link externo, como o do gd.games). -->
+		<!-- O jogo roda aqui dentro. Primeiro tenta a versão hospedada no site (jogo/index.html,
+		     exportação HTML5 do GDevelop: só o jogo, sem a interface do gd.games). Se ela não
+		     existir, usa a página do gd.games (data-fallback), que vem com a moldura deles. -->
 		<section class="game-stage-section" id="jogar">
 			<div class="stage-head">
 				<h2>Jogar</h2>
@@ -75,7 +76,7 @@
 			</div>
 
 			<div class="game-stage" id="gameStage">
-				<iframe id="gameFrame" data-src="../jogo/index.html" title="ELO: O Jogo" allow="fullscreen; autoplay; gamepad" allowfullscreen loading="lazy"></iframe>
+				<iframe id="gameFrame" data-src="../jogo/index.html" data-fallback="https://gd.games/games/15184de8-d773-4b90-b41d-5c0a2c104402" title="ELO: O Jogo" allow="fullscreen; autoplay; gamepad" allowfullscreen loading="lazy"></iframe>
 				<div class="game-stage-empty" id="gameEmpty" hidden>
 					<span class="demo-play" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2.5" y="7" width="19" height="11" rx="4"/><path d="M7 11v3M5.5 12.5h3"/><circle cx="16" cy="11.5" r=".9"/><circle cx="18" cy="13.5" r=".9"/></svg></span>
 					<h3>O jogo ainda está em desenvolvimento</h3>

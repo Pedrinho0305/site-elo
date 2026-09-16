@@ -1,7 +1,8 @@
-// O jogo roda num iframe. O endereço fica em data-src:
-//   - caminho relativo (../jogo/index.html): verifica se o arquivo existe antes
-//     de carregar; se não existir, mostra o aviso de "em desenvolvimento";
-//   - endereço externo (https://...): carrega direto.
+// O jogo roda num iframe. Ordem:
+//   1. data-src local (../jogo/index.html, exportação HTML5 do GDevelop): verifica
+//      se existe (HEAD) e carrega — só o jogo, sem interface de terceiros;
+//   2. data-fallback (página do gd.games): usado se o arquivo local não existir;
+//   3. sem nenhum dos dois: aviso de "em desenvolvimento".
 document.addEventListener('DOMContentLoaded', () => {
   const frame = document.getElementById('gameFrame');
   const stage = document.getElementById('gameStage');
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!frame || !stage) return;
 
   const src = frame.dataset.src;
+  const fallback = frame.dataset.fallback;
 
   const showEmpty = () => {
     stage.classList.add('is-empty');
@@ -18,19 +20,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (hint) hint.textContent = 'Em desenvolvimento';
   };
 
-  const load = () => {
-    frame.src = src;
+  const load = (url, externo) => {
+    frame.src = url;
     stage.classList.add('is-ready');
-    if (hint) hint.textContent = 'Clique dentro do jogo para começar. Use tela cheia para jogar melhor.';
+    if (hint) hint.textContent = externo
+      ? 'Jogo carregado do gd.games. Use tela cheia para jogar melhor.'
+      : 'Clique dentro do jogo para começar. Use tela cheia para jogar melhor.';
     if (fullscreen) fullscreen.hidden = false;
   };
 
+  const usarFallback = () => (fallback ? load(fallback, true) : showEmpty());
+
   if (/^https?:\/\//.test(src)) {
-    load();
+    load(src, true);
   } else {
     fetch(src, { method: 'HEAD', cache: 'no-store' })
-      .then(r => (r.ok ? load() : showEmpty()))
-      .catch(showEmpty);
+      .then(r => (r.ok ? load(src, false) : usarFallback()))
+      .catch(usarFallback);
   }
 
   fullscreen?.addEventListener('click', async () => {

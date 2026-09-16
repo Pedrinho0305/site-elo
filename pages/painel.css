@@ -467,3 +467,110 @@
   .device-thumb { width: 110px; height: 76px; }
   .device-thumb img { width: 230px; margin: -100px 0 0 -16px; }
 }
+
+/* --------------------------------------------------------------------------
+   7 · Pochete ao vivo: corrida, avisos, vínculo e simulação
+   -------------------------------------------------------------------------- */
+.ride-panel {
+  margin-top: 1.5rem;
+  padding: 1.4rem 1.6rem;
+  border-radius: var(--r-lg);
+  background: linear-gradient(165deg, color-mix(in srgb, var(--orange) 16%, var(--bg-3)), var(--bg-2) 70%);
+  border: 1px solid color-mix(in srgb, var(--orange) 45%, var(--line));
+  box-shadow: var(--shadow-1);
+  animation: ride-in .4s var(--ease);
+}
+
+@keyframes ride-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+.ride-panel--a_caminho, .ride-panel--em_andamento, .ride-panel--concluida { background: linear-gradient(165deg, color-mix(in srgb, var(--green) 14%, var(--bg-3)), var(--bg-2) 70%); border-color: color-mix(in srgb, var(--green) 45%, var(--line)); }
+.ride-panel--erro, .ride-panel--sem_motorista, .ride-panel--cancelada, .ride-panel--recusada { background: var(--bg-2); border-color: var(--line-2); }
+
+.ride-head { display: flex; gap: 1rem; align-items: flex-start; }
+.ride-icon { flex: none; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-size: 1.4rem; background: color-mix(in srgb, var(--orange) 16%, transparent); }
+.ride-head h2 { font-family: var(--font-text); font-weight: 700; font-size: 1.25rem; letter-spacing: 0; }
+.ride-head p { margin-top: .3rem; color: var(--text-2); line-height: 1.5; }
+.ride-head strong { color: var(--text); }
+.ride-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; }
+.ride-actions .btn { min-height: 46px; padding-inline: 1.2rem; font-size: .92rem; }
+
+.pochete-section { margin-top: clamp(2.5rem, 5vw, 3.5rem); scroll-margin-top: calc(var(--header-h) + 1.5rem); }
+.pochete-section h2 { font-size: clamp(1.4rem, 2.6vw, 1.9rem); }
+.section-lead { margin-top: .5rem; color: var(--text-2); max-width: 60ch; }
+
+.pochete-grid { margin-top: 1.3rem; display: grid; grid-template-columns: 1.3fr .85fr .85fr; gap: 1rem; align-items: start; }
+
+.panel {
+  padding: 1.4rem;
+  border-radius: var(--r-lg);
+  background: linear-gradient(165deg, var(--bg-3), var(--bg-2));
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
+}
+
+.panel h3 { font-family: var(--font-text); font-weight: 700; font-size: 1.15rem; letter-spacing: 0; }
+.panel h4 { margin-top: 1.4rem; font-family: var(--font-text); font-weight: 700; font-size: 1rem; letter-spacing: 0; }
+.panel .muted, .muted { color: var(--text-3); font-size: .92rem; line-height: 1.5; }
+.panel > .muted { margin-top: .4rem; }
+.panel code { font-family: ui-monospace, Consolas, monospace; font-size: .88em; background: color-mix(in srgb, var(--text) 8%, transparent); padding: .1em .4em; border-radius: 6px; }
+
+.pochete-lista { margin-top: .9rem; display: grid; gap: .6rem; }
+.pochete-item { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem 1rem; padding: .9rem 1rem; border-radius: var(--r-md); background: var(--bg-2); border: 1px solid var(--line); }
+.pochete-item strong { display: block; }
+.pochete-item .muted { display: block; margin-top: .15rem; font-size: .85rem; }
+.pochete-item-actions { display: flex; gap: .4rem; }
+.pochete-item-actions .btn, .tg-actions .btn, .tg-form .btn { min-height: 40px; padding-inline: .9rem; font-size: .85rem; }
+.btn-danger { color: var(--red); }
+
+.pochete-form { margin-top: .4rem; display: grid; gap: .9rem; }
+.pochete-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+.pochete-form .form-row--3 { grid-template-columns: 1.4fr 1fr 1fr; }
+.pochete-form .form-field { display: grid; gap: .35rem; }
+.pochete-form label { font-weight: 600; font-size: .88rem; }
+.pochete-form input, .tg-form input {
+  width: 100%; min-height: 46px; padding: .7rem .95rem; border-radius: var(--r-md);
+  background: var(--bg-2); border: 1px solid var(--line-2); color: var(--text); font: inherit; font-size: .95rem;
+}
+.pochete-form input:focus, .tg-form input:focus { outline: 0; border-color: var(--cyan); box-shadow: 0 0 0 4px color-mix(in srgb, var(--cyan) 22%, transparent); }
+.pochete-form .btn { justify-self: start; min-height: 48px; }
+.link-btn { border: 0; background: none; padding: 0; color: var(--cyan); font: inherit; font-size: inherit; font-weight: 600; cursor: pointer; text-decoration: underline; }
+
+.key-box { margin-top: 1.2rem; padding: 1.1rem 1.2rem; border-radius: var(--r-md); background: color-mix(in srgb, var(--cyan) 8%, var(--bg-2)); border: 1px solid color-mix(in srgb, var(--cyan) 40%, var(--line)); }
+.key-box h4 { margin-top: 0; }
+.key-box p { margin-top: .4rem; color: var(--text-2); font-size: .92rem; }
+.key-value { display: block; margin-top: .8rem; padding: .8rem 1rem; border-radius: var(--r-sm); background: var(--bg); border: 1px dashed var(--line-2); font-family: ui-monospace, Consolas, monospace; font-size: .95rem; overflow-wrap: anywhere; user-select: all; }
+.key-box .btn { margin-top: .8rem; min-height: 42px; padding-inline: 1rem; font-size: .88rem; }
+
+.tg-ok { display: inline-flex; align-items: center; gap: .5rem; margin-top: .9rem; color: var(--green-2); font-weight: 700; }
+.tg-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .9rem; }
+.tg-form { display: grid; grid-template-columns: 1fr auto; gap: .5rem; margin-top: .8rem; }
+#telegramEstado > p:first-child { margin-top: .9rem; }
+#telegramEstado a { color: var(--cyan); font-weight: 600; }
+
+.simular-grid { margin-top: .9rem; display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+.simular-grid .action { padding: .9rem 1rem 1rem; }
+#simularPanel.is-disabled .simular-grid { opacity: .5; }
+
+/* Avisos que chegam ao vivo */
+.toasts { position: fixed; right: var(--edge); bottom: 1.2rem; z-index: 200; display: grid; gap: .6rem; width: min(380px, calc(100vw - 2 * var(--edge))); }
+.toast {
+  display: grid; grid-template-columns: auto 1fr auto; gap: .8rem; align-items: start;
+  padding: .9rem 1rem; border-radius: var(--r-md);
+  background: var(--bg-2); border: 1px solid var(--line-2); box-shadow: var(--shadow-2);
+  animation: toast-in .35s var(--ease);
+}
+@keyframes toast-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.toast.is-leaving { opacity: 0; transition: opacity .4s; }
+.toast-icon { font-size: 1.3rem; line-height: 1; }
+.toast strong { display: block; font-size: .98rem; }
+.toast p { margin-top: .15rem; color: var(--text-2); font-size: .9rem; line-height: 1.45; }
+.toast button { border: 0; background: none; color: var(--text-3); cursor: pointer; font-size: .9rem; padding: 0 .2rem; }
+.toast--emergencia { border-color: var(--red); box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 25%, transparent), var(--shadow-2); }
+.toast--transporte { border-color: var(--orange); }
+.toast--corrida, .toast--teste { border-color: var(--green); }
+
+@media (max-width: 1080px) { .pochete-grid { grid-template-columns: 1fr 1fr; } #pochetePanel { grid-column: 1 / -1; } }
+@media (max-width: 700px) {
+  .pochete-grid, .pochete-form .form-row, .pochete-form .form-row--3, .simular-grid { grid-template-columns: 1fr; }
+  .ride-actions .btn { flex: 1 1 100%; }
+}

@@ -182,12 +182,12 @@ ASSUNTOS = [
     {
         "id": "jogo", "nome": "o jogo",
         "pistas": ["jogo", "game", "jogar", "gameplay", "fase"],
-        "fato": "ELO: O Jogo é uma jornada interativa sobre cuidado, conexão e tecnologia. Você é um cuidador tecnológico numa cidade moderna e enfrenta cenários como ajudar dona Maria a chamar um Uber para a consulta ou responder ao alerta do Sr. João, que se perdeu no parque. Ensina como funcionam os alertas 192, a aprovação de transporte, os comandos de voz, a localização em tempo real e a comunicação entre cuidador e idoso. Está em desenvolvimento; vai rodar dentro da página Jogo.",
+        "fato": "ELO: O Jogo é uma jornada interativa sobre cuidado, conexão e tecnologia, feita pelo Guilherme no GDevelop. Você é um cuidador tecnológico numa cidade moderna e enfrenta cenários como ajudar dona Maria a chamar um Uber para a consulta ou responder ao alerta do Sr. João, que se perdeu no parque. Ensina como funcionam os alertas 192, a aprovação de transporte, os comandos de voz, a localização em tempo real e a comunicação entre cuidador e idoso. Dá para jogar direto na página Jogo do site (roda no navegador, sem instalar nada). O vídeo de demonstração ainda está em produção.",
     },
     {
         "id": "painel", "nome": "o painel do cuidador",
         "pistas": ["painel", "login", "entrar", "senha", "perfil", "relatorio", "dashboard", "minha conta", "cadastro no site"],
-        "fato": "Painel do cuidador (no site, em Entrar): mostra o estado da pochete (status, bateria, último alerta, localização), ações rápidas (ligar para o idoso, enviar mensagem, enviar emergência, comando de voz, ver familiares) e a página de Relatórios com atividades do mês e o registro do sistema. Hoje é uma demonstração: os dados são ilustrativos.",
+        "fato": "Painel do cuidador (no site, em Entrar, com conta criada em Cadastro): mostra o estado da pochete (bateria, último alerta, localização), avisa na hora quando a pochete aperta um botão, mostra o pedido de transporte para o cuidador aprovar ou recusar (só depois do ok a Uber é chamada) e acompanha a corrida (procurando motorista, a caminho, em viagem). Lá também se vincula a pochete (gera a chave do dispositivo), o Telegram (para receber os avisos como mensagem) e dá para testar os botões sem a pochete. A página Relatórios ainda mostra dados ilustrativos.",
     },
     {
         "id": "eloa", "nome": "eu mesma",

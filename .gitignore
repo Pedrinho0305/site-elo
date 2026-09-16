@@ -1,5 +1,7 @@
 # Segredos e lixo local
 api/.env
+backend/.env
+backend/node_modules/
+.venv/
 __pycache__/
 *.pyc
-.venv/

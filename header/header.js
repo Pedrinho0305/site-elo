@@ -91,9 +91,22 @@ document.addEventListener('DOMContentLoaded', () => {
     window.EloSessao.sair();
     window.location.href = inicio;
   });
+
+  // Sessão do backend: confirma que o token ainda vale (senão, sai)
+  if (session.token) {
+    window.EloSessao.api('me').then(({ cuidador }) => {
+      window.EloSessao.entrar({ ...cuidador, token: session.token });
+    }).catch(e => {
+      if (e.status === 401) { localStorage.removeItem('elo-sessao'); window.location.reload(); }
+    });
+  }
 });
 
-/* Sessão: uma API mínima compartilhada por login, cadastro e painel */
+/* Sessão: uma API mínima compartilhada por login, cadastro e painel.
+   { nome, email, foto, token? } — o token existe quando o login foi feito
+   no backend (backend/server.js); sem token é a demonstração local. */
+window.ELO_API_URL = window.ELO_API_URL || 'http://localhost:3000/api';
+
 window.EloSessao = {
   ler() {
     try { return JSON.parse(localStorage.getItem('elo-sessao')); } catch { return null; }
@@ -102,6 +115,21 @@ window.EloSessao = {
     localStorage.setItem('elo-sessao', JSON.stringify(dados));
   },
   sair() {
+    const s = this.ler();
     localStorage.removeItem('elo-sessao');
+    // avisa o backend, sem esperar: a sessão local já acabou
+    if (s?.token) this.api('logout', { method: 'POST' }).catch(() => {});
+  },
+  // Chamada ao backend com o token da sessão. Lança { status, message }.
+  async api(rota, opcoes = {}) {
+    const s = this.ler();
+    const resposta = await fetch(`${window.ELO_API_URL}/${rota}`, {
+      method: opcoes.method || 'GET',
+      headers: { 'Content-Type': 'application/json', ...(s?.token ? { Authorization: `Bearer ${s.token}` } : {}) },
+      body: opcoes.body ? JSON.stringify(opcoes.body) : undefined
+    });
+    const dados = await resposta.json().catch(() => ({}));
+    if (!resposta.ok) throw Object.assign(new Error(dados.erro || 'Algo deu errado.'), { status: resposta.status });
+    return dados;
   }
 };

@@ -10,3 +10,5 @@ Resumo das regras que mais quebram quando ignoradas:
 - Preço aparece na home e no produto; fatos citados pela Eloá vivem em `api/conhecimento.py`. Mude junto.
 - Não reintroduzir padrões evitados (lista na seção 2 do README): caixa alta espaçada, "→" em links, uma palavra colorida no título, cards idênticos, fade-slide-up por seção.
 - Conferir visualmente em 1440, 1000 e 390 px antes de entregar; testar o fluxo cadastro → painel → sair quando tocar em sessão.
+- Dois back-ends opcionais: `api/` (Eloá, Python + Claude) e `backend/` (contas, pochete, Uber, Telegram, SSE — Express + MySQL). O front cai em modo local quando eles estão fora; Uber e Telegram rodam simulados sem credencial. Não remova esses fallbacks.
+- O contrato que a pochete usa (`X-Pochete-Key`, `POST /api/pochete/evento`, `GET /api/pochete/estado`) está em `backend/README.md`; mudanças nele precisam ser combinadas com o firmware.
