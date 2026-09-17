@@ -1,6 +1,9 @@
 {
   "enabledPlugins": {
     "skill-creator@claude-plugins-official": true,
-    "figma@claude-plugins-official": true
+    "figma@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "vercel@claude-plugins-official": true,
+    "telegram@claude-plugins-official": true
   }
 }
