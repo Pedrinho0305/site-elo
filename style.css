@@ -232,13 +232,13 @@
   margin-top: 3rem;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.1rem;
+  gap: 1rem;
 }
 
 .card {
   position: relative;
   isolation: isolate;
-  padding: 1.9rem 1.8rem;
+  padding: 1.7rem 1.6rem;
   border-radius: var(--r-lg);
   background: linear-gradient(165deg, var(--bg-3), var(--bg-2));
   border: 1px solid var(--line);
@@ -272,7 +272,7 @@
 .card:hover::after { opacity: 1; }
 
 .card h3 {
-  margin-top: 1.4rem;
+  margin-top: 1.2rem;
   font-family: var(--font-text);
   font-weight: 700;
   font-size: 1.25rem;
@@ -284,8 +284,8 @@
 .icon-box {
   --c: var(--cyan);
   position: relative;
-  width: 64px;
-  height: 64px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -341,15 +341,15 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  min-height: 380px;
-  padding: 2.4rem 2.2rem;
+  min-height: 0;
+  padding: 2rem 1.9rem;
   background: linear-gradient(160deg, color-mix(in srgb, var(--red) 18%, var(--bg-3)), var(--bg-2) 65%);
 }
 
-.card--featured .icon-box { width: 112px; height: 112px; margin-bottom: auto; }
-.card--featured .icon-box svg { width: 48px; height: 48px; }
-.card--featured h3 { margin-top: 2rem; font-family: var(--font-display); font-weight: 600; font-size: clamp(1.4rem, 2.2vw, 1.9rem); max-width: 14ch; }
-.card--featured p { font-size: 1.1rem; max-width: 44ch; }
+.card--featured .icon-box { width: 84px; height: 84px; margin-bottom: auto; }
+.card--featured .icon-box svg { width: 36px; height: 36px; }
+.card--featured h3 { margin-top: 1.5rem; font-family: var(--font-display); font-weight: 600; font-size: clamp(1.25rem, 1.7vw, 1.5rem); max-width: 16ch; }
+.card--featured p { font-size: 1rem; max-width: 44ch; }
 
 .card--featured .icon-box::after {
   content: "";
@@ -576,10 +576,10 @@
 
 @media (max-width: 640px) {
   .cards-grid { grid-template-columns: 1fr; }
-  .card--featured { grid-column: auto; grid-row: auto; min-height: 0; padding: 1.9rem 1.8rem; }
-  .card--featured .icon-box { width: 84px; height: 84px; margin-bottom: 0; }
-  .card--featured .icon-box svg { width: 36px; height: 36px; }
-  .card--featured h3 { margin-top: 1.4rem; }
+  .card--featured { grid-column: auto; grid-row: auto; min-height: 0; padding: 1.7rem 1.6rem; }
+  .card--featured .icon-box { width: 72px; height: 72px; margin-bottom: 0; }
+  .card--featured .icon-box svg { width: 32px; height: 32px; }
+  .card--featured h3 { margin-top: 1.2rem; }
   .cta-section .section-content::before { background-size: 360px; background-position: 140% 100%; opacity: .3; }
   .hero-chips li:nth-child(3) { display: none; }
   .stats-grid { grid-template-columns: 1fr; }
