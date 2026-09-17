@@ -27,13 +27,19 @@ id. Sessões paradas por 30 minutos são apagadas. Em serverless a memória
 não sobrevive entre chamadas, então o cliente pode mandar "historico" (as
 últimas mensagens, [{role, content}]) e ele passa a valer como a memória.
 
-Credencial (uma das duas):
-    ANTHROPIC_API_KEY    chave da Anthropic (console.anthropic.com)
-    AI_GATEWAY_API_KEY   chave do Vercel AI Gateway (usa os créditos da Vercel;
-                         o mesmo SDK, apontado para https://ai-gateway.vercel.sh)
+Credencial: a primeira destas que existir define o provedor (ou force com
+ELOA_PROVEDOR = anthropic | gemini | groq | openai | gateway):
+    ANTHROPIC_API_KEY    Anthropic (console.anthropic.com) — pago
+    GEMINI_API_KEY       Google Gemini (aistudio.google.com) — GRÁTIS, sem cartão
+    GROQ_API_KEY         Groq (console.groq.com) — GRÁTIS, sem cartão
+    OPENAI_API_KEY       OpenAI (pago) ou qualquer API compatível (OPENAI_BASE_URL)
+    AI_GATEWAY_API_KEY   Vercel AI Gateway (precisa de cartão na Vercel)
+Gemini, Groq e OpenAI falam o protocolo da OpenAI (SDK openai); Anthropic e o
+Gateway falam o da Anthropic (SDK anthropic). A persona e os fatos são os mesmos.
 
 Variáveis opcionais:
-    ELOA_MODELO   modelo (padrão: claude-opus-5; no Gateway vira anthropic/claude-opus-5)
+    ELOA_MODELO   modelo; padrão por provedor: claude-opus-5, gemini-3.5-flash,
+                  llama-3.3-70b-versatile, gpt-4o-mini, anthropic/claude-opus-5
     ELOA_ESFORCO  low | medium | high (padrão: low; chat curto não precisa de mais)
     ELOA_ORIGENS  origens permitidas no CORS, separadas por vírgula (padrão: *)
 """
@@ -64,6 +70,7 @@ if os.path.exists(_env):
                 os.environ.setdefault(_k.strip(), _v.strip().strip('"').strip("'"))
 
 import anthropic
+import openai
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -71,13 +78,23 @@ from pydantic import BaseModel, Field
 # _conhecimento.py: o "_" impede a Vercel de tratar o arquivo como uma função própria
 from _conhecimento import ASSUNTOS, CONVERSA_CURTA, NAO_SEI, PERSONA, texto_dos_fatos
 
-VERSAO = "2.1.0"
-# Sem chave da Anthropic mas com a do Vercel AI Gateway, o mesmo SDK fala com o
-# Gateway (ids de modelo lá são "provedor/modelo").
-GATEWAY = bool(os.environ.get("AI_GATEWAY_API_KEY")) and not os.environ.get("ANTHROPIC_API_KEY")
-MODELO = os.environ.get("ELOA_MODELO", "claude-opus-5")
-if GATEWAY and "/" not in MODELO:
-    MODELO = "anthropic/" + MODELO
+VERSAO = "2.2.0"
+
+# Provedores: chave que os ativa, protocolo, endereço e modelo padrão.
+# Ordem = prioridade quando há mais de uma chave (ELOA_PROVEDOR força uma).
+PROVEDORES = {
+    "anthropic": {"chave": "ANTHROPIC_API_KEY", "sdk": "anthropic", "base_url": None, "modelo": "claude-opus-5"},
+    "gemini":    {"chave": "GEMINI_API_KEY",    "sdk": "openai",    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/", "modelo": "gemini-3.5-flash"},
+    "groq":      {"chave": "GROQ_API_KEY",      "sdk": "openai",    "base_url": "https://api.groq.com/openai/v1", "modelo": "llama-3.3-70b-versatile"},
+    "openai":    {"chave": "OPENAI_API_KEY",    "sdk": "openai",    "base_url": os.environ.get("OPENAI_BASE_URL"), "modelo": "gpt-4o-mini"},
+    "gateway":   {"chave": "AI_GATEWAY_API_KEY", "sdk": "anthropic", "base_url": "https://ai-gateway.vercel.sh", "modelo": "anthropic/claude-opus-5"},
+}
+PROVEDOR = os.environ.get("ELOA_PROVEDOR") or next((n for n, p in PROVEDORES.items() if os.environ.get(p["chave"])), None)
+if PROVEDOR and PROVEDOR not in PROVEDORES:
+    raise SystemExit(f"ELOA_PROVEDOR={PROVEDOR!r} desconhecido. Use um de: {', '.join(PROVEDORES)}")
+CONFIG_PROVEDOR = PROVEDORES[PROVEDOR] if PROVEDOR else PROVEDORES["anthropic"]
+SDK = openai if CONFIG_PROVEDOR["sdk"] == "openai" else anthropic
+MODELO = os.environ.get("ELOA_MODELO", CONFIG_PROVEDOR["modelo"])
 ESFORCO = os.environ.get("ELOA_ESFORCO", "low")
 VALIDADE_SESSAO = 30 * 60          # segundos
 MAX_TURNOS = 40                    # mensagens guardadas por sessão (user + assistant)
@@ -89,11 +106,8 @@ logging.getLogger("httpx2").setLevel(logging.WARNING)
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
 # O prefixo estável (persona + fatos) é o mesmo em todas as chamadas: fica em cache.
-SISTEMA = [{
-    "type": "text",
-    "text": PERSONA + "\n\n" + texto_dos_fatos(),
-    "cache_control": {"type": "ephemeral"},
-}]
+SISTEMA_TEXTO = PERSONA + "\n\n" + texto_dos_fatos()
+SISTEMA = [{"type": "text", "text": SISTEMA_TEXTO, "cache_control": {"type": "ephemeral"}}]
 
 
 # ---------------------------------------------------------------------------
@@ -125,19 +139,22 @@ def obter_sessao(id_sessao: str | None) -> tuple[str, Sessao]:
 
 
 # ---------------------------------------------------------------------------
-# Modo modelo (Claude)
+# Modo modelo (Claude, Gemini, Llama... conforme o provedor)
 # ---------------------------------------------------------------------------
-_cliente: anthropic.Anthropic | None = None
+_cliente = None
 _modelo_indisponivel_ate = 0.0     # depois de erro de credencial, evita bater na API a cada pergunta
 
 
-def cliente() -> anthropic.Anthropic:
+def cliente():
     global _cliente
     if _cliente is None:
-        if GATEWAY:
-            _cliente = anthropic.Anthropic(api_key=os.environ["AI_GATEWAY_API_KEY"], base_url="https://ai-gateway.vercel.sh", timeout=45.0, max_retries=1)
-        else:
-            _cliente = anthropic.Anthropic(timeout=45.0, max_retries=1)
+        chave = os.environ.get(CONFIG_PROVEDOR["chave"]) if PROVEDOR else None
+        opcoes = {"timeout": 45.0, "max_retries": 1}
+        if CONFIG_PROVEDOR["base_url"]:
+            opcoes["base_url"] = CONFIG_PROVEDOR["base_url"]
+        if chave:
+            opcoes["api_key"] = chave
+        _cliente = (openai.OpenAI if SDK is openai else anthropic.Anthropic)(**opcoes)
     return _cliente
 
 
@@ -145,52 +162,76 @@ def modelo_disponivel() -> bool:
     return time.time() >= _modelo_indisponivel_ate
 
 
+def chamar_modelo(mensagens: list[dict]) -> str | None:
+    """Uma chamada ao provedor configurado; devolve o texto ou None (recusa/vazio)."""
+    if SDK is openai:
+        # Gemini, Groq, OpenAI e compatíveis: chat completions com a persona em "system"
+        extras = {"reasoning_effort": ESFORCO} if PROVEDOR == "gemini" else {}
+        resposta = cliente().chat.completions.create(
+            model=MODELO,
+            max_tokens=MAX_TOKENS_RESPOSTA,
+            messages=[{"role": "system", "content": SISTEMA_TEXTO}] + mensagens,
+            **extras,
+        )
+        escolha = resposta.choices[0] if resposta.choices else None
+        if not escolha or escolha.finish_reason == "content_filter":
+            log.info("Modelo não respondeu (%s).", getattr(escolha, "finish_reason", None))
+            return None
+        return (escolha.message.content or "").strip() or None
+
+    resposta = cliente().messages.create(
+        model=MODELO,
+        max_tokens=MAX_TOKENS_RESPOSTA,
+        system=SISTEMA,
+        messages=mensagens,
+        output_config={"effort": ESFORCO},
+    )
+    if resposta.stop_reason == "refusal":
+        log.info("Modelo recusou (%s).", getattr(resposta.stop_details, "category", None))
+        return None
+    return "".join(b.text for b in resposta.content if b.type == "text").strip() or None
+
+
 def responder_com_modelo(sessao: Sessao, pergunta: str) -> str | None:
     """Uma resposta do modelo, ou None se ele não puder responder agora."""
     global _modelo_indisponivel_ate
     mensagens = sessao.mensagens + [{"role": "user", "content": pergunta}]
+    # Os dois SDKs (anthropic e openai) usam os mesmos nomes de exceção
     try:
-        resposta = cliente().messages.create(
-            model=MODELO,
-            max_tokens=MAX_TOKENS_RESPOSTA,
-            system=SISTEMA,
-            messages=mensagens,
-            output_config={"effort": ESFORCO},
-        )
+        texto = chamar_modelo(mensagens)
     except TypeError as e:
         # O SDK levanta TypeError quando não acha credencial nenhuma
-        if "authentication" not in str(e).lower():
+        if "authentication" not in str(e).lower() and "api_key" not in str(e).lower():
             raise
-        log.warning("Nenhuma credencial da API encontrada (defina ANTHROPIC_API_KEY). Modo local por 10 minutos.")
+        log.warning("Nenhuma credencial encontrada (defina %s). Modo local por 10 minutos.", CONFIG_PROVEDOR["chave"])
         _modelo_indisponivel_ate = time.time() + 600
         return None
-    except anthropic.AuthenticationError:
-        log.warning("Credencial da API inválida (ANTHROPIC_API_KEY). Modo local por 10 minutos.")
+    except SDK.AuthenticationError:
+        log.warning("Credencial inválida (%s). Modo local por 10 minutos.", CONFIG_PROVEDOR["chave"])
         _modelo_indisponivel_ate = time.time() + 600
         return None
-    except anthropic.PermissionDeniedError as e:
+    except SDK.PermissionDeniedError as e:
         log.warning("Chave sem permissão: %s. Modo local por 10 minutos.", e.message)
         _modelo_indisponivel_ate = time.time() + 600
         return None
-    except anthropic.RateLimitError:
+    except SDK.NotFoundError as e:
+        log.error("Modelo %r não existe em %s (%s). Ajuste ELOA_MODELO. Modo local por 10 minutos.", MODELO, PROVEDOR, e.message)
+        _modelo_indisponivel_ate = time.time() + 600
+        return None
+    except SDK.RateLimitError:
         log.warning("Limite de requisições da API. Modo local por 30 segundos.")
         _modelo_indisponivel_ate = time.time() + 30
         return None
-    except anthropic.BadRequestError as e:
+    except SDK.BadRequestError as e:
         log.error("Pedido recusado pela API: %s", e.message)
         return None
-    except anthropic.APIStatusError as e:
+    except SDK.APIStatusError as e:
         log.warning("API respondeu %s. Modo local nesta pergunta.", e.status_code)
         return None
-    except anthropic.APIConnectionError:
+    except SDK.APIConnectionError:
         log.warning("Sem conexão com a API. Modo local nesta pergunta.")
         return None
 
-    if resposta.stop_reason == "refusal":
-        log.info("Modelo recusou (%s).", getattr(resposta.stop_details, "category", None))
-        return None
-
-    texto = "".join(b.text for b in resposta.content if b.type == "text").strip()
     if not texto:
         return None
 
@@ -298,7 +339,7 @@ rotas = APIRouter()
 @rotas.get("/")
 @rotas.get("/saude")
 def saude():
-    return {"ok": True, "versao": VERSAO, "modo": "modelo" if modelo_disponivel() else "local", "modelo": MODELO, "via": "vercel-ai-gateway" if GATEWAY else "anthropic", "sessoes": len(_sessoes)}
+    return {"ok": True, "versao": VERSAO, "modo": "modelo" if modelo_disponivel() else "local", "modelo": MODELO, "provedor": PROVEDOR, "sessoes": len(_sessoes)}
 
 
 @rotas.post("/perguntar")
@@ -337,8 +378,9 @@ app.include_router(rotas, prefix="/api/eloa")
 
 # Sem credencial nenhuma, nem tenta o modelo: responde no modo local direto
 _perfil = os.path.join(os.path.expanduser("~"), ".config", "anthropic")
-if not (GATEWAY or os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN") or os.path.isdir(_perfil)):
-    log.warning("Nem ANTHROPIC_API_KEY nem AI_GATEWAY_API_KEY definidas (e nenhum perfil do 'ant auth login'): a Eloá responde no modo local.")
+if not (PROVEDOR or os.environ.get("ANTHROPIC_AUTH_TOKEN") or os.path.isdir(_perfil)):
+    log.warning("Nenhuma chave de modelo (%s) e nenhum perfil do 'ant auth login': a Eloá responde no modo local.",
+                ", ".join(p["chave"] for p in PROVEDORES.values()))
     _modelo_indisponivel_ate = float("inf")
 
 
@@ -346,5 +388,5 @@ if __name__ == "__main__":
     import uvicorn
 
     porta = int(os.environ.get("PORT", "8000"))
-    log.info("Eloá respondendo em http://localhost:%s/perguntar (modelo: %s, esforço: %s)", porta, MODELO, ESFORCO)
+    log.info("Eloá respondendo em http://localhost:%s/perguntar (provedor: %s, modelo: %s, esforço: %s)", porta, PROVEDOR or "nenhum", MODELO, ESFORCO)
     uvicorn.run(app, host="0.0.0.0", port=porta, log_level="warning")

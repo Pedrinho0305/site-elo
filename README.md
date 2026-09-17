@@ -253,7 +253,7 @@ Como funciona: `package.json` da raiz declara `backend` como workspace, então o
 
 | Variável | Para quê |
 |---|---|
-| `AI_GATEWAY_API_KEY` **(já cadastrada)** ou `ANTHROPIC_API_KEY` | Eloá com o modelo. A do Vercel AI Gateway (chave `eloa-site-elo`, teto de US$ 5/mês) usa os créditos da Vercel — **exige um cartão cadastrado na conta da Vercel** para liberar os créditos gratuitos; até lá o Gateway responde 403 e a Eloá fica no modo local. Uma chave da Anthropic também serve. Sem nenhuma, modo local (palavras-chave). |
+| **`GEMINI_API_KEY`** (ou `GROQ_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `AI_GATEWAY_API_KEY`) | Eloá com o modelo. **Gemini é o caminho gratuito**: chave em [aistudio.google.com/apikey](https://aistudio.google.com/apikey), sem cartão, ~1.000 pedidos/dia (a Google pode usar as conversas para treinar). Groq também é grátis (modelos Llama). Anthropic e OpenAI são pagas; o Vercel AI Gateway exige cartão na conta. Uma chave basta; a primeira encontrada (nesta ordem: Anthropic, Gemini, Groq, OpenAI, Gateway) define o provedor, ou force com `ELOA_PROVEDOR`. Sem nenhuma, modo local (palavras-chave). |
 | `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | MySQL do backend (os mesmos valores de `backend/.env`). O banco da escola precisa aceitar conexão de fora, e aceita. |
 | `ALLOWED_ORIGINS` | `*` ou o domínio do site. |
 | `SESSION_DAYS` | duração do login (padrão 30). |
@@ -271,7 +271,7 @@ Documentação completa em [api/README.md](api/README.md). O essencial:
 
 - `api/eloa.py` — servidor FastAPI. `POST /perguntar {pergunta, sessao, historico?}` → `{status, resposta_da_ia, intencao, confianca, fonte, sessao}`; `GET /saude`. As mesmas rotas existem sob `/api/eloa/…` (é assim que a Vercel chama; ver §6c). Roda com `python api/eloa.py` na porta 8000; dependências em `requirements.txt` na raiz.
 - **Memória em serverless:** a Vercel não guarda nada entre chamadas, então o cliente manda `historico` (as últimas mensagens) e o servidor usa isso como memória. Localmente a sessão em memória continua funcionando.
-- **Modo modelo:** com `ANTHROPIC_API_KEY` (direto na Anthropic) ou `AI_GATEWAY_API_KEY` (Vercel AI Gateway, mesmo SDK com `base_url` trocada e modelo `anthropic/claude-opus-5`), chama Claude (`claude-opus-5`, `effort: low`) com `system` = persona + fatos (com `cache_control`) e o histórico da sessão (até 40 mensagens, 30 min de validade). `GET /saude` diz `via: anthropic | vercel-ai-gateway`.
+- **Modo modelo:** o provedor vem da chave que existir (`PROVEDORES` no topo de `eloa.py`): Anthropic (`claude-opus-5`, SDK `anthropic`), **Gemini** (`gemini-3.5-flash`, grátis), Groq (`llama-3.3-70b-versatile`, grátis), OpenAI (`gpt-4o-mini`) ou Vercel AI Gateway. Gemini, Groq e OpenAI falam o protocolo da OpenAI (SDK `openai`, endpoint compatível); Anthropic e Gateway, o da Anthropic. Em todos, `system` = persona + fatos e o histórico da sessão (até 40 mensagens). `ELOA_MODELO` troca o modelo; `GET /saude` diz `provedor` e `modelo`. Erros de chave, permissão ou modelo inexistente (404) caem no modo local por 10 min com log explicando.
 - **Modo local:** sem chave ou com a API fora, reconhece o assunto por palavras-chave e responde com o fato. Troca sozinho.
 - `api/_conhecimento.py` — **a única fonte do que a Eloá sabe e de como fala.** `PERSONA` (tom, regras: não inventa, não finge ser humana, não aciona emergência, não sai do assunto, sem Markdown) e `ASSUNTOS` (id, nome, pistas, fato). Mudou algo no site → atualize o fato correspondente. (O `_` no nome impede a Vercel de tratar o arquivo como função.)
 - `pages/eloa.js` — cliente; escolhe o endereço sozinho (localhost → porta 8000; publicado → `/api/eloa`). `window.ELOA_API_URL` sobrescreve. `pages/eloa-engine.js` é o motor de fallback no navegador.
@@ -302,7 +302,7 @@ Documentação completa em [api/README.md](api/README.md). O essencial:
 | Vídeo demonstrativo | `pages/instrucoes.html` `<video>` | Gravar o vídeo novo e colocar `src`. O antigo mostrava o site velho e foi retirado. |
 | Fotos da equipe | `assets/team/` | 5 arquivos `.jpg` com os nomes do `LEIA-ME.txt`. Até lá, iniciais. |
 | Links dos artigos | `pages/referencias.html` `.article-link` | Todos `href="#"`. |
-| Cartão na conta da Vercel | painel da Vercel → AI Gateway | A chave do AI Gateway já está no projeto, mas a Vercel só libera os créditos com um cartão cadastrado (403 `customer_verification_required` até lá). Sem isso a Eloá responde no modo local (palavras-chave), nunca fica muda. |
+| Chave do Gemini | `GEMINI_API_KEY` no projeto da Vercel (e em `api/.env` para rodar local) | Gratuita em aistudio.google.com/apikey. Sem ela a Eloá responde no modo local (palavras-chave), nunca fica muda. |
 | Jogo sem a interface do gd.games | `jogo/index.html` | Exportar o jogo em HTML5 no GDevelop e copiar para a pasta `jogo/` (passo a passo no `LEIA-ME`). A página troca sozinha. |
 | Firmware da pochete | — | O backend já aceita os eventos (contrato em `backend/README.md`); falta o dispositivo mandar. Até lá, "Testar sem a pochete" no painel. |
 | Credenciais Uber e Telegram | `backend/.env` | Sem elas, os dois rodam simulados. Uber exige app aprovado (Guest Rides); Telegram é só criar o bot no @BotFather. |
@@ -324,5 +324,6 @@ Documentação completa em [api/README.md](api/README.md). O essencial:
 6. **Backend de login e cadastro:** `backend/server.js` (Express + MySQL, scrypt, sessões por token); `auth.js`, `painel.js` e `header.js` integrados, com a demonstração local como fallback quando o servidor está fora.
 7. **Jogo no gd.games** dentro do iframe; **backend da pochete**: chaves por dispositivo, eventos, corridas Uber (Guest Rides API, com simulação), avisos por Telegram e stream SSE; painel ao vivo com aprovação de corrida, vínculo de pochete/Telegram e simulação dos botões.
 8. **Deploy unificado na Vercel e login só com cadastro:** site, Eloá (`api/eloa.py`) e backend (`api/backend.js`) no mesmo projeto e domínio; o front escolhe o endereço da API sozinho; a Eloá manda o histórico do navegador (memória em serverless) e ganhou o fallback em cadeia; `api/eloa-engine.js` virou `pages/eloa-engine.js` e `conhecimento.py` virou `_conhecimento.py` (a Vercel tratava os dois como funções); a demonstração local de login foi removida — só entra quem o backend reconhece; o painel consulta a API quando não há stream.
+9. **Eloá multi-provedor:** além da Anthropic, fala com Gemini (grátis), Groq (grátis), OpenAI e Vercel AI Gateway; provedor escolhido pela chave existente. Gemini é o caminho adotado por ser gratuito sem cartão.
 
 Commits relevantes começam em `093e664 Redesign do CSS do site inteiro`.

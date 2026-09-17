@@ -10,16 +10,16 @@ Ela entende praticamente qualquer jeito de perguntar — gíria, abreviação, e
 pip install -r requirements.txt      # na raiz do projeto
 ```
 
-Coloque a chave da API da Anthropic (crie em console.anthropic.com):
+Coloque **uma** chave de modelo. A gratuita é a do Google Gemini (crie em [aistudio.google.com/apikey](https://aistudio.google.com/apikey), sem cartão):
 
 ```bash
 # Windows (PowerShell)
-$env:ANTHROPIC_API_KEY = "sk-ant-..."
+$env:GEMINI_API_KEY = "AIza..."
 # Linux / Mac
-export ANTHROPIC_API_KEY="sk-ant-..."
+export GEMINI_API_KEY="AIza..."
 ```
 
-Ou copie `api/.env.example` para `api/.env` e preencha (o arquivo não vai para o git).
+Ou copie `api/.env.example` para `api/.env` e preencha (o arquivo não vai para o git). Outras chaves aceitas: `GROQ_API_KEY` (grátis, Llama), `ANTHROPIC_API_KEY` (paga), `OPENAI_API_KEY` (paga; com `OPENAI_BASE_URL` serve para qualquer API compatível) e `AI_GATEWAY_API_KEY` (Vercel, exige cartão). A primeira encontrada, na ordem Anthropic → Gemini → Groq → OpenAI → Gateway, define o provedor; `ELOA_PROVEDOR` força um.
 
 ```bash
 python api/eloa.py           # http://localhost:8000
@@ -29,13 +29,13 @@ Abra o site (por exemplo `python -m http.server 8765` na raiz) e vá em **Eloá*
 
 ## Na Vercel
 
-`api/eloa.py` vira a função `/api/eloa` do mesmo projeto do site (o `vercel.json` da raiz manda `/api/eloa/*` para ela; as rotas existem com e sem esse prefixo). Dependências em `requirements.txt` na raiz. O projeto já tem `AI_GATEWAY_API_KEY` (Vercel AI Gateway; a Vercel exige cartão cadastrado para liberar os créditos — antes disso o Gateway responde 403 e a Eloá fica no modo local). `ANTHROPIC_API_KEY` também funciona e tem prioridade se as duas existirem. Como serverless não guarda nada entre chamadas, `pages/eloa.js` manda o campo `historico` (últimas mensagens, em `sessionStorage`) e o servidor usa isso como memória da conversa.
+`api/eloa.py` vira a função `/api/eloa` do mesmo projeto do site (o `vercel.json` da raiz manda `/api/eloa/*` para ela; as rotas existem com e sem esse prefixo). Dependências em `requirements.txt` na raiz. Defina `GEMINI_API_KEY` (ou outra das chaves acima) nas variáveis do projeto e faça redeploy — sem chave, modo local. `GET /api/eloa/saude` mostra `provedor` e `modelo`. Como serverless não guarda nada entre chamadas, `pages/eloa.js` manda o campo `historico` (últimas mensagens, em `sessionStorage`) e o servidor usa isso como memória da conversa.
 
 ## Dois modos
 
 | Modo | Quando | Como responde |
 |---|---|---|
-| **modelo** | há chave válida: `ANTHROPIC_API_KEY` (Anthropic) ou `AI_GATEWAY_API_KEY` (Vercel AI Gateway, mesmo SDK apontado para `https://ai-gateway.vercel.sh`, modelo `anthropic/claude-opus-5`) | Claude (`claude-opus-5`), com a persona e os fatos como contexto e o histórico da sessão. É o modo "gente". |
+| **modelo** | há uma chave válida (Gemini, Groq, Anthropic, OpenAI ou Gateway) | O modelo do provedor (`gemini-3.5-flash`, `llama-3.3-70b-versatile`, `claude-opus-5`, `gpt-4o-mini`…), com a persona e os fatos como contexto e o histórico da sessão. É o modo "gente". Troque o modelo com `ELOA_MODELO`. |
 | **local** | sem chave, chave inválida, limite de uso ou API fora | Reconhece o assunto por palavras-chave e responde com o fato correspondente. Menos natural, mas nunca inventa e nunca fica muda. |
 
 O servidor troca de modo sozinho e informa em `GET /saude` (`"modo": "modelo"` ou `"local"`). Se a API do modelo falhar no meio de uma conversa, aquela pergunta cai no modo local e a próxima tenta o modelo de novo.
