@@ -9,7 +9,7 @@
   "functions": {
     "api/eloa.py": {
       "maxDuration": 60,
-      "excludeFiles": "{assets/**,backend/**,node_modules/**,jogo/**,pages/**,header/**,.venv/**,*.mp4,*.glb}"
+      "excludeFiles": "{assets/**,backend/**,node_modules/**,jogo/**,pages/**,css/**,js/**,.venv/**,*.mp4,*.glb}"
     },
     "api/backend.js": {
       "maxDuration": 30

@@ -46,9 +46,9 @@ Estes padrões foram evitados porque denunciam design genérico. Não os reintro
 
 ---
 
-## 3. Sistema de design (`header/header.css`)
+## 3. Sistema de design (`css/header.css`)
 
-Tudo compartilhado vive em `header/header.css` (apesar do nome, é o sistema inteiro: tokens, base, cabeçalho, botões, faixas, rodapé). É o **primeiro** CSS carregado em toda página.
+Tudo compartilhado vive em `css/header.css` (apesar do nome, é o sistema inteiro: tokens, base, cabeçalho, botões, faixas, rodapé). É o **primeiro** CSS carregado em toda página.
 
 ### Tokens (tema escuro é o padrão)
 
@@ -105,9 +105,9 @@ Largura padrão de conteúdo: `width: min(100% - 2 * var(--edge), var(--page)); 
 
 Ícones são **SVG inline** com `fill="none" stroke="currentColor"`, 1.8–2 px de traço, cantos redondos, dentro de um círculo ou "squircle" (`border-radius: 14–20px`) colorido por `--c`. Padrão de card com cor: `.card { --c: var(--green) }` e o CSS usa `color-mix(in srgb, var(--c) 14%, transparent)` para fundos.
 
-### Movimento (`reveal.css` + `reveal.js`)
+### Movimento (`css/reveal.css` + `js/reveal.js`)
 
-- `reveal.js` marca cada filho direto de `<main>` com `.reveal-on-scroll` e, ao entrar na tela, `.is-revealed`. `index.js` faz o mesmo com `.animate-on-scroll` → `.visible`. Páginas com cards escalonados usam `.reveal-item` com `transition-delay` por índice (quem-somos.js, referencias.js).
+- `reveal.js` marca cada filho direto de `<main>` com `.reveal-on-scroll` e, ao entrar na tela, `.is-revealed`. `js/home.js` faz o mesmo com `.animate-on-scroll` → `.visible`. Páginas com cards escalonados usam `.reveal-item` com `transition-delay` por índice (`js/quem-somos.js`, `js/referencias.js`).
 - A entrada é **opacidade + `filter: blur(10px) → 0`**. Nada de `transform`.
 - A primeira faixa de cada página já nasce visível (lista em `reveal.css`) — se criar uma página com uma primeira seção de classe nova, adicione-a lá.
 - Animações contínuas existentes e propositais: pulso do sinal (home), flutuação do produto e dos chips, anel SOS pulsando, hotspots do 3D, ponto "online" da Eloá, cursor de digitação. Não adicione outras "porque sim".
@@ -117,19 +117,28 @@ Largura padrão de conteúdo: `width: min(100% - 2 * var(--edge), var(--page)); 
 
 ## 4. Estrutura de arquivos
 
+Organização por tipo: HTML na raiz (home) e em `pages/`, todo CSS em `css/`, todo JS em `js/`, mídia em `assets/` por categoria. `api/` precisa ficar na raiz (a Vercel só reconhece funções ali).
+
 ```
-index.html · index.js · style.css        home (style.css também é carregado pela página Eloá — por isso todas as regras da home são escopadas por seção)
-reveal.css · reveal.js                   entrada das seções
-header/header.css · header/header.js     SISTEMA compartilhado + tema, menu, sessão, perfil
-pages/
-  instrucoes.html/.css/.js + video-player.js
-  produtos.html/.css/.js
-  quem-somos.html/.css/.js
-  referencias.html/.css/.js
-  jogo.html/.css/.js
-  eloa.html/.css/.js · eloa-engine.js    (o engine é o fallback da Eloá no navegador)
-  login.html · cadastro.html · auth.css · auth.js
-  painel.html · relatorios.html · painel.css · painel.js · painel-pochete.js
+index.html                               home (fica na raiz: é o que a Vercel serve em /)
+pages/                                   as outras páginas, só HTML
+  instrucoes · produtos · quem-somos · referencias · jogo · eloa · login · cadastro · painel · relatorios
+css/
+  header.css                             SISTEMA compartilhado (tokens, componentes) — primeiro CSS de toda página
+  home.css                               home (também carregado pela página Eloá — por isso as regras da home são escopadas por seção)
+  reveal.css                             entrada das seções
+  auth.css · eloa.css · instrucoes.css · jogo.css · painel.css · produtos.css · quem-somos.css · referencias.css   um por página
+js/
+  header.js                              tema, menu, sessão (window.EloSessao), perfil — roda em todas as páginas
+  home.js · reveal.js
+  auth.js · eloa.js · eloa-engine.js · instrucoes.js · video-player.js · jogo.js · painel.js · painel-pochete.js · produtos.js · quem-somos.js · referencias.js
+assets/
+  favicon.svg
+  img/                                   as imagens usadas, com nome do que mostram: pochete-clara, pochete-escura, pochete-embalagem, pochete-miniatura, eloa-avatar, jogo-cuidador, mockup-visualizador-3d
+  3d/pochete.glb                         modelo 3D (60 MB; Instruções e Produto)
+  icons/                                 PNGs pequenos exportados do Figma — nenhum é usado hoje
+  video/                                 vídeo do site antigo (77 MB, sem uso; pode ser apagado)
+  team/                                  fotos da equipe (LEIA-ME.txt diz os nomes)
 api/                                     FUNÇÕES DA VERCEL (tudo aqui vira rota /api/…; arquivos com "_" na frente não)
   eloa.py                                API da Eloá em Python (FastAPI) → /api/eloa
   _conhecimento.py                       o que a Eloá sabe e como fala (módulo, não é função)
@@ -138,14 +147,15 @@ api/                                     FUNÇÕES DA VERCEL (tudo aqui vira rot
 backend/
   server.js · uber.js · telegram.js · eventos.js · package.json · .env.example · README.md   contas, pochete, Uber, Telegram (Express 5 + MySQL)
   api/index.js · vercel.json             só para publicar o backend como projeto separado (não é o caminho padrão)
-vercel.json · package.json · requirements.txt · .vercelignore   deploy: rotas das funções, dependências Node (workspace backend) e Python
 jogo/LEIA-ME.txt                         onde colocar a exportação HTML5 do jogo (jogo/index.html)
-assets/                                  imagens, favicon, modelo 3D (.glb, 60 MB), vídeo antigo (77 MB), team/ (fotos da equipe)
+vercel.json · package.json · requirements.txt · .vercelignore   deploy: rotas das funções, dependências Node (workspace backend) e Python
 ```
+
+**Caminhos:** a home referencia `css/…`, `js/…`, `assets/…`; as páginas em `pages/` referenciam `../css/…`, `../js/…`, `../assets/…`. Os JS usam caminhos relativos à **página** que os carrega (ex.: `js/eloa.js` aponta o avatar como `../assets/img/eloa-avatar.png`), não ao próprio arquivo.
 
 **Não coloque arquivo do site em `api/`.** A Vercel transforma cada `.js`/`.py` dessa pasta numa função serverless — um script do navegador ali nunca chega ao navegador (foi o que deixou a Eloá muda no primeiro deploy). Módulos auxiliares das funções começam com `_`.
 
-**Ordem dos `<link>` em toda página:** fontes do Google → `header/header.css` → CSS da página → `reveal.css`. **Ordem dos scripts:** JS da página → `header/header.js` → `reveal.js` (auth e painel invertem: `header.js` antes do JS da página, porque usam `window.EloSessao`). Todos com `defer`. Cache-bust: `?v=6` — suba o número quando mudar CSS.
+**Ordem dos `<link>` em toda página:** fontes do Google → `css/header.css` → CSS da página → `css/reveal.css`. **Ordem dos scripts:** JS da página → `js/header.js` → `js/reveal.js` (auth e painel invertem: `header.js` antes do JS da página, porque usam `window.EloSessao`). Todos com `defer`. Cache-bust: `?v=6` — suba o número quando mudar CSS.
 
 Toda página tem `<html lang="pt-BR" data-theme="dark">` para não piscar claro antes do JS.
 
@@ -153,7 +163,7 @@ Toda página tem `<html lang="pt-BR" data-theme="dark">` para não piscar claro 
 
 1. Copie o `<head>` e o `<header class="site-header">` de `pages/referencias.html` (tem o menu completo com `Entrar`). Marque o link da página como `class="active"`.
 2. Adicione o link dela no `.nav-links` de **todas** as outras páginas (o menu é estático, não há include).
-3. Crie `pages/nome.css` seguindo o padrão: comentário de abertura explicando o conceito da página, seções numeradas, responsivo no fim. Use só tokens.
+3. Crie `pages/nome.html`, `css/nome.css` e `js/nome.js` seguindo o padrão: comentário de abertura explicando o conceito da página, seções numeradas, responsivo no fim. Use só tokens.
 4. Se a primeira seção for de classe nova, adicione-a à lista de "já visível" em `reveal.css`.
 5. Ensine a Eloá sobre a página em `api/_conhecimento.py` (assunto `site`).
 
@@ -161,52 +171,52 @@ Toda página tem `<html lang="pt-BR" data-theme="dark">` para não piscar claro 
 
 ## 5. Página por página
 
-### Home (`index.html`, `style.css`)
+### Home (`index.html`, `css/home.css`)
 - **Hero** (`.hero.night`): H1 em duas linhas (segunda com peso 400 e cor `--text-2`), botões, `.hero-trust` (garantia, suporte, IP63). À direita, a foto do produto (`.img-escura` no tema escuro, `.img-clara` no claro) flutuando sobre um halo, com **`.hero-chips`** (3 chips de status do app) e o **`.hero-signal`** (SVG inline com dois `<path>` idênticos: `.signal-track` tracejado e `.signal-pulse` com gradiente `#signalGrad` e `stroke-dashoffset` animado). Sequência de entrada orquestrada por `animation-delay` nos filhos de `.hero-text`.
 - **Tecnologia que cuida** (`.tecnologia`): grade 3 colunas de `.card`, todos da mesma altura. Três `.card--wide` (2 colunas, ícone à esquerda do texto: Alerta, App do Cuidador, Segurança Total) alternam com três normais — largo+normal, normal+largo, largo+normal — e fecham 3 linhas exatas. O `.card--featured` (emergência) é o largo que pulsa (`sos` keyframes). Em ≤1080 px todos viram normais numa grade 2×3. `.icon-box` = anel cônico; `.icon-red/-orange/-green/-blue/-purple/-teal` definem `--c`.
 - **Diferencial** (`.diferencial.night`): grade em áreas `title/visual`, `text/visual`, `stats`, `info`. `.diferencial-visual` = foto da embalagem. `.stats-grid` = faixa com números em gradiente separados por fios. `.info-card` (público) e `.card-objetivo` (painel marinho com ∞ de marca d'água).
 - **CTA** (`.cta-section`): painel marinho com ∞ à direita, preço em gradiente, botão. O preço aparece **também** em `pages/produtos.html` (`.offer-value`) — mude os dois juntos.
 
-### Instruções (`pages/instrucoes.*`)
+### Instruções (`pages/instrucoes.html`, `css/instrucoes.css`, `js/instrucoes.js`)
 - **Esquema 3D** (`.scheme-section.night`): `<model-viewer>` num `.scheme-stage` quadrado com piso de luz; 6 `.hotspot` numerados (slot `hotspot-N`) ligados à `.scheme-legend` por `data-hotspot`/`data-target` (instrucoes.js). `.is-active` nos dois lados.
 - **Seis passos** (`.steps-section`): linha do tempo vertical; o fio é `.step-card::before`; ícones em squircle coloridos por `.icon-*`.
 - **Vídeo** (`.video-section.night`): `.video-player` com `<video>` **sem `src`** (o vídeo antigo mostrava o site velho). `video-player.js` detecta a ausência e liga `.is-empty` (aviso "Vídeo em produção" + controles desligados). Para publicar: adicione `src="../assets/arquivo.mp4"` e tudo liga. Controles são **só ícones**: play/pause (troca por `.is-playing`), −10 s, +10 s, barra, tempo, tela cheia.
 - **Dicas** (`.tips-box`): painel esverdeado com checks por máscara (`--check-mark`).
 
-### Produto (`pages/produtos.*`)
+### Produto (`pages/produtos.html`, `css/produtos.css`, `js/produtos.js`)
 - Título na faixa `.hero.night` com `padding-bottom` grande; o `.banner-card` sobe por cima (`margin-top` negativo) com texto à esquerda e `.banner-visual` (embalagem) à direita.
 - `.components-section`: tabela em `.table-container` (rola horizontal), cabeçalho sticky, `.price.highlight` em verde; `.desktop-only`/`.mobile-only` trocam colunas em ≤700 px.
 - `.product-preview.night`: `<model-viewer>` com piso de luz (`::after`).
 - `.included-card`: grade de itens com check verde. `.offer-card#oferta`: painel marinho (preço) + ações com `.offer-btn` laranja. Usa Font Awesome (único lugar do site).
 
-### Quem Somos (`pages/quem-somos.*`)
+### Quem Somos (`pages/quem-somos.html`, `css/quem-somos.css`, `js/quem-somos.js`)
 - `.page-header.night` + `.mission-card` sobreposto (ícone em anel giratório lento, `.mission-eyebrow` em ciano sentence-case, três `.pillar`).
 - `.team-grid` de `.team-card` com `.member-photo` 3:4. Sem foto (`assets/team/nome.jpg` ausente), `quem-somos.js` marca `.no-image` e o CSS mostra as **iniciais em gradiente** via `::after { content: attr(data-initials) }`. Nomes dos arquivos esperados estão em `assets/team/LEIA-ME.txt`.
 - `.contact-section.night#contato` com `.contact-form` (validação nativa + status; sem back-end). É o destino de todos os "Fale conosco", "Ajuda" e "Esqueci minha senha".
 
-### Referências (`pages/referencias.*`)
+### Referências (`pages/referencias.html`, `css/referencias.css`, `js/referencias.js`)
 - Mesmo cabeçalho sobreposto (`.foundation-card`: header/lead em cima, chips de temas e 3 stats embaixo).
 - `.articles-section.night`: lista `<ol>` de `.article-card` numerados (é bibliografia). Links `href="#"` viram `aria-disabled` pelo JS até serem preenchidos.
 - `.resources-grid` de `<a class="resource-card">` com fio gradiente que cresce no hover. `.methodology-card` com barra lateral gradiente.
 
-### Jogo (`pages/jogo.*`) — construído depois do redesign, a partir do Figma
+### Jogo (`pages/jogo.html`, `css/jogo.css`, `js/jogo.js`) — construído depois do redesign, a partir do Figma
 - **Abertura** (`.game-hero.night`): texto + `.game-art` com a ilustração do Sr. João (`assets/jogo-cuidador.png`, baixada do Figma) e HUD.
 - **Jogar** (`.game-stage-section#jogar`): `<iframe id="gameFrame" data-src="../jogo/index.html" data-fallback="https://gd.games/games/15184de8-…">`. `jogo.js` tenta primeiro a exportação HTML5 local (`HEAD` em `jogo/index.html`) — é a única forma de mostrar **só o jogo**; se não existir, usa a página do gd.games, que vem com a interface deles (o build do GDevelop redireciona qualquer embed para o gd.games, não há como esconder). Passo a passo da exportação em `jogo/LEIA-ME.txt`.
 - **História** (`.game-story`): texto + `.story-objectives` (5 objetivos com ícone e cor).
 - **Demonstração** (`.game-demo.night`): `.demo-screen` com cantos de mira e "Vídeo em produção" (placeholder até haver vídeo).
 
-### Eloá (`pages/eloa.*`)
+### Eloá (`pages/eloa.html`, `css/eloa.css`, `js/eloa.js`)
 - `main.ai-shell` em duas colunas: `.eloa-presence` (sticky; avatar recortado em círculo com `object-position: 50% 12%`, status "Online agora", `.suggestions` que enviam ao clicar) e `.eloa-console` (`.chat-box` + `.composer`).
 - Mensagens: `.message.user` (gradiente, à direita) e `.ai-message-row > .response-avatar + .message.ai`. Estados: `.is-loading` (três pontos) e `.is-typing` (cursor).
-- `eloa.js` fala com a API Python (ver §7): em `localhost` usa `http://localhost:8000/perguntar`, publicado usa `/api/eloa/perguntar` (mesmo domínio). Guarda `eloa-sessao` e `eloa-historico` (últimas 40 mensagens) em `sessionStorage` e manda o histórico em cada pergunta — é assim que ela lembra da conversa mesmo em serverless. Se a API não responder, cai no `pages/eloa-engine.js` (motor no navegador). **A Eloá sempre responde alguma coisa**: modelo → modo local do servidor → engine do navegador → mensagem de "sem conexão".
-- Esta página carrega `style.css` da home — por isso toda regra da home é escopada (`.hero .hero-text`, não `.hero-text`).
+- `eloa.js` fala com a API Python (ver §7): em `localhost` usa `http://localhost:8000/perguntar`, publicado usa `/api/eloa/perguntar` (mesmo domínio). Guarda `eloa-sessao` e `eloa-historico` (últimas 40 mensagens) em `sessionStorage` e manda o histórico em cada pergunta — é assim que ela lembra da conversa mesmo em serverless. Se a API não responder, cai no `js/eloa-engine.js` (motor no navegador). **A Eloá sempre responde alguma coisa**: modelo → modo local do servidor → engine do navegador → mensagem de "sem conexão".
+- Esta página carrega `css/home.css` da home — por isso toda regra da home é escopada (`.hero .hero-text`, não `.hero-text`).
 
-### Login e Cadastro (`pages/login.html`, `cadastro.html`, `auth.*`)
+### Login e Cadastro (`pages/login.html`, `pages/cadastro.html`, `css/auth.css`, `js/auth.js`)
 - Cabeçalho próprio (`.auth-header`: logo, "Precisa de ajuda? Fale conosco", tema). Sem rodapé.
 - `.auth-shell`: `.auth-welcome.night` (título, foto do produto flutuando, 3 pontos) + `.auth-card` (formulário). Campos com `.password-field` + `.password-toggle`, checkbox customizado `.auth-check`, `.photo-picker` no cadastro (recorta a foto em quadrado 160 px e guarda como data-URL).
 - `auth.js`: valida (senhas iguais via `setCustomValidity`) e chama o **backend** (`POST /api/cadastro` ou `/api/login`, ver §6b). **Só entra quem está cadastrado no backend.** Se ele responder com erro (409 email já usado, 401 email/senha incorretos, 503 banco fora), mostra a mensagem; se nem for alcançado, mostra "Não consegui falar com o servidor da ELO" — em nenhum dos casos abre sessão. Com sucesso, `window.EloSessao.entrar({ …cuidador, token })` e vai para `painel.html`. Quem já está logado é redirecionado. (A antiga "demonstração local", que aceitava qualquer email sem servidor, foi removida de propósito.)
 
-### Painel e Relatórios (`pages/painel.html`, `relatorios.html`, `painel.*`) — telas do app do cuidador, do Figma
+### Painel e Relatórios (`pages/painel.html`, `pages/relatorios.html`, `css/painel.css`, `js/painel.js`) — telas do app do cuidador, do Figma
 - `.app-header` **sticky** (não flutuante), com `.app-nav` (Painel / Relatórios), sino e o chip de perfil (slot `data-profile-slot`).
 - `.app-hero` (saudação com nome da sessão + `.device-card` com a pochete recortada por `.device-thumb`), `.tiles` (4 `.tile` coloridos por `--c`, com `.tile-bar` animada), `.actions-grid` (5 `.action` que mostram uma confirmação em `#actionStatus`), `.profile-section#perfil` (foto grande, nome, email, trocar foto, sair). Relatórios: `.date-range`, tiles com `.tile-delta`, `.log-card` com tabela e `.log-type` coloridos.
 - `painel.js` **exige sessão**: sem `elo-sessao`, redireciona para `login.html`. Trocar a foto faz `PATCH /api/me`. Os dados dos tiles e do registro são ilustrativos (o rodapé avisa).
@@ -214,7 +224,7 @@ Toda página tem `<html lang="pt-BR" data-theme="dark">` para não piscar claro 
 
 ---
 
-## 6. Sessão e perfil (`header/header.js`)
+## 6. Sessão e perfil (`js/header.js`)
 
 `header.js` roda em todas as páginas e faz quatro coisas:
 
@@ -234,7 +244,7 @@ Documentação completa em [backend/README.md](backend/README.md), incluindo o *
 - **Uber:** `uber.js` implementa a Guest Rides API (token `client_credentials`, estimativa, pedido, consulta, cancelamento). Sem `UBER_CLIENT_ID/SECRET` roda **simulado** (corrida fictícia que avança sozinha). Fluxo: botão amarelo → corrida `pendente` → cuidador aprova no painel → estimativa + pedido → status sincronizado a cada 10 s.
 - **Telegram:** `telegram.js` (Bot API `sendMessage` + polling `getUpdates`). O cuidador manda `/start CÓDIGO` ao bot. Sem `TELEGRAM_BOT_TOKEN`, simulado (mensagens no terminal, vínculo por `chat_id` digitado).
 - **Tempo real:** `eventos.js` é um canal SSE por cuidador (`GET /api/eventos/stream?token=`); o painel usa `EventSource`. Payload `{ tipo, dados, em }`.
-- **Painel** (`pages/painel-pochete.js`): toasts, tile "Último alerta", painel de corrida com Aprovar/Recusar/Cancelar, vínculo de pochete (mostra a chave uma vez), Telegram e botões de simulação. Sem token (demonstração local), a seção explica que precisa do servidor.
+- **Painel** (`js/painel-pochete.js`): toasts, tile "Último alerta", painel de corrida com Aprovar/Recusar/Cancelar, vínculo de pochete (mostra a chave uma vez), Telegram e botões de simulação. Sem token (demonstração local), a seção explica que precisa do servidor.
 - **`GET /`** (e `GET /api`, no site publicado) é a página do backend (rotas, estado, ambiente). **Vercel:** publicado junto com o site pela função `api/backend.js` (ver §6c). Em serverless o SSE, o polling do Telegram e a sincronização automática ficam desligados (o app detecta `process.env.VERCEL`); o painel consulta a cada 10 s no lugar do stream, e cada pedido tenta reconectar ao banco se a conexão inicial falhou (`garantirBanco`).
 
 ### 6c. Deploy na Vercel (site + Eloá + backend, um projeto só)
@@ -274,7 +284,7 @@ Documentação completa em [api/README.md](api/README.md). O essencial:
 - **Modo modelo:** o provedor vem da chave que existir (`PROVEDORES` no topo de `eloa.py`): Anthropic (`claude-opus-5`, SDK `anthropic`), **Gemini** (`gemini-3.5-flash`, grátis), Groq (`llama-3.3-70b-versatile`, grátis), OpenAI (`gpt-4o-mini`) ou Vercel AI Gateway. Gemini, Groq e OpenAI falam o protocolo da OpenAI (SDK `openai`, endpoint compatível); Anthropic e Gateway, o da Anthropic. Em todos, `system` = persona + fatos e o histórico da sessão (até 40 mensagens). `ELOA_MODELO` troca o modelo; `GET /saude` diz `provedor` e `modelo`. Erros de chave, permissão ou modelo inexistente (404) caem no modo local por 10 min com log explicando.
 - **Modo local:** sem chave ou com a API fora, reconhece o assunto por palavras-chave e responde com o fato. Troca sozinho.
 - `api/_conhecimento.py` — **a única fonte do que a Eloá sabe e de como fala.** `PERSONA` (tom, regras: não inventa, não finge ser humana, não aciona emergência, não sai do assunto, sem Markdown) e `ASSUNTOS` (id, nome, pistas, fato). Mudou algo no site → atualize o fato correspondente. (O `_` no nome impede a Vercel de tratar o arquivo como função.)
-- `pages/eloa.js` — cliente; escolhe o endereço sozinho (localhost → porta 8000; publicado → `/api/eloa`). `window.ELOA_API_URL` sobrescreve. `pages/eloa-engine.js` é o motor de fallback no navegador.
+- `js/eloa.js` — cliente; escolhe o endereço sozinho (localhost → porta 8000; publicado → `/api/eloa`). `window.ELOA_API_URL` sobrescreve. `js/eloa-engine.js` é o motor de fallback no navegador.
 - O Node (`server.js`) e o servidor Gemini no Render foram **removidos**. Não recrie.
 
 ---
@@ -320,10 +330,11 @@ Documentação completa em [api/README.md](api/README.md). O essencial:
 2. **Conteúdo do Figma no visual novo:** Jogo (história, objetivos, demo), Login, Cadastro, Painel, Relatórios; link "Entrar".
 3. **Ajustes pedidos:** logo vira link; player sem vídeo e com ícones; iframe do jogo; "Entrar" ao lado do tema; chip de perfil com foto e menu após login; seção "Meu perfil"; painel exige sessão.
 4. **Eloá em Python:** API FastAPI com Claude + modo local; persona e base em `conhecimento.py`; front com sessão persistente; Node e Gemini removidos.
-5. **Reorganização (feita pela equipe):** `header.css`/`header.js` movidos para `header/`.
+5. **Reorganização (feita pela equipe):** `header.css`/`header.js` movidos para `header/` (depois, no item 10, para `css/` e `js/`).
 6. **Backend de login e cadastro:** `backend/server.js` (Express + MySQL, scrypt, sessões por token); `auth.js`, `painel.js` e `header.js` integrados, com a demonstração local como fallback quando o servidor está fora.
 7. **Jogo no gd.games** dentro do iframe; **backend da pochete**: chaves por dispositivo, eventos, corridas Uber (Guest Rides API, com simulação), avisos por Telegram e stream SSE; painel ao vivo com aprovação de corrida, vínculo de pochete/Telegram e simulação dos botões.
-8. **Deploy unificado na Vercel e login só com cadastro:** site, Eloá (`api/eloa.py`) e backend (`api/backend.js`) no mesmo projeto e domínio; o front escolhe o endereço da API sozinho; a Eloá manda o histórico do navegador (memória em serverless) e ganhou o fallback em cadeia; `api/eloa-engine.js` virou `pages/eloa-engine.js` e `conhecimento.py` virou `_conhecimento.py` (a Vercel tratava os dois como funções); a demonstração local de login foi removida — só entra quem o backend reconhece; o painel consulta a API quando não há stream.
+8. **Deploy unificado na Vercel e login só com cadastro:** site, Eloá (`api/eloa.py`) e backend (`api/backend.js`) no mesmo projeto e domínio; o front escolhe o endereço da API sozinho; a Eloá manda o histórico do navegador (memória em serverless) e ganhou o fallback em cadeia; `api/eloa-engine.js` virou `js/eloa-engine.js` e `conhecimento.py` virou `_conhecimento.py` (a Vercel tratava os dois como funções); a demonstração local de login foi removida — só entra quem o backend reconhece; o painel consulta a API quando não há stream.
 9. **Eloá multi-provedor:** além da Anthropic, fala com Gemini (grátis), Groq (grátis), OpenAI e Vercel AI Gateway; provedor escolhido pela chave existente. Gemini é o caminho adotado por ser gratuito sem cartão.
+10. **Arquivos organizados por tipo:** todo CSS em `css/`, todo JS em `js/`, `pages/` só com HTML, `assets/` em `img/` (nomes descritivos), `3d/`, `icons/`, `video/`, `team/`. `style.css`→`css/home.css`, `index.js`→`js/home.js`, `header/`→`css/`+`js/`. Caminhos de todas as páginas atualizados; referência quebrada a `script.js` em Produto removida.
 
 Commits relevantes começam em `093e664 Redesign do CSS do site inteiro`.

@@ -38,7 +38,7 @@ Abra `http://localhost:3000/` no navegador: é a **página do backend**, com tod
 
 Sem as variáveis do banco, todas as rotas respondem `503 { erro: "O banco de dados está indisponível…" }` e o login do site mostra essa mensagem — ninguém entra. Cada pedido tenta reconectar (`garantirBanco`), então basta corrigir a variável e fazer redeploy.
 
-**Projeto separado (alternativa):** `backend/api/index.js` + `backend/vercel.json` continuam aqui para publicar só o backend com Root Directory = `backend`. Nesse caso, defina `window.ELO_API_URL = 'https://seu-backend.vercel.app/api'` antes de `header/header.js` em todas as páginas do site.
+**Projeto separado (alternativa):** `backend/api/index.js` + `backend/vercel.json` continuam aqui para publicar só o backend com Root Directory = `backend`. Nesse caso, defina `window.ELO_API_URL = 'https://seu-backend.vercel.app/api'` antes de `js/header.js` em todas as páginas do site.
 
 **O que não funciona em serverless** (a página `/api` avisa): o stream em tempo real (`/api/eventos/stream` responde 501 — o painel do site então consulta `GET /api/eventos` e `/api/corridas` a cada 10 s), o bot do Telegram ouvindo `/start` e a sincronização automática das corridas — porque a Vercel não mantém um processo aberto. Tudo o resto (contas, pochetes, eventos, corridas com aprovação, envio de mensagens no Telegram) funciona. Para o tempo real, hospede em um lugar com processo contínuo (Render, Railway ou o servidor da escola) com `npm start`; o código é o mesmo.
 
@@ -161,6 +161,6 @@ Senhas com `scrypt` nativo (`scrypt$sal$chave`). A chave da pochete é guardada 
 
 ## O front
 
-- `header/header.js`: `window.EloSessao.api()` (manda o token), `window.ELO_API_URL` (`/api` publicado, `localhost:3000/api` na máquina).
-- `pages/auth.js`: cadastro/login; **só entra quem o servidor reconhece** — sem servidor, avisa e não abre sessão.
-- `pages/painel.js`: perfil e ações; `pages/painel-pochete.js`: stream ao vivo, painel de corrida (Aprovar/Recusar/Cancelar), vínculo de pochete e Telegram, simulação dos botões.
+- `js/header.js`: `window.EloSessao.api()` (manda o token), `window.ELO_API_URL` (`/api` publicado, `localhost:3000/api` na máquina).
+- `js/auth.js`: cadastro/login; **só entra quem o servidor reconhece** — sem servidor, avisa e não abre sessão.
+- `js/painel.js`: perfil e ações; `js/painel-pochete.js`: stream ao vivo, painel de corrida (Aprovar/Recusar/Cancelar), vínculo de pochete e Telegram, simulação dos botões.

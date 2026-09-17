@@ -25,11 +25,11 @@ Ou copie `api/.env.example` para `api/.env` e preencha (o arquivo não vai para 
 python api/eloa.py           # http://localhost:8000
 ```
 
-Abra o site (por exemplo `python -m http.server 8765` na raiz) e vá em **Eloá**. Em `localhost` a página aponta sozinha para `http://localhost:8000/perguntar`; no site publicado, para `/api/eloa/perguntar`. Para outro endereço, defina `window.ELOA_API_URL` antes de carregar `pages/eloa.js`.
+Abra o site (por exemplo `python -m http.server 8765` na raiz) e vá em **Eloá**. Em `localhost` a página aponta sozinha para `http://localhost:8000/perguntar`; no site publicado, para `/api/eloa/perguntar`. Para outro endereço, defina `window.ELOA_API_URL` antes de carregar `js/eloa.js`.
 
 ## Na Vercel
 
-`api/eloa.py` vira a função `/api/eloa` do mesmo projeto do site (o `vercel.json` da raiz manda `/api/eloa/*` para ela; as rotas existem com e sem esse prefixo). Dependências em `requirements.txt` na raiz. Defina `GEMINI_API_KEY` (ou outra das chaves acima) nas variáveis do projeto e faça redeploy — sem chave, modo local. `GET /api/eloa/saude` mostra `provedor` e `modelo`. Como serverless não guarda nada entre chamadas, `pages/eloa.js` manda o campo `historico` (últimas mensagens, em `sessionStorage`) e o servidor usa isso como memória da conversa.
+`api/eloa.py` vira a função `/api/eloa` do mesmo projeto do site (o `vercel.json` da raiz manda `/api/eloa/*` para ela; as rotas existem com e sem esse prefixo). Dependências em `requirements.txt` na raiz. Defina `GEMINI_API_KEY` (ou outra das chaves acima) nas variáveis do projeto e faça redeploy — sem chave, modo local. `GET /api/eloa/saude` mostra `provedor` e `modelo`. Como serverless não guarda nada entre chamadas, `js/eloa.js` manda o campo `historico` (últimas mensagens, em `sessionStorage`) e o servidor usa isso como memória da conversa.
 
 ## Dois modos
 
@@ -40,7 +40,7 @@ Abra o site (por exemplo `python -m http.server 8765` na raiz) e vá em **Eloá*
 
 O servidor troca de modo sozinho e informa em `GET /saude` (`"modo": "modelo"` ou `"local"`). Se a API do modelo falhar no meio de uma conversa, aquela pergunta cai no modo local e a próxima tenta o modelo de novo.
 
-E se o servidor Python nem estiver no ar, a página usa o motor antigo no próprio navegador (`pages/eloa-engine.js`) e tenta a API de novo a cada minuto. Ou seja: **a Eloá sempre responde**.
+E se o servidor Python nem estiver no ar, a página usa o motor antigo no próprio navegador (`js/eloa-engine.js`) e tenta a API de novo a cada minuto. Ou seja: **a Eloá sempre responde**.
 
 ## Rotas
 
@@ -70,8 +70,8 @@ O prefixo enviado ao modelo (persona + fatos) é o mesmo em todas as chamadas e 
 |---|---|
 | `eloa.py` | O servidor (FastAPI): sessões, chamada ao modelo, modo local, rotas. |
 | `_conhecimento.py` | A persona da Eloá e os fatos sobre a ELO. **Para ensinar algo novo, edite aqui** — vale para os dois modos. (O `_` impede a Vercel de tratar o arquivo como função.) |
-| `../pages/eloa-engine.js` | Motor antigo, só no navegador, usado quando o servidor está fora do ar. |
-| `../pages/eloa.js` | A conversa na página: fala com a API, guarda a sessão, mostra a resposta sendo digitada. |
+| `../js/eloa-engine.js` | Motor antigo, só no navegador, usado quando o servidor está fora do ar. |
+| `../js/eloa.js` | A conversa na página: fala com a API, guarda a sessão, mostra a resposta sendo digitada. |
 | `../requirements.txt` | `anthropic`, `fastapi`, `uvicorn` (na raiz, onde a Vercel procura). |
 
 ## Para ensinar a Eloá

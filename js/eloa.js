@@ -8,7 +8,7 @@
    com cada pergunta.
 
    Se a API estiver fora do ar, a Eloá responde com o motor local do
-   navegador (pages/eloa-engine.js): mais simples, mas nunca muda.
+   navegador (js/eloa-engine.js): mais simples, mas nunca muda.
 
    A resposta aparece sendo digitada, como numa conversa de verdade.
    ========================================================================== */
@@ -29,7 +29,7 @@
     // Tempo "pensando" antes de digitar (só no modo local; o modelo já demora o seu)
     pensando: { base: 350, porCaractere: 3, maximo: 900 },
     digitacao: { msPorCaractere: 14, maximoMs: 2600 },
-    avatar: '../assets/ChatGPT%20Image%201%20de%20set.%20de%202026,%2021_31_52.png'
+    avatar: '../assets/img/eloa-avatar.png'
   };
 
   const reduzirMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
