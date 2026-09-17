@@ -253,7 +253,7 @@ Como funciona: `package.json` da raiz declara `backend` como workspace, então o
 
 | Variável | Para quê |
 |---|---|
-| `ANTHROPIC_API_KEY` | Eloá com o modelo. Sem ela, modo local (palavras-chave). |
+| `AI_GATEWAY_API_KEY` **(já cadastrada)** ou `ANTHROPIC_API_KEY` | Eloá com o modelo. A do Vercel AI Gateway (chave `eloa-site-elo`, teto de US$ 5/mês) usa os créditos da Vercel — **exige um cartão cadastrado na conta da Vercel** para liberar os créditos gratuitos; até lá o Gateway responde 403 e a Eloá fica no modo local. Uma chave da Anthropic também serve. Sem nenhuma, modo local (palavras-chave). |
 | `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | MySQL do backend (os mesmos valores de `backend/.env`). O banco da escola precisa aceitar conexão de fora, e aceita. |
 | `ALLOWED_ORIGINS` | `*` ou o domínio do site. |
 | `SESSION_DAYS` | duração do login (padrão 30). |
@@ -271,7 +271,7 @@ Documentação completa em [api/README.md](api/README.md). O essencial:
 
 - `api/eloa.py` — servidor FastAPI. `POST /perguntar {pergunta, sessao, historico?}` → `{status, resposta_da_ia, intencao, confianca, fonte, sessao}`; `GET /saude`. As mesmas rotas existem sob `/api/eloa/…` (é assim que a Vercel chama; ver §6c). Roda com `python api/eloa.py` na porta 8000; dependências em `requirements.txt` na raiz.
 - **Memória em serverless:** a Vercel não guarda nada entre chamadas, então o cliente manda `historico` (as últimas mensagens) e o servidor usa isso como memória. Localmente a sessão em memória continua funcionando.
-- **Modo modelo:** com `ANTHROPIC_API_KEY`, chama Claude (`claude-opus-5`, `effort: low`) com `system` = persona + fatos (com `cache_control`) e o histórico da sessão (até 40 mensagens, 30 min de validade).
+- **Modo modelo:** com `ANTHROPIC_API_KEY` (direto na Anthropic) ou `AI_GATEWAY_API_KEY` (Vercel AI Gateway, mesmo SDK com `base_url` trocada e modelo `anthropic/claude-opus-5`), chama Claude (`claude-opus-5`, `effort: low`) com `system` = persona + fatos (com `cache_control`) e o histórico da sessão (até 40 mensagens, 30 min de validade). `GET /saude` diz `via: anthropic | vercel-ai-gateway`.
 - **Modo local:** sem chave ou com a API fora, reconhece o assunto por palavras-chave e responde com o fato. Troca sozinho.
 - `api/_conhecimento.py` — **a única fonte do que a Eloá sabe e de como fala.** `PERSONA` (tom, regras: não inventa, não finge ser humana, não aciona emergência, não sai do assunto, sem Markdown) e `ASSUNTOS` (id, nome, pistas, fato). Mudou algo no site → atualize o fato correspondente. (O `_` no nome impede a Vercel de tratar o arquivo como função.)
 - `pages/eloa.js` — cliente; escolhe o endereço sozinho (localhost → porta 8000; publicado → `/api/eloa`). `window.ELOA_API_URL` sobrescreve. `pages/eloa-engine.js` é o motor de fallback no navegador.
@@ -302,7 +302,7 @@ Documentação completa em [api/README.md](api/README.md). O essencial:
 | Vídeo demonstrativo | `pages/instrucoes.html` `<video>` | Gravar o vídeo novo e colocar `src`. O antigo mostrava o site velho e foi retirado. |
 | Fotos da equipe | `assets/team/` | 5 arquivos `.jpg` com os nomes do `LEIA-ME.txt`. Até lá, iniciais. |
 | Links dos artigos | `pages/referencias.html` `.article-link` | Todos `href="#"`. |
-| Chave da API | `api/.env` (local) e `ANTHROPIC_API_KEY` no projeto da Vercel | Sem ela a Eloá responde no modo local (palavras-chave), nunca fica muda. |
+| Cartão na conta da Vercel | painel da Vercel → AI Gateway | A chave do AI Gateway já está no projeto, mas a Vercel só libera os créditos com um cartão cadastrado (403 `customer_verification_required` até lá). Sem isso a Eloá responde no modo local (palavras-chave), nunca fica muda. |
 | Jogo sem a interface do gd.games | `jogo/index.html` | Exportar o jogo em HTML5 no GDevelop e copiar para a pasta `jogo/` (passo a passo no `LEIA-ME`). A página troca sozinha. |
 | Firmware da pochete | — | O backend já aceita os eventos (contrato em `backend/README.md`); falta o dispositivo mandar. Até lá, "Testar sem a pochete" no painel. |
 | Credenciais Uber e Telegram | `backend/.env` | Sem elas, os dois rodam simulados. Uber exige app aprovado (Guest Rides); Telegram é só criar o bot no @BotFather. |

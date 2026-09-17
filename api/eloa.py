@@ -27,8 +27,13 @@ id. Sessões paradas por 30 minutos são apagadas. Em serverless a memória
 não sobrevive entre chamadas, então o cliente pode mandar "historico" (as
 últimas mensagens, [{role, content}]) e ele passa a valer como a memória.
 
+Credencial (uma das duas):
+    ANTHROPIC_API_KEY    chave da Anthropic (console.anthropic.com)
+    AI_GATEWAY_API_KEY   chave do Vercel AI Gateway (usa os créditos da Vercel;
+                         o mesmo SDK, apontado para https://ai-gateway.vercel.sh)
+
 Variáveis opcionais:
-    ELOA_MODELO   modelo (padrão: claude-opus-5)
+    ELOA_MODELO   modelo (padrão: claude-opus-5; no Gateway vira anthropic/claude-opus-5)
     ELOA_ESFORCO  low | medium | high (padrão: low; chat curto não precisa de mais)
     ELOA_ORIGENS  origens permitidas no CORS, separadas por vírgula (padrão: *)
 """
@@ -66,8 +71,13 @@ from pydantic import BaseModel, Field
 # _conhecimento.py: o "_" impede a Vercel de tratar o arquivo como uma função própria
 from _conhecimento import ASSUNTOS, CONVERSA_CURTA, NAO_SEI, PERSONA, texto_dos_fatos
 
-VERSAO = "2.0.0"
+VERSAO = "2.1.0"
+# Sem chave da Anthropic mas com a do Vercel AI Gateway, o mesmo SDK fala com o
+# Gateway (ids de modelo lá são "provedor/modelo").
+GATEWAY = bool(os.environ.get("AI_GATEWAY_API_KEY")) and not os.environ.get("ANTHROPIC_API_KEY")
 MODELO = os.environ.get("ELOA_MODELO", "claude-opus-5")
+if GATEWAY and "/" not in MODELO:
+    MODELO = "anthropic/" + MODELO
 ESFORCO = os.environ.get("ELOA_ESFORCO", "low")
 VALIDADE_SESSAO = 30 * 60          # segundos
 MAX_TURNOS = 40                    # mensagens guardadas por sessão (user + assistant)
@@ -124,7 +134,10 @@ _modelo_indisponivel_ate = 0.0     # depois de erro de credencial, evita bater n
 def cliente() -> anthropic.Anthropic:
     global _cliente
     if _cliente is None:
-        _cliente = anthropic.Anthropic(timeout=45.0, max_retries=1)
+        if GATEWAY:
+            _cliente = anthropic.Anthropic(api_key=os.environ["AI_GATEWAY_API_KEY"], base_url="https://ai-gateway.vercel.sh", timeout=45.0, max_retries=1)
+        else:
+            _cliente = anthropic.Anthropic(timeout=45.0, max_retries=1)
     return _cliente
 
 
@@ -285,7 +298,7 @@ rotas = APIRouter()
 @rotas.get("/")
 @rotas.get("/saude")
 def saude():
-    return {"ok": True, "versao": VERSAO, "modo": "modelo" if modelo_disponivel() else "local", "modelo": MODELO, "sessoes": len(_sessoes)}
+    return {"ok": True, "versao": VERSAO, "modo": "modelo" if modelo_disponivel() else "local", "modelo": MODELO, "via": "vercel-ai-gateway" if GATEWAY else "anthropic", "sessoes": len(_sessoes)}
 
 
 @rotas.post("/perguntar")
@@ -324,8 +337,8 @@ app.include_router(rotas, prefix="/api/eloa")
 
 # Sem credencial nenhuma, nem tenta o modelo: responde no modo local direto
 _perfil = os.path.join(os.path.expanduser("~"), ".config", "anthropic")
-if not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN") or os.path.isdir(_perfil)):
-    log.warning("ANTHROPIC_API_KEY não definida e nenhum perfil do 'ant auth login': a Eloá responde no modo local.")
+if not (GATEWAY or os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN") or os.path.isdir(_perfil)):
+    log.warning("Nem ANTHROPIC_API_KEY nem AI_GATEWAY_API_KEY definidas (e nenhum perfil do 'ant auth login'): a Eloá responde no modo local.")
     _modelo_indisponivel_ate = float("inf")
 
 
