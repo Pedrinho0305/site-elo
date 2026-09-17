@@ -3,11 +3,12 @@
    ---------------------------------------------------------------------------
    Só funciona com sessão do backend (token). Faz quatro coisas:
      1. ouve GET /api/eventos/stream (SSE) e mostra cada aviso na hora:
-        toast, tile "Último alerta", bateria e localização;
+        toast, tile "Último alerta", bateria e localização; se o servidor
+        não tem stream (serverless, como na Vercel), consulta a cada 10 s;
      2. mostra a corrida pendente com Aprovar / Recusar e acompanha o status;
      3. vincula pochetes (gera a chave) e o Telegram;
      4. simula os botões da pochete para testar.
-   Sem token (demonstração local), a seção explica e para por aqui.
+   Sem token (sessão antiga, sem login no servidor), a seção explica e para por aqui.
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
   const sessao = window.EloSessao?.ler();
@@ -18,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!secao) return;
 
   if (!sessao?.token) {
-    secao.querySelector('.pochete-grid').innerHTML = '<div class="panel"><h3>Precisa do servidor</h3><p class="muted">Esta parte fala com o backend (pasta <code>backend</code>). Suba o servidor com <code>npm start</code>, saia e entre de novo para vincular a pochete e receber os avisos ao vivo.</p></div>';
+    secao.querySelector('.pochete-grid').innerHTML = '<div class="panel"><h3>Precisa entrar de novo</h3><p class="muted">Esta parte fala com o servidor da ELO e a sua sessão não tem um login nele. Saia e entre de novo para vincular a pochete e receber os avisos.</p></div>';
     return;
   }
 
@@ -169,7 +170,41 @@ document.addEventListener('DOMContentLoaded', () => {
       if (['a_caminho', 'em_andamento', 'concluida', 'sem_motorista', 'erro'].includes(corrida.status)) toast('corrida', titulo, corrida.motorista || corrida.erro || '');
     });
     fonte.addEventListener('telegram', () => { telegram.vinculado = true; renderTelegram(); toast('telegram', 'Telegram vinculado', 'Os avisos vão chegar lá também.'); });
-    fonte.onerror = () => { /* o EventSource reconecta sozinho */ };
+    fonte.onerror = () => {
+      // Queda de rede: o EventSource reconecta sozinho. Fechado de vez (o
+      // servidor respondeu 501, sem stream em serverless): passa a consultar.
+      if (fonte.readyState === EventSource.CLOSED) consultar();
+    };
+  }
+
+  /* Sem stream, o painel pergunta ao servidor a cada 10 s o que mudou:
+     eventos novos viram avisos, a corrida ativa é atualizada. */
+  let consultando = false;
+  let ultimoEventoId = null;
+  function consultar() {
+    if (consultando) return;
+    consultando = true;
+    const tique = async () => {
+      if (document.hidden) return;
+      try {
+        const { eventos } = await api('eventos?limite=10');
+        // a primeira consulta só marca de onde começar (nada de reavisar o que é antigo)
+        const novos = ultimoEventoId == null ? [] : eventos.filter(e => e.id > ultimoEventoId);
+        ultimoEventoId = Math.max(ultimoEventoId ?? 0, ...eventos.map(e => e.id));
+        for (const ev of novos.reverse()) {
+          const p = pochetes.find(x => x.id === ev.pochete_id) || {};
+          const nome = ev.nome_idoso || p.nome_idoso || 'A pochete';
+          if (ev.tipo === 'emergencia') { marcarAlerta('Emergência', `${nome}, ${hora(ev.criado_em)}`, 'tile--red'); toast('emergencia', `Emergência: ${nome}`, `Botão vermelho apertado às ${hora(ev.criado_em)}. O SAMU foi acionado.`, 0); }
+          if (ev.tipo === 'transporte') { marcarAlerta('Pedido de carro', `${nome}, ${hora(ev.criado_em)}`, 'tile--orange'); toast('transporte', `${nome} pediu um carro`, 'Aprove ou recuse no painel de corrida, logo acima dos números.', 12000); }
+          if (ev.tipo === 'bateria' && ev.dados?.bateria <= 20) { marcarAlerta('Bateria baixa', `${ev.dados.bateria}%, ${hora(ev.criado_em)}`, 'tile--orange'); toast('bateria', 'Bateria baixa', `A pochete de ${nome} está com ${ev.dados.bateria}%.`); }
+          if (ev.tipo === 'teste') toast('teste', 'Teste recebido', `A pochete de ${nome} está funcionando.`);
+        }
+        await carregarPochetes();
+        await carregarCorridas();
+      } catch (e) { console.warn('consulta', e.message); }
+    };
+    tique();
+    setInterval(tique, 10_000);
   }
 
   /* ---------------------------------------------------------------------

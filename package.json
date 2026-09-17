@@ -1,0 +1,12 @@
+{
+  "name": "site-elo",
+  "private": true,
+  "description": "Site da ELO: front estático + funções da Vercel (api/eloa.py e api/backend.js)",
+  "type": "module",
+  "workspaces": [
+    "backend"
+  ],
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -11,8 +11,8 @@ Express 5 + MySQL. É o servidor que liga a pochete, o cuidador e os serviços e
 ## Rodar
 
 ```bash
+npm install                 # na raiz do repositório (backend é um workspace; as dependências vão para node_modules da raiz)
 cd backend
-npm install
 copy .env.example .env      # Windows (cp no Linux/Mac) — preencha o MySQL
 npm start                   # http://localhost:3000/api
 npm run dev                 # reinicia sozinho quando o código muda
@@ -30,14 +30,17 @@ Abra `http://localhost:3000/` no navegador: é a **página do backend**, com tod
 
 ## Deploy na Vercel
 
-A pasta `backend` já está preparada: `api/index.js` exporta o app Express como função serverless e `vercel.json` manda todas as rotas para ela.
+**Caminho padrão: junto com o site, no mesmo projeto.** A raiz do repositório tem `api/backend.js`, que importa `server.js` e o entrega como função serverless; o `vercel.json` da raiz manda `/api` e `/api/*` (menos `/api/eloa/*`, que é da Eloá) para ela, e o `package.json` da raiz declara `backend` como workspace para a Vercel instalar `express`, `cors` e `mysql2`. O front chama `/api` no mesmo domínio — nada de URL fixa.
 
-1. Na Vercel, **Add New → Project**, importe o repositório e defina **Root Directory = `backend`**.
-2. Em *Environment Variables*, copie as do `.env` (`DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `ALLOWED_ORIGINS` com o domínio do site e, se tiver, as da Uber e do Telegram). O `.env` não sobe (`.vercelignore`).
-3. Deploy. A URL raiz mostra a página do backend; as rotas ficam em `https://seu-projeto.vercel.app/api/...`.
-4. No site, aponte o front para lá: antes de `header/header.js`, adicione `<script>window.ELO_API_URL = 'https://seu-projeto.vercel.app/api';</script>` em cada página (ou troque o padrão em `header.js`).
+1. Projeto da Vercel com **Root Directory = raiz** do repositório (Framework Preset: Other).
+2. Em *Environment Variables*, copie as do `.env`: `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `ALLOWED_ORIGINS`, `SESSION_DAYS` e, se tiver, as da Uber e do Telegram. O `.env` não sobe.
+3. Deploy (push na `main`). Conferir em `https://seu-dominio/api`: é a página do backend, com o chip do banco.
 
-**O que não funciona em serverless** (a página raiz avisa): o stream em tempo real (`/api/eventos/stream` responde 501), o bot do Telegram ouvindo `/start` e a sincronização automática das corridas — porque a Vercel não mantém um processo aberto. Tudo o resto (contas, pochetes, eventos, corridas com aprovação, envio de mensagens no Telegram) funciona. Para o tempo real, hospede em um lugar com processo contínuo (Render, Railway ou o servidor da escola) com `npm start`; o código é o mesmo.
+Sem as variáveis do banco, todas as rotas respondem `503 { erro: "O banco de dados está indisponível…" }` e o login do site mostra essa mensagem — ninguém entra. Cada pedido tenta reconectar (`garantirBanco`), então basta corrigir a variável e fazer redeploy.
+
+**Projeto separado (alternativa):** `backend/api/index.js` + `backend/vercel.json` continuam aqui para publicar só o backend com Root Directory = `backend`. Nesse caso, defina `window.ELO_API_URL = 'https://seu-backend.vercel.app/api'` antes de `header/header.js` em todas as páginas do site.
+
+**O que não funciona em serverless** (a página `/api` avisa): o stream em tempo real (`/api/eventos/stream` responde 501 — o painel do site então consulta `GET /api/eventos` e `/api/corridas` a cada 10 s), o bot do Telegram ouvindo `/start` e a sincronização automática das corridas — porque a Vercel não mantém um processo aberto. Tudo o resto (contas, pochetes, eventos, corridas com aprovação, envio de mensagens no Telegram) funciona. Para o tempo real, hospede em um lugar com processo contínuo (Render, Railway ou o servidor da escola) com `npm start`; o código é o mesmo.
 
 ## Uber e Telegram: real ou simulado
 
@@ -150,7 +153,7 @@ Senhas com `scrypt` nativo (`scrypt$sal$chave`). A chave da pochete é guardada 
 | Arquivo | O que é |
 |---|---|
 | `server.js` | rotas, banco, regras (o "coração" é `tratarEvento`); exporta o app |
-| `api/index.js` + `vercel.json` | deploy na Vercel (função serverless) |
+| `api/index.js` + `vercel.json` | deploy na Vercel como projeto separado (o padrão é `../api/backend.js`, junto com o site) |
 | `uber.js` | cliente da Guest Rides API + simulação |
 | `telegram.js` | envio de mensagens + polling do `/start CÓDIGO` + simulação |
 | `eventos.js` | canal SSE por cuidador |
@@ -158,6 +161,6 @@ Senhas com `scrypt` nativo (`scrypt$sal$chave`). A chave da pochete é guardada 
 
 ## O front
 
-- `header/header.js`: `window.EloSessao.api()` (manda o token), `window.ELO_API_URL`.
-- `pages/auth.js`: cadastro/login; sem servidor cai na demonstração local.
+- `header/header.js`: `window.EloSessao.api()` (manda o token), `window.ELO_API_URL` (`/api` publicado, `localhost:3000/api` na máquina).
+- `pages/auth.js`: cadastro/login; **só entra quem o servidor reconhece** — sem servidor, avisa e não abre sessão.
 - `pages/painel.js`: perfil e ações; `pages/painel-pochete.js`: stream ao vivo, painel de corrida (Aprovar/Recusar/Cancelar), vínculo de pochete e Telegram, simulação dos botões.

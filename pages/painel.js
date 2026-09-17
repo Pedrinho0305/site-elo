@@ -1,7 +1,7 @@
-// Painel de demonstração: sem servidor. Usa o nome guardado no cadastro e
-// responde às ações rápidas com uma confirmação na tela.
+// Painel do cuidador: saudação, ações rápidas e "Meu perfil". A parte que
+// fala com a pochete e o servidor está em painel-pochete.js.
 document.addEventListener('DOMContentLoaded', () => {
-  // Sem sessão, o painel não faz sentido: volta para o login
+  // Sem sessão (login no backend), o painel não faz sentido: volta para o login
   const session = window.EloSessao?.ler();
   if (!session) { window.location.replace('login.html'); return; }
 
@@ -48,17 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.getContext('2d').drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
         session.foto = canvas.toDataURL('image/jpeg', .85);
         window.EloSessao.entrar(session);
-        if (session.token) {
-          // backend: guarda a foto na conta
-          window.EloSessao.api('me', { method: 'PATCH', body: { foto: session.foto } }).catch(err => {
-            if (perfilStatus) { perfilStatus.textContent = 'A foto ficou só neste navegador: ' + err.message; perfilStatus.classList.add('is-visible'); }
-          });
-        } else {
-          try {
-            const perfil = JSON.parse(localStorage.getItem('elo-perfil'));
-            if (perfil && perfil.email === session.email) { perfil.foto = session.foto; localStorage.setItem('elo-perfil', JSON.stringify(perfil)); }
-          } catch {}
-        }
+        // guarda a foto na conta, no backend
+        window.EloSessao.api('me', { method: 'PATCH', body: { foto: session.foto } }).catch(err => {
+          if (perfilStatus) { perfilStatus.textContent = 'A foto ficou só neste navegador: ' + err.message; perfilStatus.classList.add('is-visible'); }
+        });
         renderAvatar();
         document.querySelectorAll('.profile .profile-avatar').forEach(a => { a.innerHTML = `<img src="${session.foto}" alt="">`; });
         if (perfilStatus) { perfilStatus.textContent = 'Foto atualizada.'; perfilStatus.classList.add('is-visible'); }

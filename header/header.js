@@ -1,5 +1,6 @@
 // Cabeçalho: tema, menu mobile e perfil do cuidador.
-// A sessão fica no navegador (localStorage 'elo-sessao': { nome, email, foto }).
+// A sessão fica no navegador (localStorage 'elo-sessao': { nome, email, foto, token }).
+// Só existe sessão com token, ou seja, depois de um login no backend.
 // Quem está logado vê um chip de perfil no lugar de "Entrar", em todas as páginas.
 document.addEventListener('DOMContentLoaded', () => {
   const themeToggle = document.getElementById('themeToggle');
@@ -103,13 +104,22 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* Sessão: uma API mínima compartilhada por login, cadastro e painel.
-   { nome, email, foto, token? } — o token existe quando o login foi feito
-   no backend (backend/server.js); sem token é a demonstração local. */
-window.ELO_API_URL = window.ELO_API_URL || 'http://localhost:3000/api';
+   { nome, email, foto, token } — o token vem do backend (backend/server.js)
+   e é obrigatório: sem ele não há sessão (só entra quem está cadastrado).
+
+   Endereço do backend: rodando o site na máquina (localhost ou arquivo
+   aberto direto) é o npm start na porta 3000; publicado, é /api no mesmo
+   domínio (função api/backend.js). window.ELO_API_URL, definido antes deste
+   arquivo, sobrescreve os dois. */
+window.ELO_API_URL = window.ELO_API_URL
+  || (/^(localhost|127\.0\.0\.1|\[::1\]|)$/.test(location.hostname) ? 'http://localhost:3000/api' : '/api');
 
 window.EloSessao = {
   ler() {
-    try { return JSON.parse(localStorage.getItem('elo-sessao')); } catch { return null; }
+    let s = null;
+    try { s = JSON.parse(localStorage.getItem('elo-sessao')); } catch { s = null; }
+    if (s && !s.token) { localStorage.removeItem('elo-sessao'); s = null; } // sessão antiga, sem login no servidor
+    return s;
   },
   entrar(dados) {
     localStorage.setItem('elo-sessao', JSON.stringify(dados));

@@ -8,19 +8,24 @@ um modo local por palavras-chave responde com os mesmos fatos: a Eloá
 nunca fica muda.
 
 Rodar:
-    pip install -r api/requirements.txt
+    pip install -r requirements.txt          (na raiz do projeto)
     set ANTHROPIC_API_KEY=sk-ant-...        (Windows)  |  export ... (Linux/Mac)
     python api/eloa.py                       (porta 8000)
     set PORT=3000 & python api/eloa.py       (outra porta)
 
+Na Vercel este arquivo vira a função /api/eloa (o vercel.json da raiz manda
+/api/eloa/* para cá). As mesmas rotas existem com e sem o prefixo /api/eloa.
+
 Rotas (mesmo contrato do servidor antigo):
-    POST /perguntar  { "pergunta": "...", "sessao": "id-opcional" }
+    POST /perguntar  { "pergunta": "...", "sessao": "id-opcional", "historico": [...] }
                      -> { status: "sucesso", resposta_da_ia, intencao, confianca, fonte, sessao }
     GET  /saude      -> { ok, versao, modo: "modelo" | "local", sessoes }
 
 Sessão: mande o mesmo "sessao" em todas as perguntas de uma conversa e a
 Eloá lembra do que foi dito. Sem "sessao", o servidor cria uma e devolve o
-id. Sessões paradas por 30 minutos são apagadas.
+id. Sessões paradas por 30 minutos são apagadas. Em serverless a memória
+não sobrevive entre chamadas, então o cliente pode mandar "historico" (as
+últimas mensagens, [{role, content}]) e ele passa a valer como a memória.
 
 Variáveis opcionais:
     ELOA_MODELO   modelo (padrão: claude-opus-5)
@@ -33,10 +38,15 @@ import logging
 import os
 import random
 import re
+import sys
 import threading
 import time
 import unicodedata
 import uuid
+
+# O módulo de conhecimento mora ao lado deste arquivo; garante o import
+# também quando o processo começa em outra pasta (Vercel, uvicorn na raiz).
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Um api/.env com ANTHROPIC_API_KEY=... também serve (sem dependência extra)
 _env = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
@@ -49,11 +59,12 @@ if os.path.exists(_env):
                 os.environ.setdefault(_k.strip(), _v.strip().strip('"').strip("'"))
 
 import anthropic
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from conhecimento import ASSUNTOS, CONVERSA_CURTA, NAO_SEI, PERSONA, texto_dos_fatos
+# _conhecimento.py: o "_" impede a Vercel de tratar o arquivo como uma função própria
+from _conhecimento import ASSUNTOS, CONVERSA_CURTA, NAO_SEI, PERSONA, texto_dos_fatos
 
 VERSAO = "2.0.0"
 MODELO = os.environ.get("ELOA_MODELO", "claude-opus-5")
@@ -256,23 +267,47 @@ app.add_middleware(
 )
 
 
+class Mensagem(BaseModel):
+    role: str = Field(pattern=r"^(user|assistant)$")
+    content: str = Field(min_length=1, max_length=4000)
+
+
 class Pergunta(BaseModel):
     pergunta: str = Field(min_length=1, max_length=4000)
     sessao: str | None = None
+    # memória guardada no navegador (serverless não lembra entre chamadas)
+    historico: list[Mensagem] | None = Field(default=None, max_length=MAX_TURNOS)
 
 
-@app.get("/saude")
+rotas = APIRouter()
+
+
+@rotas.get("/")
+@rotas.get("/saude")
 def saude():
     return {"ok": True, "versao": VERSAO, "modo": "modelo" if modelo_disponivel() else "local", "modelo": MODELO, "sessoes": len(_sessoes)}
 
 
-@app.post("/perguntar")
+@rotas.post("/perguntar")
 def perguntar(dados: Pergunta):
     pergunta = dados.pergunta.strip()
     if not pergunta:
         return {"status": "erro", "mensagem": 'O campo "pergunta" precisa ser um texto.'}
 
     id_sessao, sessao = obter_sessao(dados.sessao)
+    if dados.historico is not None:
+        # o cliente é a fonte da memória: user/assistant alternados, começando em user
+        mensagens = [m for m in dados.historico if m.content.strip()]
+        while mensagens and mensagens[0].role != "user":
+            mensagens.pop(0)
+        limpo: list[dict] = []
+        for m in mensagens:
+            if limpo and limpo[-1]["role"] == m.role:
+                continue
+            limpo.append({"role": m.role, "content": m.content.strip()})
+        if limpo and limpo[-1]["role"] == "user":
+            limpo.pop()
+        sessao.mensagens = limpo
 
     if modelo_disponivel():
         texto = responder_com_modelo(sessao, pergunta)
@@ -283,13 +318,20 @@ def perguntar(dados: Pergunta):
     return {"status": "sucesso", "resposta_da_ia": texto, "intencao": intencao, "confianca": confianca, "fonte": "local", "sessao": id_sessao}
 
 
+# As mesmas rotas na raiz (python api/eloa.py) e sob /api/eloa (Vercel)
+app.include_router(rotas)
+app.include_router(rotas, prefix="/api/eloa")
+
+# Sem credencial nenhuma, nem tenta o modelo: responde no modo local direto
+_perfil = os.path.join(os.path.expanduser("~"), ".config", "anthropic")
+if not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN") or os.path.isdir(_perfil)):
+    log.warning("ANTHROPIC_API_KEY não definida e nenhum perfil do 'ant auth login': a Eloá responde no modo local.")
+    _modelo_indisponivel_ate = float("inf")
+
+
 if __name__ == "__main__":
     import uvicorn
 
     porta = int(os.environ.get("PORT", "8000"))
-    _perfil = os.path.join(os.path.expanduser("~"), ".config", "anthropic")
-    if not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN") or os.path.isdir(_perfil)):
-        log.warning("ANTHROPIC_API_KEY não definida e nenhum perfil do 'ant auth login': a Eloá responde no modo local.")
-        _modelo_indisponivel_ate = float("inf")
     log.info("Eloá respondendo em http://localhost:%s/perguntar (modelo: %s, esforço: %s)", porta, MODELO, ESFORCO)
     uvicorn.run(app, host="0.0.0.0", port=porta, log_level="warning")

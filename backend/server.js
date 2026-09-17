@@ -44,10 +44,12 @@
 
    Erros: { erro: "mensagem em português" } com o status HTTP certo.
 
-   VERCEL: o app é exportado (export default) e api/index.js o entrega como
-   função serverless; vercel.json manda todas as rotas para lá. Na Vercel não
-   há processo contínuo, então o stream SSE, o polling do Telegram e a
+   VERCEL: o app é exportado (export default) e uma função serverless o
+   entrega — api/backend.js na raiz do site (mesmo projeto do front, rotas em
+   /api/*) ou backend/api/index.js (projeto só do backend). Na Vercel não há
+   processo contínuo, então o stream SSE, o polling do Telegram e a
    sincronização periódica com a Uber ficam desligados (veja a rota /).
+   O painel do site faz polling quando o stream não existe.
    ========================================================================== */
 import crypto from 'node:crypto';
 import { promisify } from 'node:util';
@@ -85,16 +87,25 @@ const scrypt = promisify(crypto.scrypt);
    Banco
    ------------------------------------------------------------------------ */
 let pool;
+let conectando = null;
+
+// Uma tentativa por vez; quem chegar enquanto conecta espera a mesma promessa
+function garantirBanco() {
+  if (pool) return Promise.resolve(pool);
+  conectando ??= conectarBanco().finally(() => { conectando = null; });
+  return conectando;
+}
 
 async function conectarBanco() {
-  const servidor = await mysql.createConnection({ ...CONFIG.banco, database: undefined });
+  const servidor = await mysql.createConnection({ ...CONFIG.banco, database: undefined, connectTimeout: 10_000 });
   await servidor.query(`CREATE DATABASE IF NOT EXISTS \`${CONFIG.banco.database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
   await servidor.end();
 
-  pool = mysql.createPool({ ...CONFIG.banco, waitForConnections: true, connectionLimit: 10, charset: 'utf8mb4', timezone: 'Z' });
+  const novo = mysql.createPool({ ...CONFIG.banco, waitForConnections: true, connectionLimit: NA_VERCEL ? 2 : 10, charset: 'utf8mb4', timezone: 'Z', connectTimeout: 10_000 });
   // NOW() e CURRENT_TIMESTAMP em UTC, igual ao que o driver lê (timezone: 'Z')
-  pool.on('connection', c => c.query("SET time_zone = '+00:00'"));
-  await pool.query("SET time_zone = '+00:00'");
+  novo.on('connection', c => c.query("SET time_zone = '+00:00'"));
+  await novo.query("SET time_zone = '+00:00'");
+  pool = novo;
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS cuidadores (
@@ -341,6 +352,14 @@ const app = express();
 app.use(cors({ origin: CONFIG.origens.includes('*') ? true : CONFIG.origens }));
 app.use(express.json({ limit: '1mb' }));
 
+// Sem banco não há rota que funcione: tenta conectar (de novo, se a primeira
+// vez falhou — comum em serverless) e responde 503 honesto se não der.
+app.use('/api', async (req, _res, next) => {
+  if (req.path === '/') return next(); // a página de estado mostra o erro do banco por conta própria
+  try { await garantirBanco(); next(); }
+  catch (e) { console.error('[banco]', e.code || '', e.message); next(erro(503, 'O banco de dados está indisponível. Tente de novo em instantes.')); }
+});
+
 async function carregarPorToken(token) {
   if (!/^[a-f0-9]{64}$/.test(token || '')) throw erro(401, 'Faça login para continuar.');
   const [linhas] = await pool.query(
@@ -392,7 +411,7 @@ async function corridaDoCuidador(req) {
 /* ---- página inicial: o backend inteiro numa tela ---- */
 const ROTAS = [
   ['Servidor', [
-    ['GET', '/', 'Esta página. Com Accept: application/json, devolve o mesmo em JSON.'],
+    ['GET', '/', 'Esta página (no site publicado, /api). Com Accept: application/json, devolve o mesmo em JSON.'],
     ['GET', '/api/saude', 'Estado do banco, da Uber e do Telegram.'],
   ]],
   ['Contas do cuidador', [
@@ -433,7 +452,7 @@ const ROTAS = [
 
 async function estadoServidor() {
   let banco = 'conectado';
-  try { await pool.query('SELECT 1'); } catch (e) { banco = 'indisponível: ' + (e.code || e.message); }
+  try { await (await garantirBanco()).query('SELECT 1'); } catch (e) { banco = 'indisponível: ' + (e.code || e.message); }
   return {
     nome: 'ELO backend',
     versao: '1.1.0',
@@ -449,7 +468,7 @@ async function estadoServidor() {
 
 const escapar = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-app.get('/', async (req, res, next) => {
+app.get(['/', '/api'], async (req, res, next) => {
   try {
     const estado = await estadoServidor();
     if (req.accepts(['html', 'json']) === 'json') return res.json({ ...estado, rotas: ROTAS });
@@ -493,7 +512,7 @@ app.get('/', async (req, res, next) => {
     ${chip('Node', estado.node, 'ok')}
   </div>
   ${grupos}
-  ${NA_VERCEL ? `<div class="aviso"><b>Rodando na Vercel.</b> Funções serverless não mantêm processo aberto: o stream em tempo real (<code>/api/eventos/stream</code>), o bot do Telegram (que precisa ficar ouvindo o <code>/start</code>) e a sincronização automática das corridas ficam desligados. Cadastro, login, pochetes, eventos, corridas e o envio de mensagens funcionam normalmente. Para o tempo real, rode o servidor num lugar com processo contínuo (Render, Railway, servidor da escola).</div>` : ''}
+  ${NA_VERCEL ? `<div class="aviso"><b>Rodando na Vercel.</b> Funções serverless não mantêm processo aberto: o stream em tempo real (<code>/api/eventos/stream</code>), o bot do Telegram (que precisa ficar ouvindo o <code>/start</code>) e a sincronização automática das corridas ficam desligados; o painel do site consulta o servidor a cada 10 s no lugar do stream. Cadastro, login, pochetes, eventos, corridas e o envio de mensagens funcionam normalmente. Para o tempo real, rode o servidor num lugar com processo contínuo (Render, Railway, servidor da escola).</div>` : ''}
   <footer>Mesmo contrato em <code>backend/README.md</code>. Saúde em <a href="/api/saude">/api/saude</a>. Esta página em JSON: <code>curl -H "Accept: application/json" /</code></footer>
 </main></body></html>`);
   } catch (e) { next(e); }
@@ -797,7 +816,7 @@ app.post('/api/telegram/teste', autenticar, async (req, res, next) => {
 app.use((req, res) => res.status(404).json({ erro: `Rota não encontrada: ${req.method} ${req.path}` }));
 
 app.use((e, _req, res, _next) => {
-  if (e instanceof TypeError && /pool/.test(e.message) && !pool) return res.status(503).json({ erro: 'O banco de dados não está configurado neste servidor.' });
+  if (e instanceof TypeError && !pool) return res.status(503).json({ erro: 'O banco de dados não está configurado neste servidor.' });
   if (e.type === 'entity.parse.failed') return res.status(400).json({ erro: 'Envie um JSON válido.' });
   if (e.type === 'entity.too.large') return res.status(413).json({ erro: 'Pedido grande demais.' });
   if (e.status) return res.status(e.status).json({ erro: e.message });
@@ -813,12 +832,12 @@ app.use((e, _req, res, _next) => {
    Sobe
    ------------------------------------------------------------------------ */
 try {
-  await conectarBanco();
+  await garantirBanco();
 } catch (e) {
   console.error('Não consegui conectar ao MySQL:', e.code || '', e.message);
   console.error('Confira DB_HOST, DB_USER, DB_PASSWORD e DB_NAME no backend/.env e se o MySQL está rodando.');
   if (!NA_VERCEL) process.exit(1);
-  // na Vercel o app segue no ar para a rota / mostrar o erro do banco
+  // na Vercel o app segue no ar: cada pedido tenta conectar de novo e a rota / mostra o erro
 }
 
 // Tarefas contínuas: só onde existe um processo de verdade (não na Vercel)

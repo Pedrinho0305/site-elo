@@ -127,17 +127,23 @@ pages/
   quem-somos.html/.css/.js
   referencias.html/.css/.js
   jogo.html/.css/.js
-  eloa.html/.css/.js
+  eloa.html/.css/.js · eloa-engine.js    (o engine é o fallback da Eloá no navegador)
   login.html · cadastro.html · auth.css · auth.js
-  painel.html · relatorios.html · painel.css · painel.js
-api/
-  eloa.py · conhecimento.py · requirements.txt · .env.example · README.md    API da Eloá em Python
-  eloa-engine.js                                                             motor antigo, fallback no navegador
+  painel.html · relatorios.html · painel.css · painel.js · painel-pochete.js
+api/                                     FUNÇÕES DA VERCEL (tudo aqui vira rota /api/…; arquivos com "_" na frente não)
+  eloa.py                                API da Eloá em Python (FastAPI) → /api/eloa
+  _conhecimento.py                       o que a Eloá sabe e como fala (módulo, não é função)
+  backend.js                             entrega backend/server.js como função → /api/*
+  .env.example · README.md
 backend/
-  server.js · package.json · .env.example · README.md                        login e cadastro (Express 5 + MySQL)
+  server.js · uber.js · telegram.js · eventos.js · package.json · .env.example · README.md   contas, pochete, Uber, Telegram (Express 5 + MySQL)
+  api/index.js · vercel.json             só para publicar o backend como projeto separado (não é o caminho padrão)
+vercel.json · package.json · requirements.txt · .vercelignore   deploy: rotas das funções, dependências Node (workspace backend) e Python
 jogo/LEIA-ME.txt                         onde colocar a exportação HTML5 do jogo (jogo/index.html)
 assets/                                  imagens, favicon, modelo 3D (.glb, 60 MB), vídeo antigo (77 MB), team/ (fotos da equipe)
 ```
+
+**Não coloque arquivo do site em `api/`.** A Vercel transforma cada `.js`/`.py` dessa pasta numa função serverless — um script do navegador ali nunca chega ao navegador (foi o que deixou a Eloá muda no primeiro deploy). Módulos auxiliares das funções começam com `_`.
 
 **Ordem dos `<link>` em toda página:** fontes do Google → `header/header.css` → CSS da página → `reveal.css`. **Ordem dos scripts:** JS da página → `header/header.js` → `reveal.js` (auth e painel invertem: `header.js` antes do JS da página, porque usam `window.EloSessao`). Todos com `defer`. Cache-bust: `?v=6` — suba o número quando mudar CSS.
 
@@ -149,7 +155,7 @@ Toda página tem `<html lang="pt-BR" data-theme="dark">` para não piscar claro 
 2. Adicione o link dela no `.nav-links` de **todas** as outras páginas (o menu é estático, não há include).
 3. Crie `pages/nome.css` seguindo o padrão: comentário de abertura explicando o conceito da página, seções numeradas, responsivo no fim. Use só tokens.
 4. Se a primeira seção for de classe nova, adicione-a à lista de "já visível" em `reveal.css`.
-5. Ensine a Eloá sobre a página em `api/conhecimento.py` (assunto `site`).
+5. Ensine a Eloá sobre a página em `api/_conhecimento.py` (assunto `site`).
 
 ---
 
@@ -192,18 +198,19 @@ Toda página tem `<html lang="pt-BR" data-theme="dark">` para não piscar claro 
 ### Eloá (`pages/eloa.*`)
 - `main.ai-shell` em duas colunas: `.eloa-presence` (sticky; avatar recortado em círculo com `object-position: 50% 12%`, status "Online agora", `.suggestions` que enviam ao clicar) e `.eloa-console` (`.chat-box` + `.composer`).
 - Mensagens: `.message.user` (gradiente, à direita) e `.ai-message-row > .response-avatar + .message.ai`. Estados: `.is-loading` (três pontos) e `.is-typing` (cursor).
-- `eloa.js` fala com a API Python (ver §7), guarda `eloa-sessao` em `sessionStorage` e cai no `api/eloa-engine.js` se o servidor não responder.
+- `eloa.js` fala com a API Python (ver §7): em `localhost` usa `http://localhost:8000/perguntar`, publicado usa `/api/eloa/perguntar` (mesmo domínio). Guarda `eloa-sessao` e `eloa-historico` (últimas 40 mensagens) em `sessionStorage` e manda o histórico em cada pergunta — é assim que ela lembra da conversa mesmo em serverless. Se a API não responder, cai no `pages/eloa-engine.js` (motor no navegador). **A Eloá sempre responde alguma coisa**: modelo → modo local do servidor → engine do navegador → mensagem de "sem conexão".
 - Esta página carrega `style.css` da home — por isso toda regra da home é escopada (`.hero .hero-text`, não `.hero-text`).
 
 ### Login e Cadastro (`pages/login.html`, `cadastro.html`, `auth.*`)
 - Cabeçalho próprio (`.auth-header`: logo, "Precisa de ajuda? Fale conosco", tema). Sem rodapé.
 - `.auth-shell`: `.auth-welcome.night` (título, foto do produto flutuando, 3 pontos) + `.auth-card` (formulário). Campos com `.password-field` + `.password-toggle`, checkbox customizado `.auth-check`, `.photo-picker` no cadastro (recorta a foto em quadrado 160 px e guarda como data-URL).
-- `auth.js`: valida (senhas iguais via `setCustomValidity`) e chama o **backend** (`POST /api/cadastro` ou `/api/login`, ver §6b). Se o backend responder com erro (409 email já usado, 401 senha errada), mostra a mensagem. Se o backend não estiver no ar, cai na **demonstração local** (`elo-perfil` em `localStorage`, nome derivado do email). Em qualquer caso abre a sessão (`window.EloSessao.entrar`) e vai para `painel.html`. Quem já está logado é redirecionado.
+- `auth.js`: valida (senhas iguais via `setCustomValidity`) e chama o **backend** (`POST /api/cadastro` ou `/api/login`, ver §6b). **Só entra quem está cadastrado no backend.** Se ele responder com erro (409 email já usado, 401 email/senha incorretos, 503 banco fora), mostra a mensagem; se nem for alcançado, mostra "Não consegui falar com o servidor da ELO" — em nenhum dos casos abre sessão. Com sucesso, `window.EloSessao.entrar({ …cuidador, token })` e vai para `painel.html`. Quem já está logado é redirecionado. (A antiga "demonstração local", que aceitava qualquer email sem servidor, foi removida de propósito.)
 
 ### Painel e Relatórios (`pages/painel.html`, `relatorios.html`, `painel.*`) — telas do app do cuidador, do Figma
 - `.app-header` **sticky** (não flutuante), com `.app-nav` (Painel / Relatórios), sino e o chip de perfil (slot `data-profile-slot`).
 - `.app-hero` (saudação com nome da sessão + `.device-card` com a pochete recortada por `.device-thumb`), `.tiles` (4 `.tile` coloridos por `--c`, com `.tile-bar` animada), `.actions-grid` (5 `.action` que mostram uma confirmação em `#actionStatus`), `.profile-section#perfil` (foto grande, nome, email, trocar foto, sair). Relatórios: `.date-range`, tiles com `.tile-delta`, `.log-card` com tabela e `.log-type` coloridos.
-- `painel.js` **exige sessão**: sem `elo-sessao`, redireciona para `login.html`. Trocar a foto faz `PATCH /api/me` quando há token. Os dados dos tiles e do registro são ilustrativos (o rodapé avisa).
+- `painel.js` **exige sessão**: sem `elo-sessao`, redireciona para `login.html`. Trocar a foto faz `PATCH /api/me`. Os dados dos tiles e do registro são ilustrativos (o rodapé avisa).
+- `painel-pochete.js` (só `painel.html`): stream SSE quando o servidor tem processo contínuo; quando o stream responde 501 (Vercel), passa a **consultar `GET /api/eventos` e `/api/corridas` a cada 10 s** e mostra os mesmos avisos.
 
 ---
 
@@ -213,10 +220,10 @@ Toda página tem `<html lang="pt-BR" data-theme="dark">` para não piscar claro 
 
 1. **Tema:** lê `localStorage.theme` (padrão **dark**), aplica em `<html data-theme>`, troca o ícone do botão.
 2. **Menu mobile:** `#menuToggle` alterna `.nav-links.active`; fecha ao clicar num link.
-3. **Sessão:** expõe `window.EloSessao = { ler(), entrar(dados), sair(), api(rota, opções) }` sobre `localStorage['elo-sessao']` = `{ nome, email, foto, token? }`. `token` existe quando o login foi feito no backend; `api()` já manda `Authorization: Bearer`. `sair()` avisa o backend (`POST /api/logout`). Com token, cada página confirma a sessão em `GET /api/me` e a derruba se vier 401. `window.ELO_API_URL` (padrão `http://localhost:3000/api`) define o endereço.
+3. **Sessão:** expõe `window.EloSessao = { ler(), entrar(dados), sair(), api(rota, opções) }` sobre `localStorage['elo-sessao']` = `{ nome, email, foto, token }`. O `token` vem do login no backend e é **obrigatório**: `ler()` descarta sessões sem token (não existe mais sessão "local"). `api()` manda `Authorization: Bearer`; `sair()` avisa o backend (`POST /api/logout`); cada página confirma a sessão em `GET /api/me` e a derruba se vier 401. **Endereço do backend:** `window.ELO_API_URL`, que por padrão é `http://localhost:3000/api` quando o site roda em `localhost` (ou aberto do disco) e `/api` (mesmo domínio) quando está publicado. Para apontar para outro servidor, defina a variável antes de carregar `header.js`.
 4. **Perfil:** se há sessão e existe um elemento `[data-profile-slot]`, substitui-o pelo `.profile` (chip + menu). Os links do menu são calculados a partir do `href` do slot (`pages/login.html` na home, `login.html` nas páginas), então **mantenha o `href` do slot correto** em cada página. "Sair" limpa a sessão e volta à home.
 
-Chaves usadas no `localStorage`: `theme`, `elo-sessao`, `elo-perfil` (só na demonstração local), `elo-cuidador` (legado, primeiro nome). No `sessionStorage`: `eloa-sessao` (id da conversa com a Eloá).
+Chaves usadas no `localStorage`: `theme`, `elo-sessao`, `elo-cuidador` (legado, primeiro nome). No `sessionStorage`: `eloa-sessao` (id da conversa com a Eloá) e `eloa-historico` (as últimas mensagens, enviadas a cada pergunta).
 
 ### 6b. Backend (`backend/`)
 
@@ -228,7 +235,33 @@ Documentação completa em [backend/README.md](backend/README.md), incluindo o *
 - **Telegram:** `telegram.js` (Bot API `sendMessage` + polling `getUpdates`). O cuidador manda `/start CÓDIGO` ao bot. Sem `TELEGRAM_BOT_TOKEN`, simulado (mensagens no terminal, vínculo por `chat_id` digitado).
 - **Tempo real:** `eventos.js` é um canal SSE por cuidador (`GET /api/eventos/stream?token=`); o painel usa `EventSource`. Payload `{ tipo, dados, em }`.
 - **Painel** (`pages/painel-pochete.js`): toasts, tile "Último alerta", painel de corrida com Aprovar/Recusar/Cancelar, vínculo de pochete (mostra a chave uma vez), Telegram e botões de simulação. Sem token (demonstração local), a seção explica que precisa do servidor.
-- **`GET /`** é a página do backend (rotas, estado, ambiente). **Vercel:** `backend/api/index.js` + `vercel.json`; Root Directory = `backend`, variáveis do `.env` no painel da Vercel. Em serverless o SSE, o polling do Telegram e a sincronização automática ficam desligados (o app detecta `process.env.VERCEL`); o resto funciona.
+- **`GET /`** (e `GET /api`, no site publicado) é a página do backend (rotas, estado, ambiente). **Vercel:** publicado junto com o site pela função `api/backend.js` (ver §6c). Em serverless o SSE, o polling do Telegram e a sincronização automática ficam desligados (o app detecta `process.env.VERCEL`); o painel consulta a cada 10 s no lugar do stream, e cada pedido tenta reconectar ao banco se a conexão inicial falhou (`garantirBanco`).
+
+### 6c. Deploy na Vercel (site + Eloá + backend, um projeto só)
+
+O repositório inteiro é **um** projeto na Vercel (Root Directory = raiz, Framework Preset = Other). Tudo no mesmo domínio, sem CORS nem URL fixa no front:
+
+| URL | O que responde |
+|---|---|
+| `/`, `/pages/…`, `/assets/…` | o site, estático |
+| `/api/eloa/perguntar`, `/api/eloa/saude` | `api/eloa.py` (função Python; `vercel.json` manda `/api/eloa/*` para ela) |
+| `/api`, `/api/login`, `/api/me`, `/api/pochete/…` etc. | `api/backend.js` → `backend/server.js` (função Node; `vercel.json` manda o resto de `/api/*` para ela) |
+
+Como funciona: `package.json` da raiz declara `backend` como workspace, então o `npm install` da Vercel instala `express`, `cors` e `mysql2` para a função Node; `requirements.txt` da raiz instala `anthropic`, `fastapi` e `uvicorn` para a Python. `vercel.json` tem as rotas e o `excludeFiles` que tira `assets/` (140 MB) do pacote da função Python.
+
+**Variáveis de ambiente** (Settings → Environment Variables do projeto; sem elas o deploy sobe, mas a Eloá fica no modo local e o login responde 503):
+
+| Variável | Para quê |
+|---|---|
+| `ANTHROPIC_API_KEY` | Eloá com o modelo. Sem ela, modo local (palavras-chave). |
+| `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | MySQL do backend (os mesmos valores de `backend/.env`). O banco da escola precisa aceitar conexão de fora, e aceita. |
+| `ALLOWED_ORIGINS` | `*` ou o domínio do site. |
+| `SESSION_DAYS` | duração do login (padrão 30). |
+| `UBER_CLIENT_ID/SECRET`, `TELEGRAM_BOT_TOKEN/USERNAME` | opcionais; sem elas, simulados. |
+
+Depois de mudar variáveis, faça um redeploy. Conferir: `https://SEU-DOMINIO/api` (página do backend, chip "Banco: conectado") e `https://SEU-DOMINIO/api/eloa/saude` (`"modo": "modelo"`).
+
+Para rodar tudo na máquina continua igual: `python -m http.server 8765` na raiz + `python api/eloa.py` + `cd backend && npm start` — o front detecta `localhost` e usa as portas 8000 e 3000.
 
 ---
 
@@ -236,11 +269,12 @@ Documentação completa em [backend/README.md](backend/README.md), incluindo o *
 
 Documentação completa em [api/README.md](api/README.md). O essencial:
 
-- `api/eloa.py` — servidor FastAPI. `POST /perguntar {pergunta, sessao}` → `{status, resposta_da_ia, intencao, confianca, fonte, sessao}`; `GET /saude`. Roda com `python api/eloa.py` na porta 8000.
+- `api/eloa.py` — servidor FastAPI. `POST /perguntar {pergunta, sessao, historico?}` → `{status, resposta_da_ia, intencao, confianca, fonte, sessao}`; `GET /saude`. As mesmas rotas existem sob `/api/eloa/…` (é assim que a Vercel chama; ver §6c). Roda com `python api/eloa.py` na porta 8000; dependências em `requirements.txt` na raiz.
+- **Memória em serverless:** a Vercel não guarda nada entre chamadas, então o cliente manda `historico` (as últimas mensagens) e o servidor usa isso como memória. Localmente a sessão em memória continua funcionando.
 - **Modo modelo:** com `ANTHROPIC_API_KEY`, chama Claude (`claude-opus-5`, `effort: low`) com `system` = persona + fatos (com `cache_control`) e o histórico da sessão (até 40 mensagens, 30 min de validade).
 - **Modo local:** sem chave ou com a API fora, reconhece o assunto por palavras-chave e responde com o fato. Troca sozinho.
-- `api/conhecimento.py` — **a única fonte do que a Eloá sabe e de como fala.** `PERSONA` (tom, regras: não inventa, não finge ser humana, não aciona emergência, não sai do assunto, sem Markdown) e `ASSUNTOS` (id, nome, pistas, fato). Mudou algo no site → atualize o fato correspondente.
-- `pages/eloa.js` — cliente. `window.ELOA_API_URL` muda o endereço.
+- `api/_conhecimento.py` — **a única fonte do que a Eloá sabe e de como fala.** `PERSONA` (tom, regras: não inventa, não finge ser humana, não aciona emergência, não sai do assunto, sem Markdown) e `ASSUNTOS` (id, nome, pistas, fato). Mudou algo no site → atualize o fato correspondente. (O `_` no nome impede a Vercel de tratar o arquivo como função.)
+- `pages/eloa.js` — cliente; escolhe o endereço sozinho (localhost → porta 8000; publicado → `/api/eloa`). `window.ELOA_API_URL` sobrescreve. `pages/eloa-engine.js` é o motor de fallback no navegador.
 - O Node (`server.js`) e o servidor Gemini no Render foram **removidos**. Não recrie.
 
 ---
@@ -250,13 +284,14 @@ Documentação completa em [api/README.md](api/README.md). O essencial:
 1. **Tokens, sempre.** Cor, raio, sombra, fonte: só via `var(--…)`. Teste a mudança nos dois temas.
 2. **Mobile é obrigatório.** Toda regra nova tem contraparte nos breakpoints (`1080`, `960`, `900`, `760`, `700`, `640`, `560`, `480` px conforme a página). O menu mobile abre em ≤960 px.
 3. **Conteúdo real, sem placeholder inventado.** Se algo ainda não existe (vídeo, jogo, foto), use o padrão já criado: estado vazio honesto ("em produção", "em desenvolvimento", iniciais no lugar da foto).
-4. **Preço em dois lugares** (home e produto). Fatos que a Eloá cita (preço, bateria, garantia…) estão em `api/conhecimento.py` — mude junto.
+4. **Preço em dois lugares** (home e produto). Fatos que a Eloá cita (preço, bateria, garantia…) estão em `api/_conhecimento.py` — mude junto.
 5. **Menu é estático.** Nova página = editar o `.nav-links` em todas as páginas.
 6. **Header flutuante ≠ header do app.** Páginas do site usam `.site-header` (fixo, pílula). Painel/Relatórios usam `.app-header` (sticky, largura total). Login/Cadastro usam `.auth-header` (simples, sem menu).
 7. **Especificidade:** as páginas usam seletores de uma classe; o sistema usa `main > :first-child` (0,1,1). Se precisar sobrescrever, use `.pagina > .secao` (0,2,0), não `!important`. Os poucos `!important` existentes (`.scheme-hint`, `.demo-specs`, `.profile-logout`, `.profile-role`) são conscientes.
 8. **Acessibilidade mínima:** todo ícone-botão tem `aria-label`; `:focus-visible` é o anel ciano do sistema; contraste dos textos sobre gradiente usa `--ink-on-brand`.
-9. **Sem dependências novas no front.** O site é HTML/CSS/JS puro. Externos: Google Fonts, `model-viewer` (Instruções e Produto), Font Awesome (só Produto). Back-ends: `api/` (Eloá, Python) e `backend/` (login/cadastro, Node) — ambos opcionais para o site abrir; sem eles, Eloá e login funcionam em modo local.
-10. **Antes de entregar, olhe.** O fluxo usado neste projeto: subir `python -m http.server 8765` na raiz, abrir cada página em 1440×900, 1000×700 e 390×844 nos dois temas, rolar até o fim (para os reveals dispararem) e conferir. Fluxos a testar sempre que tocar em sessão: cadastro → painel → menu de perfil → sair; painel sem sessão → login.
+9. **Sem dependências novas no front.** O site é HTML/CSS/JS puro. Externos: Google Fonts, `model-viewer` (Instruções e Produto), Font Awesome (só Produto). Back-ends: `api/` (Eloá, Python) e `backend/` (contas e pochete, Node). O site abre sem eles; a Eloá responde pelo motor do navegador, mas **login e cadastro exigem o backend** (só entra quem está cadastrado — não recrie a demonstração local).
+10. **Deploy é um projeto só.** Não separe backend e site em projetos diferentes da Vercel sem necessidade: o front usa `/api` relativo. Se um dia o backend for para outro lugar (servidor da escola, para ter o stream), defina `window.ELO_API_URL` antes de `header.js` em todas as páginas.
+11. **Antes de entregar, olhe.** O fluxo usado neste projeto: subir `python -m http.server 8765` na raiz, abrir cada página em 1440×900, 1000×700 e 390×844 nos dois temas, rolar até o fim (para os reveals dispararem) e conferir. Fluxos a testar sempre que tocar em sessão (com o backend no ar): login com email não cadastrado → mensagem, sem sessão; cadastro → painel → menu de perfil → sair; painel sem sessão → login; backend fora → login avisa e não entra.
 
 ---
 
@@ -267,12 +302,13 @@ Documentação completa em [api/README.md](api/README.md). O essencial:
 | Vídeo demonstrativo | `pages/instrucoes.html` `<video>` | Gravar o vídeo novo e colocar `src`. O antigo mostrava o site velho e foi retirado. |
 | Fotos da equipe | `assets/team/` | 5 arquivos `.jpg` com os nomes do `LEIA-ME.txt`. Até lá, iniciais. |
 | Links dos artigos | `pages/referencias.html` `.article-link` | Todos `href="#"`. |
-| Chave da API | `api/.env` | Sem ela a Eloá responde no modo local. |
+| Chave da API | `api/.env` (local) e `ANTHROPIC_API_KEY` no projeto da Vercel | Sem ela a Eloá responde no modo local (palavras-chave), nunca fica muda. |
 | Jogo sem a interface do gd.games | `jogo/index.html` | Exportar o jogo em HTML5 no GDevelop e copiar para a pasta `jogo/` (passo a passo no `LEIA-ME`). A página troca sozinha. |
 | Firmware da pochete | — | O backend já aceita os eventos (contrato em `backend/README.md`); falta o dispositivo mandar. Até lá, "Testar sem a pochete" no painel. |
 | Credenciais Uber e Telegram | `backend/.env` | Sem elas, os dois rodam simulados. Uber exige app aprovado (Guest Rides); Telegram é só criar o bot no @BotFather. |
 | Relatórios reais | `relatorios.html` | Os tiles e o registro ainda são ilustrativos; `GET /api/eventos` e `/api/corridas` já devolvem os dados reais para ligar. |
-| MySQL configurado | `backend/.env` | Sem ele, o backend não sobe e o front cai na demonstração local. |
+| MySQL configurado | `backend/.env` (local) e `DB_*` na Vercel | Sem ele, o backend não sobe (local) ou responde 503 (Vercel) e ninguém consegue entrar. |
+| Tempo real na Vercel | `backend/server.js` | Serverless não mantém o stream SSE nem o bot do Telegram ouvindo; o painel consulta a cada 10 s. Para o tempo real de verdade, rodar `npm start` num servidor contínuo e apontar `window.ELO_API_URL`. |
 | Modelo 3D pesado | `assets/*.glb` (60 MB) | Por isso não está na home. Comprimir (Draco) se quiser usar em mais lugares. |
 | Vídeo antigo | `assets/*.mp4` (77 MB) | Não é mais referenciado; pode ser apagado do repositório. |
 
@@ -287,5 +323,6 @@ Documentação completa em [api/README.md](api/README.md). O essencial:
 5. **Reorganização (feita pela equipe):** `header.css`/`header.js` movidos para `header/`.
 6. **Backend de login e cadastro:** `backend/server.js` (Express + MySQL, scrypt, sessões por token); `auth.js`, `painel.js` e `header.js` integrados, com a demonstração local como fallback quando o servidor está fora.
 7. **Jogo no gd.games** dentro do iframe; **backend da pochete**: chaves por dispositivo, eventos, corridas Uber (Guest Rides API, com simulação), avisos por Telegram e stream SSE; painel ao vivo com aprovação de corrida, vínculo de pochete/Telegram e simulação dos botões.
+8. **Deploy unificado na Vercel e login só com cadastro:** site, Eloá (`api/eloa.py`) e backend (`api/backend.js`) no mesmo projeto e domínio; o front escolhe o endereço da API sozinho; a Eloá manda o histórico do navegador (memória em serverless) e ganhou o fallback em cadeia; `api/eloa-engine.js` virou `pages/eloa-engine.js` e `conhecimento.py` virou `_conhecimento.py` (a Vercel tratava os dois como funções); a demonstração local de login foi removida — só entra quem o backend reconhece; o painel consulta a API quando não há stream.
 
 Commits relevantes começam em `093e664 Redesign do CSS do site inteiro`.

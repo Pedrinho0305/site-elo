@@ -2,22 +2,28 @@
    Eloá · Conversa
    ---------------------------------------------------------------------------
    Liga a tela à API em Python (api/eloa.py), que responde com um modelo de
-   linguagem e memória da conversa. A sessão fica em sessionStorage, então
-   recarregar a página não faz a Eloá esquecer.
+   linguagem e memória da conversa. A sessão e as últimas mensagens ficam em
+   sessionStorage: recarregar a página não faz a Eloá esquecer, e no site
+   publicado (serverless, sem memória entre chamadas) o histórico vai junto
+   com cada pergunta.
 
    Se a API estiver fora do ar, a Eloá responde com o motor local do
-   navegador (api/eloa-engine.js): mais simples, mas nunca muda.
+   navegador (pages/eloa-engine.js): mais simples, mas nunca muda.
 
    A resposta aparece sendo digitada, como numa conversa de verdade.
    ========================================================================== */
 (function () {
   'use strict';
 
+  // Endereço da API em Python. Rodando o site na máquina (localhost, arquivo
+  // aberto direto), é o python api/eloa.py na porta 8000; publicado, é a
+  // função /api/eloa do mesmo domínio. window.ELOA_API_URL, definido antes
+  // deste arquivo, sobrescreve os dois.
+  const naMaquina = /^(localhost|127\.0\.0\.1|\[::1\]|)$/.test(location.hostname);
+
   const CONFIG = {
-    // Endereço da API em Python. Para apontar para outro servidor, defina
-    // window.ELOA_API_URL antes de carregar este arquivo.
     api: {
-      url: window.ELOA_API_URL || 'http://localhost:8000/perguntar',
+      url: window.ELOA_API_URL || (naMaquina ? 'http://localhost:8000/perguntar' : '/api/eloa/perguntar'),
       timeoutMs: 45000
     },
     // Tempo "pensando" antes de digitar (só no modo local; o modelo já demora o seu)
@@ -32,7 +38,17 @@
      Sessão: o mesmo id em todas as perguntas para a Eloá lembrar da conversa
      ------------------------------------------------------------------------ */
   const CHAVE_SESSAO = 'eloa-sessao';
+  const CHAVE_HISTORICO = 'eloa-historico';
+  const MAX_HISTORICO = 40; // mensagens (user + assistant), igual ao servidor
   let idSessao = sessionStorage.getItem(CHAVE_SESSAO) || null;
+  let historico = [];
+  try { historico = JSON.parse(sessionStorage.getItem(CHAVE_HISTORICO)) || []; } catch { historico = []; }
+
+  function lembrar(pergunta, resposta) {
+    historico.push({ role: 'user', content: pergunta }, { role: 'assistant', content: resposta });
+    historico = historico.slice(-MAX_HISTORICO);
+    try { sessionStorage.setItem(CHAVE_HISTORICO, JSON.stringify(historico)); } catch {}
+  }
 
   /* ------------------------------------------------------------------------
      API da Eloá: uma função, uma promessa, uma resposta.
@@ -58,7 +74,7 @@
       const resposta = await fetch(CONFIG.api.url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pergunta: texto, sessao: idSessao }),
+        body: JSON.stringify({ pergunta: texto, sessao: idSessao, historico }),
         signal: controle.signal
       });
       const dados = await resposta.json();
@@ -67,6 +83,7 @@
           idSessao = dados.sessao;
           sessionStorage.setItem(CHAVE_SESSAO, idSessao);
         }
+        lembrar(texto, dados.resposta_da_ia);
         return { resposta: dados.resposta_da_ia, fonte: dados.fonte || 'api', intencao: dados.intencao, confianca: dados.confianca };
       }
     } catch (erro) {

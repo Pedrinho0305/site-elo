@@ -1,7 +1,10 @@
 # Segredos e lixo local
 api/.env
 backend/.env
+.env
+node_modules/
 backend/node_modules/
 .venv/
 __pycache__/
 *.pyc
+.vercel/

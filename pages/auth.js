@@ -1,13 +1,11 @@
-// Login e cadastro. Fala com o backend (backend/server.js); se ele estiver
-// fora do ar, cai na demonstração local, só no navegador ('elo-perfil').
-// Em qualquer caso abre a sessão ('elo-sessao') e vai para o painel.
+// Login e cadastro. Fala com o backend (backend/server.js): só entra quem
+// está cadastrado lá. Se o servidor estiver fora do ar, avisa e não entra.
+// Com sucesso, abre a sessão ('elo-sessao', com o token) e vai para o painel.
 // A foto é recortada e reduzida antes de enviar.
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('authForm');
   const status = document.getElementById('formStatus');
   if (!form) return;
-
-  const lerPerfil = () => { try { return JSON.parse(localStorage.getItem('elo-perfil')); } catch { return null; } };
 
   // Quem já está logado não precisa entrar de novo
   if (window.EloSessao?.ler()) { window.location.replace(form.dataset.next || 'painel.html'); return; }
@@ -95,41 +93,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let perfil;
     try {
-      // 1. Backend (backend/server.js)
       const dados = await window.EloSessao.api(cadastro ? 'cadastro' : 'login', {
         method: 'POST',
         body: cadastro ? { nome: nomeDigitado, email, senha, foto } : { email, senha }
       });
       perfil = { ...dados.cuidador, token: dados.token };
     } catch (e) {
-      if (e.status) {
-        // o backend respondeu: email já usado, senha errada, dado inválido...
-        if (status) status.textContent = e.message;
-        button.disabled = false;
-        button.textContent = rotulo;
-        (e.status === 401 ? form.querySelector('#senha') : form.querySelector('#email'))?.focus();
-        return;
-      }
-      // 2. Backend fora do ar: demonstração local, só no navegador
-      console.warn('Backend indisponível; usando a sessão local de demonstração.', e);
-      perfil = perfilLocal(cadastro, nomeDigitado, email);
+      // o backend respondeu (email já usado, senha errada, conta inexistente,
+      // banco fora) ou nem foi alcançado: em nenhum caso a pessoa entra
+      if (status) status.textContent = e.status ? e.message : 'Não consegui falar com o servidor da ELO. Confira sua conexão e tente de novo em instantes.';
+      button.disabled = false;
+      button.textContent = rotulo;
+      (e.status === 401 ? form.querySelector('#senha') : form.querySelector('#email'))?.focus();
+      if (!e.status) console.warn('Backend indisponível em', window.ELO_API_URL, e);
+      return;
     }
 
     window.EloSessao.entrar(perfil);
     localStorage.setItem('elo-cuidador', perfil.nome.split(' ')[0]);
     setTimeout(() => { window.location.href = form.dataset.next || 'painel.html'; }, 400);
   });
-
-  // Sem backend: guarda o perfil no navegador (comportamento de demonstração)
-  function perfilLocal(cadastro, nomeDigitado, email) {
-    const salvo = lerPerfil();
-    if (cadastro) {
-      const p = { nome: nomeDigitado, email, foto };
-      localStorage.setItem('elo-perfil', JSON.stringify(p));
-      return p;
-    }
-    if (salvo && salvo.email === email) return salvo;
-    const nome = email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    return { nome, email, foto: null };
-  }
 });
