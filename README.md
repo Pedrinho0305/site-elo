@@ -310,8 +310,7 @@ Documentação completa em [api/README.md](api/README.md). O essencial:
 | Item | Onde | O que falta |
 |---|---|---|
 | Vídeo demonstrativo | `pages/instrucoes.html` `<video>` | Gravar o vídeo novo e colocar `src`. O antigo mostrava o site velho e foi retirado. |
-| Fotos da equipe | `assets/team/` | 5 arquivos `.jpg` com os nomes do `LEIA-ME.txt`. Até lá, iniciais. |
-| Links dos artigos | `pages/referencias.html` `.article-link` | Todos `href="#"`. |
+| Link do artigo 5 | `pages/referencias.html` `.article-link` do card 5 | Artigos 1–4 têm DOI (vindos do Figma, conferidos na Crossref). O 5 (Hillesheim, UFSC) não tem link no Figma e não foi localizado; segue `href="#"` até a equipe informar. |
 | Chave do Gemini | `GEMINI_API_KEY` no projeto da Vercel (e em `api/.env` para rodar local) | Gratuita em aistudio.google.com/apikey. Sem ela a Eloá responde no modo local (palavras-chave), nunca fica muda. |
 | Jogo sem a interface do gd.games | `jogo/index.html` | Exportar o jogo em HTML5 no GDevelop e copiar para a pasta `jogo/` (passo a passo no `LEIA-ME`). A página troca sozinha. |
 | Firmware da pochete | — | O backend já aceita os eventos (contrato em `backend/README.md`); falta o dispositivo mandar. Até lá, "Testar sem a pochete" no painel. |
