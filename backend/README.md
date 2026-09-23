@@ -54,6 +54,8 @@ Os dois funcionam sem credencial nenhuma, em **modo simulado**, para o projeto s
 | Serviço | Simulado (sem variável) | Real (com variável) |
 |---|---|---|
 | **Uber** | Corridas pedidas pela pochete viram fictícias e avançam sozinhas: procurando motorista (20 s) → a caminho (60 s) → em viagem (150 s) → concluída. Motorista "Carlos (simulado)". O botão "Chamar Uber" do painel **não** simula: devolve o link universal (veja abaixo). | Guest Rides API: `UBER_CLIENT_ID` + `UBER_CLIENT_SECRET` (conta Uber for Business aprovada em developer.uber.com). `UBER_SANDBOX=1` usa o sandbox da Uber. |
+
+**Credencial não é acesso.** Dá para ter `UBER_CLIENT_ID` e `UBER_CLIENT_SECRET` corretos e a Uber ainda recusar o token com `invalid_scope`, porque o produto **Guest Rides** (escopo `guests.trips`) é liberado caso a caso, só para contas Uber for Business aprovadas. Por isso quem decide o caminho é `uber.disponivel()`, que pede um token de verdade: se a Uber não responder, o servidor volta ao modo simulado/link e guarda esse resultado por 10 minutos (para não bater na Uber a cada clique). A página `/api` mostra o motivo exato no chip **Uber** — por exemplo `credencial sem acesso à Guest Rides (scope(s) are invalid)`.
 | **Telegram** | Mensagens impressas no terminal do servidor; o painel vincula por um `chat_id` digitado. | `TELEGRAM_BOT_TOKEN` (crie com o @BotFather) + `TELEGRAM_BOT_USERNAME`. O cuidador manda `/start CÓDIGO` para o bot e fica vinculado. |
 | **E-mail** | O e-mail aparece no terminal (com o motivo) e a mensagem continua salva no banco; `reenviar-mensagens.js` manda depois. | `EMAIL_EMPRESA` (para onde vai) + `GMAIL_APP_PASSWORD` (Senha de App do Gmail da empresa), **ou** `BREVO_API_KEY`, **ou** `RESEND_API_KEY`. |
 

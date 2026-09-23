@@ -12,10 +12,12 @@
      cancelar  DELETE https://api.uber.com/v1/guests/trips/{request_id}
 
    Essa API exige uma conta Uber for Business aprovada pela Uber
-   (developer.uber.com → Guest Rides). Enquanto não houver credenciais
-   (UBER_CLIENT_ID / UBER_CLIENT_SECRET), este módulo funciona em MODO
-   SIMULAÇÃO: devolve corridas fictícias que avançam de status com o tempo,
-   para o painel e a pochete serem testados de ponta a ponta.
+   (developer.uber.com → Guest Rides). Sem credenciais (UBER_CLIENT_ID /
+   UBER_CLIENT_SECRET) — ou com credenciais que a Uber aceita mas sem o
+   escopo `guests.trips` liberado, que é o caso mais comum — este módulo
+   funciona em MODO SIMULAÇÃO: devolve corridas fictícias que avançam de
+   status com o tempo, para o painel e a pochete serem testados de ponta a
+   ponta. Quem decide é `disponivel()`, que pede um token de verdade.
 
    Variáveis:
      UBER_CLIENT_ID, UBER_CLIENT_SECRET   credenciais do app
@@ -35,6 +37,42 @@ const config = {
 };
 
 export const simulado = !(config.clientId && config.clientSecret);
+
+/* ------------------------------------------------------------------------
+   Ter credencial não é o mesmo que ter acesso
+   ---------------------------------------------------------------------------
+   A Guest Rides é um produto que a Uber libera caso a caso: dá para ter uma
+   app criada, com client_id e client_secret corretos, e mesmo assim o pedido
+   de token voltar `invalid_scope` porque `guests.trips` não foi aprovado.
+   Por isso quem decide o caminho não é a presença da chave, e sim se a Uber
+   realmente responde — senão o site trocaria o link universal (que funciona)
+   por uma API que sempre falha.
+
+   O resultado negativo vale 10 minutos, para não bater na Uber a cada clique.
+   ------------------------------------------------------------------------ */
+let semAcessoAte = 0;
+let ultimoMotivo = '';
+
+export async function disponivel() {
+  if (simulado) return false;
+  if (Date.now() < semAcessoAte) return false;
+  try {
+    await obterToken();
+    ultimoMotivo = '';
+    return true;
+  } catch (e) {
+    ultimoMotivo = e.message;
+    semAcessoAte = Date.now() + 10 * 60 * 1000;
+    console.error('[uber] credenciais existem, mas a API não respondeu:', e.message, '— usando o modo simulado/link por 10 min');
+    return false;
+  }
+}
+
+/* Como o servidor está em relação à Uber, para a página /api e o log */
+export async function estado() {
+  if (simulado) return 'simulado (sem UBER_CLIENT_ID/SECRET)';
+  return (await disponivel()) ? 'real' : `credencial sem acesso à Guest Rides (${ultimoMotivo || 'escopo não liberado'})`;
+}
 
 /* ------------------------------------------------------------------------
    Token (client_credentials). Dura 30 dias; renovamos com folga.
@@ -103,7 +141,7 @@ export function traduzirStatus(uber) {
 
 // Estimativa: devolve a opção mais barata disponível { product_id, fare_id, nome, valor, eta_min }
 export async function estimar(origem, destino) {
-  if (simulado) return simular.estimar(origem, destino);
+  if (!(await disponivel())) return simular.estimar(origem, destino);
 
   const dados = await chamar('POST', '/guests/trips/estimates', {
     pickup: { latitude: origem.lat, longitude: origem.lng },
@@ -126,7 +164,7 @@ export async function estimar(origem, destino) {
 
 // Pede a corrida para a pessoa idosa (o "convidado"). Devolve { request_id, status }
 export async function solicitar({ idoso, origem, destino, estimativa, observacao }) {
-  if (simulado) return simular.solicitar();
+  if (!(await disponivel())) return simular.solicitar();
 
   const [primeiro, ...resto] = String(idoso.nome || 'Passageiro ELO').trim().split(' ');
   const dados = await chamar('POST', '/guests/trips', {
@@ -147,7 +185,7 @@ export async function solicitar({ idoso, origem, destino, estimativa, observacao
 }
 
 export async function consultar(requestId, criadoEm) {
-  if (simulado) return simular.consultar(requestId, criadoEm);
+  if (!(await disponivel())) return simular.consultar(requestId, criadoEm);
   const dados = await chamar('GET', `/guests/trips/${requestId}`);
   return {
     status: traduzirStatus(dados.status),
@@ -159,7 +197,7 @@ export async function consultar(requestId, criadoEm) {
 }
 
 export async function cancelar(requestId) {
-  if (simulado) return simular.cancelar(requestId);
+  if (!(await disponivel())) return simular.cancelar(requestId);
   await chamar('DELETE', `/guests/trips/${requestId}`);
   return { status: 'cancelada' };
 }

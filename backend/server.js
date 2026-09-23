@@ -514,7 +514,7 @@ async function estadoServidor() {
     versao: '1.1.0',
     ambiente: NA_VERCEL ? 'vercel' : 'servidor',
     banco, host_banco: `${CONFIG.banco.user}@${CONFIG.banco.host}/${CONFIG.banco.database}`,
-    uber: uber.simulado ? 'simulado' : 'real',
+    uber: await uber.estado(),
     telegram: telegram.simulado ? 'simulado' : 'bot @' + telegram.botUsername,
     email: correio.simulado ? `simulado (${correio.motivo})` : `${correio.provedor} → ${correio.empresa}`,
     tempo_real: NA_VERCEL ? 'desligado (serverless)' : 'SSE ativo',
@@ -582,7 +582,7 @@ app.get('/api/saude', async (_req, res, next) => {
     await pool.query('SELECT 1');
     res.json({
       ok: true, banco: 'conectado',
-      uber: uber.simulado ? 'simulado' : 'real',
+      uber: await uber.estado(),
       telegram: telegram.simulado ? 'simulado' : 'real',
       email: correio.simulado ? 'simulado' : correio.provedor,
     });
@@ -835,7 +835,7 @@ app.post('/api/corridas', autenticar, async (req, res, next) => {
     const destinoNome = limparTexto(req.body?.destino?.nome, 200)
       || (informado ? null : pochete?.casa_nome || 'Casa');
 
-    if (uber.simulado) {
+    if (!(await uber.disponivel())) {
       // Modo link: nada é registrado porque ninguém aqui saberá o que
       // aconteceu depois — quem conclui o pedido é a pessoa, no app da Uber.
       const link = uber.linkUniversal({
@@ -1140,10 +1140,10 @@ if (!NA_VERCEL) {
     return `Pronto, ${linhas[0].nome.split(' ')[0]}! Os avisos da pochete vão chegar aqui.`;
   });
 
-  app.listen(CONFIG.porta, () => {
+  app.listen(CONFIG.porta, async () => {
     console.log(`ELO backend em http://localhost:${CONFIG.porta}  (rotas em /api, resumo em /)`);
     console.log(`  MySQL: ${CONFIG.banco.user}@${CONFIG.banco.host}/${CONFIG.banco.database}`);
-    console.log(`  Uber: ${uber.simulado ? 'SIMULADO (defina UBER_CLIENT_ID e UBER_CLIENT_SECRET)' : 'real' + (process.env.UBER_SANDBOX === '1' ? ' (sandbox)' : '')}`);
+    console.log(`  Uber: ${await uber.estado()}${process.env.UBER_SANDBOX === '1' ? ' (sandbox)' : ''}`);
     console.log(`  Telegram: ${telegram.simulado ? 'SIMULADO (defina TELEGRAM_BOT_TOKEN)' : 'bot @' + telegram.botUsername}`);
     console.log(`  E-mail: ${correio.simulado ? `SIMULADO (${correio.motivo})` : `${correio.provedor} → ${correio.empresa}`}`);
   });
