@@ -187,7 +187,7 @@ ASSUNTOS = [
     {
         "id": "painel", "nome": "o painel do cuidador",
         "pistas": ["painel", "login", "entrar", "senha", "perfil", "relatorio", "dashboard", "minha conta", "cadastro no site"],
-        "fato": "Painel do cuidador (no site, em Entrar, com conta criada em Cadastro): mostra o estado da pochete (bateria, último alerta, localização), avisa na hora quando a pochete aperta um botão, mostra o pedido de transporte para o cuidador aprovar ou recusar (só depois do ok a Uber é chamada) e acompanha a corrida (procurando motorista, a caminho, em viagem). Lá também se vincula a pochete (gera a chave do dispositivo), o Telegram (para receber os avisos como mensagem) e dá para testar os botões sem a pochete. A página Relatórios ainda mostra dados ilustrativos.",
+        "fato": "Painel do cuidador (no site, em Entrar, com conta criada em Cadastro): mostra o estado da pochete (bateria, último alerta, localização), avisa na hora quando a pochete aperta um botão, mostra o pedido de transporte para o cuidador aprovar ou recusar (só depois do ok a Uber é chamada) e acompanha a corrida (procurando motorista, a caminho, em viagem). Tem também o botão 'Chamar Uber' nas ações rápidas, para o próprio cuidador pedir o carro sem esperar a pochete: a partida é a última posição da pochete (ou a localização do navegador) e o destino é o endereço de casa cadastrado; no celular abre o aplicativo do Uber e no computador o site do Uber, com tudo preenchido. Lá também se vincula a pochete (gera a chave do dispositivo), o Telegram (para receber os avisos como mensagem) e dá para testar os botões sem a pochete. A página Relatórios ainda mostra dados ilustrativos.",
     },
     {
         "id": "eloa", "nome": "eu mesma",

@@ -53,11 +53,25 @@ Os dois funcionam sem credencial nenhuma, em **modo simulado**, para o projeto s
 
 | Serviço | Simulado (sem variável) | Real (com variável) |
 |---|---|---|
-| **Uber** | Corridas fictícias que avançam sozinhas: procurando motorista (20 s) → a caminho (60 s) → em viagem (150 s) → concluída. Motorista "Carlos (simulado)". | Guest Rides API: `UBER_CLIENT_ID` + `UBER_CLIENT_SECRET` (conta Uber for Business aprovada em developer.uber.com). `UBER_SANDBOX=1` usa o sandbox da Uber. |
+| **Uber** | Corridas pedidas pela pochete viram fictícias e avançam sozinhas: procurando motorista (20 s) → a caminho (60 s) → em viagem (150 s) → concluída. Motorista "Carlos (simulado)". O botão "Chamar Uber" do painel **não** simula: devolve o link universal (veja abaixo). | Guest Rides API: `UBER_CLIENT_ID` + `UBER_CLIENT_SECRET` (conta Uber for Business aprovada em developer.uber.com). `UBER_SANDBOX=1` usa o sandbox da Uber. |
 | **Telegram** | Mensagens impressas no terminal do servidor; o painel vincula por um `chat_id` digitado. | `TELEGRAM_BOT_TOKEN` (crie com o @BotFather) + `TELEGRAM_BOT_USERNAME`. O cuidador manda `/start CÓDIGO` para o bot e fica vinculado. |
 | **E-mail** | O e-mail aparece no terminal (com o motivo) e a mensagem continua salva no banco; `reenviar-mensagens.js` manda depois. | `EMAIL_EMPRESA` (para onde vai) + `GMAIL_APP_PASSWORD` (Senha de App do Gmail da empresa), **ou** `BREVO_API_KEY`, **ou** `RESEND_API_KEY`. |
 
 A Uber usa a **Guest Rides API** (`auth.uber.com/oauth/v2/token` com `client_credentials`, escopo `guests.trips`; `POST /v1/guests/trips/estimates`; `POST /v1/guests/trips`; `GET|DELETE /v1/guests/trips/{request_id}`). Ela pede corridas para um "convidado" (a pessoa idosa, que não precisa ter o app) a partir da conta da organização. A Uber precisa aprovar o app antes de liberar as credenciais.
+
+### Chamar Uber pelo painel: os dois caminhos
+
+`POST /api/corridas` é o botão **Chamar Uber** do painel do cuidador, e ele se comporta conforme o que o servidor tem:
+
+| | Com `UBER_CLIENT_ID/SECRET` | Sem credenciais (padrão hoje) |
+|---|---|---|
+| Resposta | `201 { modo: "api", corrida }` | `200 { modo: "link", link, origem, destino, aviso? }` |
+| O que acontece | Estima e pede na Guest Rides API; a corrida entra no histórico e o painel acompanha o status (`solicitada` → `a_caminho` → …), com Cancelar | O site abre o **link universal** `https://m.uber.com/ul/?action=setPickup&…`: no celular abre o app do Uber, no computador o site, já com partida e destino preenchidos. Quem confirma o carro é a pessoa, dentro do Uber |
+| Registro | Corrida gravada na tabela `corridas` | Nada é gravado — depois do link, o servidor não tem como saber o que aconteceu |
+
+A **partida** é a última posição conhecida da pochete; se ela ainda não mandou nenhuma, o navegador pergunta a localização (funciona em desktop e celular) e manda em `origem`. O **destino** é o endereço de casa cadastrado na pochete, ou o que vier em `destino`. Sem nenhum dos dois, o link sai com `pickup=my_location` e um `aviso` explicando que o destino será escolhido na tela do Uber.
+
+Por que o link universal existe: a Guest Rides API só funciona com uma conta Uber for Business **aprovada pela Uber**, o que um projeto escolar não costuma ter. O link é o caminho oficial para chamar um carro de fora do app, não precisa de credencial nenhuma e funciona de verdade — por isso ele é o padrão, em vez de uma corrida fictícia que ninguém poderia pegar.
 
 ## Como a pochete fala com o servidor (contrato do dispositivo)
 
@@ -131,6 +145,7 @@ Enquanto o dispositivo não existe, o painel tem a seção **"Testar sem a poche
 | `POST` | `/api/pochetes/:id/simular` | `{ tipo, lat?, lng?, bateria?, destino? }` | igual ao evento da pochete |
 | `GET` | `/api/eventos?limite=20` | — | `{ eventos }` |
 | `GET` | `/api/eventos/stream?token=` | — | **SSE**: eventos `emergencia`, `transporte`, `bateria`, `localizacao`, `teste`, `corrida`, `telegram` |
+| `POST` | `/api/corridas` | `{ pochete_id?, origem?: { lat, lng }, destino?: { lat, lng, nome } }` | chama o carro pelo painel: `201 { modo: "api", corrida }` com credenciais da Uber, ou `{ modo: "link", link, origem, destino, aviso? }` sem elas |
 | `GET` | `/api/corridas` · `/api/corridas/:id` | — | `{ corridas }` / `{ corrida }` (consulta a Uber e atualiza) |
 | `POST` | `/api/corridas/:id/aprovar` | — | estima na Uber, pede o carro, `{ corrida }` |
 | `POST` | `/api/corridas/:id/recusar` · `/cancelar` | — | `{ corrida }` |

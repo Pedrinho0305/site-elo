@@ -129,6 +129,93 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
   }
 
+  /* ---------------------------------------------------------------------
+     Chamar Uber pelo painel
+     ---------------------------------------------------------------------
+     Partida: a última posição da pochete; se ela ainda não falou com o
+     servidor, a do navegador (funciona no computador e no celular, com
+     permissão). Destino: o endereço de casa cadastrado na pochete.
+
+     O servidor responde de dois jeitos (POST /api/corridas):
+       modo "api"  → tem credencial da Uber: a corrida é pedida e o painel
+                     acompanha o status aqui dentro, como o fluxo da pochete;
+       modo "link" → sem credencial: vem o link universal do Uber, que abre o
+                     app no celular e o site no computador com partida e
+                     destino prontos. Ninguém finge corrida que não existe.
+     --------------------------------------------------------------------- */
+  function posicaoDoNavegador() {
+    return new Promise(resolve => {
+      if (!navigator.geolocation) return resolve(null);
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve({ lat: +pos.coords.latitude.toFixed(6), lng: +pos.coords.longitude.toFixed(6) }),
+        () => resolve(null),
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60_000 }
+      );
+    });
+  }
+
+  function renderLinkUber({ link, destino, aviso }) {
+    const painel = $('corridaPanel');
+    corridaAtual = null;
+    painel.hidden = false;
+    painel.className = 'ride-panel ride-panel--link';
+    painel.innerHTML = `
+      <div class="ride-head">
+        <span class="ride-icon" aria-hidden="true">🚕</span>
+        <div>
+          <h2>Uber pronto para pedir</h2>
+          <p>Abri o Uber ${destino ? `com destino <strong>${destino.nome || 'cadastrado'}</strong> já preenchido` : 'com a partida já preenchida'}.
+             No celular ele abre no aplicativo; no computador, no site do Uber. Confirme o carro por lá.
+             ${aviso ? `<br><span class="muted">${aviso}</span>` : ''}</p>
+        </div>
+      </div>
+      <div class="ride-actions">
+        <a class="btn btn-green" href="${link}" target="_blank" rel="noopener">Abrir o Uber</a>
+        <button type="button" class="btn btn-outline" data-corrida="fechar">Fechar</button>
+      </div>`;
+    painel.querySelector('[data-corrida="fechar"]').addEventListener('click', () => { painel.hidden = true; });
+    painel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  $('acaoUber')?.addEventListener('click', async () => {
+    const botao = $('acaoUber');
+    const nota = $('acaoUberNota');
+    const textoNota = nota.textContent;
+    botao.disabled = true;
+
+    try {
+      // A pochete sabe onde está? Senão, pergunta ao navegador.
+      const pochete = pochetes[0] || null;
+      let origem = pochete?.posicao || null;
+      if (!origem) {
+        nota.textContent = 'Procurando sua localização…';
+        origem = await posicaoDoNavegador();
+      }
+
+      nota.textContent = 'Falando com a Uber…';
+      const r = await api('corridas', {
+        method: 'POST',
+        body: { pochete_id: pochete?.id, origem: origem || undefined }
+      });
+
+      if (r.modo === 'link') {
+        renderLinkUber(r);
+        // O clique já passou por um await, então o navegador pode bloquear a
+        // aba nova: o botão "Abrir o Uber" do painel continua ali para isso.
+        const aba = window.open(r.link, '_blank', 'noopener');
+        if (!aba) toast('corrida', 'Toque em "Abrir o Uber"', 'O navegador bloqueou a aba nova. O botão está logo acima dos números.');
+      } else {
+        renderCorrida(r.corrida);
+        toast('corrida', 'Carro chamado', 'Acompanhe o status no painel da corrida.');
+      }
+    } catch (e) {
+      toast('corrida', 'Não deu certo', e.message);
+    } finally {
+      nota.textContent = textoNota;
+      botao.disabled = false;
+    }
+  });
+
   async function carregarCorridas() {
     try {
       const { corridas } = await api('corridas');

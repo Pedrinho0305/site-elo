@@ -272,10 +272,12 @@
 .actions-section { margin-top: clamp(2.5rem, 5vw, 3.5rem); }
 .actions-section h2 { font-size: clamp(1.4rem, 2.6vw, 1.9rem); }
 
+/* Seis ações numa linha só; abaixo de 1080 px viram 3 + 3, e assim por diante
+   (a conta fecha em todos os breakpoints: 6, 3, 2 e 1 coluna) */
 .actions-grid {
   margin-top: 1.3rem;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: .9rem;
 }
 
@@ -303,6 +305,10 @@
 .action--red { --c: var(--red); }
 .action--purple { --c: var(--purple); }
 .action--orange { --c: var(--orange); }
+.action--teal { --c: var(--teal); }
+
+/* "Chamar Uber" fala com o servidor: fica desabilitado enquanto espera */
+.action:disabled { opacity: .6; cursor: progress; transform: none; }
 
 .action-icon {
   width: 46px;
@@ -485,6 +491,11 @@
 
 .ride-panel--a_caminho, .ride-panel--em_andamento, .ride-panel--concluida { background: linear-gradient(165deg, color-mix(in srgb, var(--green) 14%, var(--bg-3)), var(--bg-2) 70%); border-color: color-mix(in srgb, var(--green) 45%, var(--line)); }
 .ride-panel--erro, .ride-panel--sem_motorista, .ride-panel--cancelada, .ride-panel--recusada { background: var(--bg-2); border-color: var(--line-2); }
+
+/* Carro chamado pelo link universal: o pedido continua no app do Uber, então
+   o painel é informativo, não um acompanhamento */
+.ride-panel--link { background: linear-gradient(165deg, color-mix(in srgb, var(--teal) 14%, var(--bg-3)), var(--bg-2) 70%); border-color: color-mix(in srgb, var(--teal) 45%, var(--line)); }
+.ride-panel--link .ride-icon { background: color-mix(in srgb, var(--teal) 16%, transparent); }
 
 .ride-head { display: flex; gap: 1rem; align-items: flex-start; }
 .ride-icon { flex: none; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-size: 1.4rem; background: color-mix(in srgb, var(--orange) 16%, transparent); }

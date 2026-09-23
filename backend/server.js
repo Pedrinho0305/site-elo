@@ -5,7 +5,9 @@
      • contas dos cuidadores (cadastro, login, sessão por token)
      • pochetes vinculadas a cada cuidador (chave própria para o dispositivo)
      • eventos que a pochete manda (emergência, transporte, bateria, localização)
-     • corridas de Uber: pedido → aprovação do cuidador → chamada à Uber
+     • corridas de Uber: pedido da pochete → aprovação do cuidador → chamada
+       à Uber; ou o botão "Chamar Uber" do painel (API com credencial, link
+       universal sem ela)
      • avisos no Telegram e em tempo real no painel (SSE)
      • mensagens dos formulários do site (contato e pedido): guardadas no
        banco e mandadas para o e-mail da empresa (email.js)
@@ -31,6 +33,8 @@
      POST   /api/pochetes/:id/simular    { tipo, lat?, lng?, bateria?, destino? }  (testa sem o dispositivo)
      GET    /api/eventos?limite=20                                          → { eventos }
      GET    /api/eventos/stream?token=   SSE: emergencia, transporte, corrida, bateria, localizacao
+     POST   /api/corridas                { pochete_id?, origem?, destino? } → chama o carro
+                                        (com credenciais da Uber) ou devolve o link universal
      GET    /api/corridas                                                   → { corridas }
      GET    /api/corridas/:id            (atualiza o status na Uber)        → { corrida }
      POST   /api/corridas/:id/aprovar · /recusar · /cancelar
@@ -482,6 +486,7 @@ const ROTAS = [
   ['Eventos e corridas (cuidador)', [
     ['GET', '/api/eventos?limite=20', 'Bearer → { eventos }'],
     ['GET', '/api/eventos/stream?token=', 'SSE: emergencia, transporte, bateria, localizacao, teste, corrida, telegram. Não funciona em serverless.'],
+    ['POST', '/api/corridas', 'Bearer { pochete_id?, origem?: { lat, lng }, destino?: { lat, lng, nome } } — o botão "Chamar Uber" do painel. Com UBER_CLIENT_ID/SECRET: pede na Guest Rides API → 201 { modo: "api", corrida }. Sem credenciais: → { modo: "link", link } para abrir o app do Uber com partida e destino prontos.'],
     ['GET', '/api/corridas', 'Bearer → { corridas } (consulta a Uber e atualiza)'],
     ['GET', '/api/corridas/:id', 'Bearer → { corrida }'],
     ['POST', '/api/corridas/:id/aprovar', 'Bearer → estima e pede o carro na Uber → { corrida }'],
@@ -778,32 +783,102 @@ app.get('/api/corridas/:id', autenticar, async (req, res, next) => {
   try { res.json({ corrida: corridaPublica(await sincronizarCorrida(await corridaDoCuidador(req), req.cuidador.id)) }); } catch (e) { next(e); }
 });
 
+/* Estima e pede o carro na Uber para uma corrida já registrada. Usada pela
+   aprovação de um pedido da pochete e pelo botão "Chamar Uber" do painel:
+   nos dois casos a corrida já existe no banco e falta falar com a Uber. */
+async function pedirNaUber(corrida, pochete, cuidador) {
+  const origem = { lat: Number(corrida.origem_lat), lng: Number(corrida.origem_lng) };
+  const destino = { lat: Number(corrida.destino_lat), lng: Number(corrida.destino_lng), nome: corrida.destino_nome };
+
+  await pool.query('UPDATE corridas SET status = "aprovada" WHERE id = ?', [corrida.id]);
+  try {
+    const estimativa = await uber.estimar(origem, destino);
+    const pedido = await uber.solicitar({
+      idoso: { nome: pochete.nome_idoso, telefone: pochete.telefone_idoso || cuidador.telefone || '+5500000000000' },
+      origem, destino, estimativa,
+    });
+    await pool.query('UPDATE corridas SET status = ?, uber_request_id = ?, produto = ?, valor = ?, eta_min = ?, solicitada_em = NOW() WHERE id = ?',
+      [pedido.status, pedido.request_id, estimativa.nome, estimativa.valor, pedido.eta_min ?? estimativa.eta_min, corrida.id]);
+    await telegram.enviar(cuidador.telegram_chat_id, `✅ Corrida aprovada para ${pochete.nome_idoso}: ${estimativa.nome}, ${estimativa.valor || 'valor a confirmar'}. Chega em ~${pedido.eta_min ?? estimativa.eta_min ?? '?'} min.`);
+  } catch (e) {
+    await pool.query('UPDATE corridas SET status = "erro", erro = ? WHERE id = ?', [String(e.message).slice(0, 200), corrida.id]);
+    const [[falha]] = await pool.query('SELECT * FROM corridas WHERE id = ?', [corrida.id]);
+    sse.publicar(cuidador.id, 'corrida', { corrida: corridaPublica(falha) });
+    throw erro(e.status || 502, `Não consegui chamar o carro: ${e.message}`);
+  }
+
+  const [[atual]] = await pool.query('SELECT * FROM corridas WHERE id = ?', [corrida.id]);
+  sse.publicar(cuidador.id, 'corrida', { corrida: corridaPublica(atual) });
+  return atual;
+}
+
+/* ---- chamar um carro pelo painel ----
+   Sem credenciais da Uber não se inventa corrida: o servidor devolve o link
+   universal, que abre o app no celular e o site do Uber no computador com
+   partida e destino prontos. Com credenciais, é a Guest Rides API e o painel
+   acompanha o status aqui dentro. */
+app.post('/api/corridas', autenticar, async (req, res, next) => {
+  try {
+    const [minhas] = await pool.query('SELECT * FROM pochetes WHERE cuidador_id = ? ORDER BY id', [req.cuidador.id]);
+    const pochete = req.body?.pochete_id
+      ? minhas.find(p => p.id === Number(req.body.pochete_id))
+      : minhas[0];
+    if (req.body?.pochete_id && !pochete) throw erro(404, 'Pochete não encontrada.');
+
+    // Partida: a que o navegador mandou, ou a última posição conhecida da pochete
+    const origem = validarCoordenada(req.body?.origem?.lat, req.body?.origem?.lng)
+      || (pochete?.lat != null ? { lat: Number(pochete.lat), lng: Number(pochete.lng) } : null);
+
+    // Destino: o informado, ou o endereço de casa cadastrado na pochete
+    const informado = validarCoordenada(req.body?.destino?.lat, req.body?.destino?.lng);
+    const destino = informado || (pochete?.casa_lat != null ? { lat: Number(pochete.casa_lat), lng: Number(pochete.casa_lng) } : null);
+    const destinoNome = limparTexto(req.body?.destino?.nome, 200)
+      || (informado ? null : pochete?.casa_nome || 'Casa');
+
+    if (uber.simulado) {
+      // Modo link: nada é registrado porque ninguém aqui saberá o que
+      // aconteceu depois — quem conclui o pedido é a pessoa, no app da Uber.
+      const link = uber.linkUniversal({
+        origem, destino,
+        nomeOrigem: origem ? (pochete?.nome_idoso ? `Onde ${pochete.nome_idoso} está` : 'Partida') : null,
+        nomeDestino: destino ? (destinoNome || 'Destino') : null,
+      });
+      return res.json({
+        modo: 'link',
+        link,
+        origem,
+        destino: destino ? { ...destino, nome: destinoNome } : null,
+        aviso: !destino
+          ? 'Escolha o destino na tela do Uber. Para ele vir preenchido, cadastre o endereço de casa da pochete aqui no painel.'
+          : null,
+      });
+    }
+
+    // Modo API: precisa de pochete (a corrida fica no histórico dela), de
+    // partida e de destino
+    if (!pochete) throw erro(422, 'Vincule uma pochete antes de chamar o carro.');
+    if (!origem) throw erro(422, 'Sem local de partida: permita a localização no navegador ou espere a pochete mandar a posição.');
+    if (!destino) throw erro(422, 'Sem destino: cadastre o endereço de casa da pochete ou escolha um destino.');
+
+    const [ativas] = await pool.query('SELECT id FROM corridas WHERE pochete_id = ? AND status IN (?)', [pochete.id, STATUS_ATIVOS]);
+    if (ativas.length) throw erro(409, 'Já existe uma corrida em andamento para esta pochete.');
+
+    const [r] = await pool.query(
+      'INSERT INTO corridas (pochete_id, status, origem_lat, origem_lng, destino_lat, destino_lng, destino_nome) VALUES (?, "aprovada", ?, ?, ?, ?, ?)',
+      [pochete.id, origem.lat, origem.lng, destino.lat, destino.lng, destinoNome]);
+    const [[nova]] = await pool.query('SELECT * FROM corridas WHERE id = ?', [r.insertId]);
+
+    const atual = await pedirNaUber(nova, pochete, req.cuidador);
+    res.status(201).json({ modo: 'api', corrida: corridaPublica(atual) });
+  } catch (e) { next(e); }
+});
+
 app.post('/api/corridas/:id/aprovar', autenticar, async (req, res, next) => {
   try {
     const c = await corridaDoCuidador(req);
     if (c.status !== 'pendente') throw erro(409, 'Essa corrida não está mais esperando aprovação.');
     const [[p]] = await pool.query('SELECT * FROM pochetes WHERE id = ?', [c.pochete_id]);
-    const origem = { lat: Number(c.origem_lat), lng: Number(c.origem_lng) };
-    const destino = { lat: Number(c.destino_lat), lng: Number(c.destino_lng), nome: c.destino_nome };
-
-    await pool.query('UPDATE corridas SET status = "aprovada" WHERE id = ?', [c.id]);
-    try {
-      const estimativa = await uber.estimar(origem, destino);
-      const pedido = await uber.solicitar({
-        idoso: { nome: p.nome_idoso, telefone: p.telefone_idoso || req.cuidador.telefone || '+5500000000000' },
-        origem, destino, estimativa,
-      });
-      await pool.query('UPDATE corridas SET status = ?, uber_request_id = ?, produto = ?, valor = ?, eta_min = ?, solicitada_em = NOW() WHERE id = ?',
-        [pedido.status, pedido.request_id, estimativa.nome, estimativa.valor, pedido.eta_min ?? estimativa.eta_min, c.id]);
-      await telegram.enviar(req.cuidador.telegram_chat_id, `✅ Corrida aprovada para ${p.nome_idoso}: ${estimativa.nome}, ${estimativa.valor || 'valor a confirmar'}. Chega em ~${pedido.eta_min ?? estimativa.eta_min ?? '?'} min.`);
-    } catch (e) {
-      await pool.query('UPDATE corridas SET status = "erro", erro = ? WHERE id = ?', [String(e.message).slice(0, 200), c.id]);
-      const [[falha]] = await pool.query('SELECT * FROM corridas WHERE id = ?', [c.id]);
-      sse.publicar(req.cuidador.id, 'corrida', { corrida: corridaPublica(falha) });
-      throw erro(e.status || 502, `Não consegui chamar o carro: ${e.message}`);
-    }
-    const [[atual]] = await pool.query('SELECT * FROM corridas WHERE id = ?', [c.id]);
-    sse.publicar(req.cuidador.id, 'corrida', { corrida: corridaPublica(atual) });
+    const atual = await pedirNaUber(c, p, req.cuidador);
     res.json({ corrida: corridaPublica(atual) });
   } catch (e) { next(e); }
 });

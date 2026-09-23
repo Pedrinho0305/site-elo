@@ -165,6 +165,42 @@ export async function cancelar(requestId) {
 }
 
 /* ------------------------------------------------------------------------
+   Link universal (deep link)
+   ---------------------------------------------------------------------------
+   O outro jeito de chamar um carro, e o único que funciona sem a Uber ter
+   aprovado credenciais: um link que abre o app no celular e o site do Uber
+   no computador, já com a partida e o destino preenchidos. Quem conclui o
+   pedido é a pessoa, dentro do Uber — por isso o servidor não acompanha o
+   status depois (diferente da Guest Rides API, acima).
+
+   Formato oficial: https://m.uber.com/ul/?action=setPickup
+     &pickup[latitude]&pickup[longitude]&pickup[nickname]
+     &dropoff[latitude]&dropoff[longitude]&dropoff[nickname]
+   Sem coordenada de partida, "pickup=my_location" deixa o próprio app
+   resolver onde a pessoa está.
+   ------------------------------------------------------------------------ */
+export function linkUniversal({ origem, destino, nomeOrigem, nomeDestino } = {}) {
+  const p = new URLSearchParams({ action: 'setPickup' });
+  if (config.clientId) p.set('client_id', config.clientId);
+
+  if (origem) {
+    p.set('pickup[latitude]', String(origem.lat));
+    p.set('pickup[longitude]', String(origem.lng));
+    if (nomeOrigem) p.set('pickup[nickname]', nomeOrigem);
+  } else {
+    p.set('pickup', 'my_location');
+  }
+
+  if (destino) {
+    p.set('dropoff[latitude]', String(destino.lat));
+    p.set('dropoff[longitude]', String(destino.lng));
+    if (nomeDestino) p.set('dropoff[nickname]', nomeDestino);
+  }
+
+  return `https://m.uber.com/ul/?${p}`;
+}
+
+/* ------------------------------------------------------------------------
    Simulação: uma corrida fictícia que avança sozinha
      0–20 s   solicitada (procurando motorista)
      20–60 s  a_caminho (motorista aceitou)
