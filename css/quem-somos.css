@@ -249,8 +249,24 @@
 
 .form-field textarea { resize: vertical; min-height: 150px; }
 
+.form-optional { color: var(--text-3); font-weight: 400; }
+
+/* Campo-armadilha contra robôs: sai da tela sem sumir do HTML */
+.form-trap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .submit-button { justify-self: start; margin-top: .4rem; }
-.form-status { min-height: 1.5em; color: var(--green-2); font-weight: 500; }
+.submit-button:disabled { opacity: .65; cursor: progress; transform: none; }
+
+.form-status { min-height: 1.5em; color: var(--text-2); font-weight: 500; }
+.form-status.is-ok { color: var(--green-2); }
+.form-status.is-error { color: var(--red); }
 
 /* --------------------------------------------------------------------------
    5 · Responsivo

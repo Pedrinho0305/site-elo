@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Produto ELO - Pochete Inteligente</title>
   <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/header.css?v=6">
-  <link rel="stylesheet" href="../css/produtos.css?v=6">
-  <link rel="stylesheet" href="../css/reveal.css?v=6">
+  <link rel="stylesheet" href="../css/header.css?v=7">
+  <link rel="stylesheet" href="../css/produtos.css?v=7">
+  <link rel="stylesheet" href="../css/reveal.css?v=7">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="../js/formulario.js" defer></script>
   <script src="../js/produtos.js" defer></script>
   <script src="../js/header.js" defer></script>
   <script src="../js/reveal.js" defer></script>
@@ -217,8 +218,80 @@
           <li><i class="fa-solid fa-rotate"></i> Atualizações de software gratuitas</li>
           <li><i class="fa-solid fa-flask"></i> Baseada em 5 estudos revisados por pares</li>
         </ul>
-        <a class="offer-btn" href="quem-somos.html#contato">Quero uma ELO</a>
+        <a class="offer-btn" href="#pedido">Quero uma ELO</a>
         <p class="offer-note">Você fala direto com a equipe que desenvolveu o produto.</p>
+      </div>
+    </section>
+
+    <!-- Pedido: vai para o backend (POST /api/mensagens) e para o e-mail da equipe -->
+    <section class="order-section night" id="pedido">
+      <div class="order-card">
+        <div class="order-intro">
+          <p class="order-eyebrow">Fazer o pedido</p>
+          <h2>Peça a sua ELO</h2>
+          <p class="order-lead">Preencha e a equipe responde no seu e-mail com as formas de pagamento e o prazo de entrega. Nenhuma cobrança acontece aqui.</p>
+          <ul class="order-facts">
+            <li><i class="fa-solid fa-envelope-open-text"></i> Resposta em até 2 dias úteis</li>
+            <li><i class="fa-solid fa-shield-halved"></i> Garantia de 12 meses</li>
+            <li><i class="fa-solid fa-headset"></i> Suporte técnico 24/7 em português</li>
+          </ul>
+        </div>
+
+        <form class="order-form" id="orderForm" novalidate>
+          <div class="order-row">
+            <div class="order-field">
+              <label for="pedido-nome">Nome completo</label>
+              <input type="text" id="pedido-nome" name="nome" placeholder="Seu nome" autocomplete="name" required>
+            </div>
+            <div class="order-field">
+              <label for="pedido-email">E-mail</label>
+              <input type="email" id="pedido-email" name="email" placeholder="Para onde respondemos" autocomplete="email" required>
+            </div>
+          </div>
+
+          <div class="order-row">
+            <div class="order-field">
+              <label for="pedido-telefone">Telefone / WhatsApp</label>
+              <input type="tel" id="pedido-telefone" name="telefone" placeholder="(11) 90000-0000" autocomplete="tel" required>
+            </div>
+            <div class="order-field">
+              <label for="pedido-cidade">Cidade e estado</label>
+              <input type="text" id="pedido-cidade" name="cidade" placeholder="São Paulo, SP" autocomplete="address-level2" required>
+            </div>
+          </div>
+
+          <div class="order-row">
+            <div class="order-field">
+              <label for="pedido-quantidade">Quantidade</label>
+              <input type="number" id="pedido-quantidade" name="quantidade" value="1" min="1" max="50" required>
+            </div>
+            <div class="order-field">
+              <label for="pedido-pagamento">Forma de pagamento</label>
+              <div class="order-select">
+                <select id="pedido-pagamento" name="pagamento">
+                  <option value="à vista">À vista — R$ 997</option>
+                  <option value="12× sem juros">12× de R$ 89,90 sem juros</option>
+                  <option value="a combinar" selected>Ainda quero conversar sobre isso</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="order-field">
+            <label for="pedido-observacoes">Observações <span class="order-optional">(opcional)</span></label>
+            <textarea id="pedido-observacoes" name="mensagem" rows="4" placeholder="Para quem é a pochete, dúvidas sobre o envio, prazo…"></textarea>
+          </div>
+
+          <!-- Campo-armadilha: ninguém vê, robô preenche. O servidor descarta
+               o pedido quando vem com algo aqui. -->
+          <div class="order-trap" aria-hidden="true">
+            <label for="pedido-site">Não preencha este campo</label>
+            <input type="text" id="pedido-site" name="site" tabindex="-1" autocomplete="off">
+          </div>
+
+          <button type="submit" class="offer-btn order-submit">Enviar pedido</button>
+          <p class="order-status" id="orderStatus" role="status" aria-live="polite"></p>
+        </form>
       </div>
     </section>
 

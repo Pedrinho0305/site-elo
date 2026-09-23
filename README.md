@@ -130,6 +130,7 @@ css/
   auth.css · eloa.css · instrucoes.css · jogo.css · painel.css · produtos.css · quem-somos.css · referencias.css   um por página
 js/
   header.js                              tema, menu, sessão (window.EloSessao), perfil — roda em todas as páginas
+  formulario.js                          envio dos formulários públicos (contato e pedido) ao backend — Quem Somos e Produto
   home.js · reveal.js
   auth.js · eloa.js · eloa-engine.js · instrucoes.js · video-player.js · jogo.js · painel.js · painel-pochete.js · produtos.js · quem-somos.js · referencias.js
 assets/
@@ -145,7 +146,7 @@ api/                                     FUNÇÕES DA VERCEL (tudo aqui vira rot
   backend.js                             entrega backend/server.js como função → /api/*
   .env.example · README.md
 backend/
-  server.js · uber.js · telegram.js · eventos.js · package.json · .env.example · README.md   contas, pochete, Uber, Telegram (Express 5 + MySQL)
+  server.js · uber.js · telegram.js · eventos.js · email.js · reenviar-mensagens.js · package.json · .env.example · README.md   contas, pochete, Uber, Telegram, e-mail dos formulários (Express 5 + MySQL)
   api/index.js · vercel.json             só para publicar o backend como projeto separado (não é o caminho padrão)
 jogo/LEIA-ME.txt                         onde colocar a exportação HTML5 do jogo (jogo/index.html)
 vercel.json · package.json · requirements.txt · .vercelignore   deploy: rotas das funções, dependências Node (workspace backend) e Python
@@ -188,11 +189,12 @@ Toda página tem `<html lang="pt-BR" data-theme="dark">` para não piscar claro 
 - `.components-section`: tabela em `.table-container` (rola horizontal), cabeçalho sticky, `.price.highlight` em verde; `.desktop-only`/`.mobile-only` trocam colunas em ≤700 px.
 - `.product-preview.night`: `<model-viewer>` com piso de luz (`::after`).
 - `.included-card`: grade de itens com check verde. `.offer-card#oferta`: painel marinho (preço) + ações com `.offer-btn` laranja. Usa Font Awesome (único lugar do site).
+- `.order-section.night#pedido`: **fazer o pedido**. "Quero uma ELO" leva para cá (não sai mais da página). Texto e três fatos à esquerda, `.order-form` à direita (nome, e-mail, telefone, cidade, quantidade, forma de pagamento num `.order-select` com a seta desenhada por máscara, observações). Manda `tipo: "pedido"` para `POST /api/mensagens` (§6b) e mostra o protocolo na resposta. Nenhuma cobrança acontece no site — a equipe responde por e-mail.
 
 ### Quem Somos (`pages/quem-somos.html`, `css/quem-somos.css`, `js/quem-somos.js`)
 - `.page-header.night` + `.mission-card` sobreposto (ícone em anel giratório lento, `.mission-eyebrow` em ciano sentence-case, três `.pillar`).
 - `.team-grid` de `.team-card` com `.member-photo` 3:4. Sem foto (`assets/team/nome.jpg` ausente), `quem-somos.js` marca `.no-image` e o CSS mostra as **iniciais em gradiente** via `::after { content: attr(data-initials) }`. Nomes dos arquivos esperados estão em `assets/team/LEIA-ME.txt`.
-- `.contact-section.night#contato` com `.contact-form` (validação nativa + status; sem back-end). É o destino de todos os "Fale conosco", "Ajuda" e "Esqueci minha senha".
+- `.contact-section.night#contato` com `.contact-form` (nome, e-mail, assunto, telefone opcional, mensagem). É o destino de todos os "Fale conosco", "Ajuda" e "Esqueci minha senha". **Tem back-end:** manda `tipo: "contato"` para `POST /api/mensagens` (§6b), que guarda no banco e manda para o e-mail da equipe; o `.form-status` mostra o protocolo (`is-ok`) ou o motivo da falha (`is-error`), e o botão fica desabilitado durante o envio. Quem está logado tem nome e e-mail preenchidos.
 
 ### Referências (`pages/referencias.html`, `css/referencias.css`, `js/referencias.js`)
 - Mesmo cabeçalho sobreposto (`.foundation-card`: header/lead em cima, chips de temas e 3 stats embaixo).
@@ -231,6 +233,8 @@ Toda página tem `<html lang="pt-BR" data-theme="dark">` para não piscar claro 
 1. **Tema:** lê `localStorage.theme` (padrão **dark**), aplica em `<html data-theme>`, troca o ícone do botão.
 2. **Menu mobile:** `#menuToggle` alterna `.nav-links.active`; fecha ao clicar num link.
 3. **Sessão:** expõe `window.EloSessao = { ler(), entrar(dados), sair(), api(rota, opções) }` sobre `localStorage['elo-sessao']` = `{ nome, email, foto, token }`. O `token` vem do login no backend e é **obrigatório**: `ler()` descarta sessões sem token (não existe mais sessão "local"). `api()` manda `Authorization: Bearer`; `sair()` avisa o backend (`POST /api/logout`); cada página confirma a sessão em `GET /api/me` e a derruba se vier 401. **Endereço do backend:** `window.ELO_API_URL`, que por padrão é `http://localhost:3000/api` quando o site roda em `localhost` (ou aberto do disco) e `/api` (mesmo domínio) quando está publicado. Para apontar para outro servidor, defina a variável antes de carregar `header.js`.
+
+**Trabalhar sem MySQL na máquina:** abra qualquer página com **`?api=publicado`** (ex.: `http://localhost:5500/pages/login.html?api=publicado`) e aquela **aba** passa a falar com o backend do site publicado — as mesmas contas de lá, sem subir nada localmente. `?api=local` volta ao `localhost:3000`. A escolha vive em `sessionStorage['elo-api']` (morre com a aba), só funciona quando o site roda na máquina e não muda nada no site publicado; enquanto está ativa, o console avisa que o que for criado ali é real. O backend publicado aceita essas chamadas porque `ALLOWED_ORIGINS` libera a origem.
 4. **Perfil:** se há sessão e existe um elemento `[data-profile-slot]`, substitui-o pelo `.profile` (chip + menu). Os links do menu são calculados a partir do `href` do slot (`pages/login.html` na home, `login.html` nas páginas), então **mantenha o `href` do slot correto** em cada página. "Sair" limpa a sessão e volta à home.
 
 Chaves usadas no `localStorage`: `theme`, `elo-sessao`, `elo-cuidador` (legado, primeiro nome). No `sessionStorage`: `eloa-sessao` (id da conversa com a Eloá) e `eloa-historico` (as últimas mensagens, enviadas a cada pergunta).
@@ -244,6 +248,7 @@ Documentação completa em [backend/README.md](backend/README.md), incluindo o *
 - **Uber:** `uber.js` implementa a Guest Rides API (token `client_credentials`, estimativa, pedido, consulta, cancelamento). Sem `UBER_CLIENT_ID/SECRET` roda **simulado** (corrida fictícia que avança sozinha). Fluxo: botão amarelo → corrida `pendente` → cuidador aprova no painel → estimativa + pedido → status sincronizado a cada 10 s.
 - **Telegram:** `telegram.js` (Bot API `sendMessage` + polling `getUpdates`). O cuidador manda `/start CÓDIGO` ao bot. Sem `TELEGRAM_BOT_TOKEN`, simulado (mensagens no terminal, vínculo por `chat_id` digitado).
 - **Tempo real:** `eventos.js` é um canal SSE por cuidador (`GET /api/eventos/stream?token=`); o painel usa `EventSource`. Payload `{ tipo, dados, em }`.
+- **Formulários do site:** `POST /api/mensagens` (sem login) recebe o contato de Quem Somos e o pedido de Produto: valida, descarta robô (campo-armadilha `site`), limita 5 por hora do mesmo e-mail/IP, salva na tabela `mensagens` e manda para `EMAIL_EMPRESA` com *Responder* apontando para quem escreveu, mais uma confirmação com o protocolo (`ELO-0007`) para a pessoa. `email.js` manda pelo **Gmail da própria empresa** (SMTP com Senha de App, `GMAIL_APP_PASSWORD`) ou pela API HTTP da **Brevo**/Resend — a primeira chave encontrada define. Sem chave, o e-mail vai para o terminal e a mensagem continua salva — igual à Uber e ao Telegram. O que ficou sem enviar sai depois com `node --env-file-if-exists=.env reenviar-mensagens.js`. A equipe lê em `GET /api/mensagens` (só contas em `ADMIN_EMAILS`). No front, `js/formulario.js` é o envio compartilhado pelas duas páginas.
 - **Painel** (`js/painel-pochete.js`): toasts, tile "Último alerta", painel de corrida com Aprovar/Recusar/Cancelar, vínculo de pochete (mostra a chave uma vez), Telegram e botões de simulação. Sem token (demonstração local), a seção explica que precisa do servidor.
 - **`GET /`** (e `GET /api`, no site publicado) é a página do backend (rotas, estado, ambiente). **Vercel:** publicado junto com o site pela função `api/backend.js` (ver §6c). Em serverless o SSE, o polling do Telegram e a sincronização automática ficam desligados (o app detecta `process.env.VERCEL`); o painel consulta a cada 10 s no lugar do stream, e cada pedido tenta reconectar ao banco se a conexão inicial falhou (`garantirBanco`).
 
@@ -265,6 +270,7 @@ Como funciona: `package.json` da raiz declara `backend` como workspace, então o
 |---|---|
 | **`GEMINI_API_KEY`** (ou `GROQ_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `AI_GATEWAY_API_KEY`) | Eloá com o modelo. **Gemini é o caminho gratuito**: chave em [aistudio.google.com/apikey](https://aistudio.google.com/apikey), sem cartão, ~1.000 pedidos/dia (a Google pode usar as conversas para treinar). Groq também é grátis (modelos Llama). Anthropic e OpenAI são pagas; o Vercel AI Gateway exige cartão na conta. Uma chave basta; a primeira encontrada (nesta ordem: Anthropic, Gemini, Groq, OpenAI, Gateway) define o provedor, ou force com `ELOA_PROVEDOR`. Sem nenhuma, modo local (palavras-chave). |
 | `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | MySQL do backend (os mesmos valores de `backend/.env`). O banco da escola precisa aceitar conexão de fora, e aceita. |
+| **`EMAIL_EMPRESA`** + **`GMAIL_APP_PASSWORD`** | Para onde vão as mensagens dos formulários (contato e pedido) e a chave que as manda. Como o endereço da empresa é um Gmail, o caminho curto é a **Senha de App** dele (verificação em duas etapas ligada → myaccount.google.com/apppasswords → 16 letras); ~500 e-mails/dia. Alternativas: `BREVO_API_KEY` (gratuita, 300/dia, sem 2 etapas) ou `RESEND_API_KEY` (exige domínio). Sem nenhuma, a mensagem é salva no banco e o e-mail só aparece no log. Opcionais: `EMAIL_REMETENTE`, `EMAIL_NOME`, `EMAIL_COPIA=0`, `ADMIN_EMAILS`, `EMAIL_SMTP_HOST/PORTA`. |
 | `ALLOWED_ORIGINS` | `*` ou o domínio do site. |
 | `SESSION_DAYS` | duração do login (padrão 30). |
 | `UBER_CLIENT_ID/SECRET`, `TELEGRAM_BOT_TOKEN/USERNAME` | opcionais; sem elas, simulados. |
@@ -299,7 +305,7 @@ Documentação completa em [api/README.md](api/README.md). O essencial:
 6. **Header flutuante ≠ header do app.** Páginas do site usam `.site-header` (fixo, pílula). Painel/Relatórios usam `.app-header` (sticky, largura total). Login/Cadastro usam `.auth-header` (simples, sem menu).
 7. **Especificidade:** as páginas usam seletores de uma classe; o sistema usa `main > :first-child` (0,1,1). Se precisar sobrescrever, use `.pagina > .secao` (0,2,0), não `!important`. Os poucos `!important` existentes (`.scheme-hint`, `.demo-specs`, `.profile-logout`, `.profile-role`) são conscientes.
 8. **Acessibilidade mínima:** todo ícone-botão tem `aria-label`; `:focus-visible` é o anel ciano do sistema; contraste dos textos sobre gradiente usa `--ink-on-brand`.
-9. **Sem dependências novas no front.** O site é HTML/CSS/JS puro. Externos: Google Fonts, `model-viewer` (Instruções e Produto), Font Awesome (só Produto). Back-ends: `api/` (Eloá, Python) e `backend/` (contas e pochete, Node). O site abre sem eles; a Eloá responde pelo motor do navegador, mas **login e cadastro exigem o backend** (só entra quem está cadastrado — não recrie a demonstração local).
+9. **Sem dependências novas no front.** O site é HTML/CSS/JS puro. Externos: Google Fonts, `model-viewer` (Instruções e Produto), Font Awesome (só Produto). Back-ends: `api/` (Eloá, Python) e `backend/` (contas, pochete e mensagens do site, Node). O site abre sem eles; a Eloá responde pelo motor do navegador, mas **login, cadastro e os dois formulários (contato e pedido) exigem o backend** — sem servidor, o formulário avisa que não conseguiu falar com a ELO em vez de fingir que enviou (a antiga confirmação local foi removida de propósito, como a demonstração de login).
 10. **Deploy é um projeto só.** Não separe backend e site em projetos diferentes da Vercel sem necessidade: o front usa `/api` relativo. Se um dia o backend for para outro lugar (servidor da escola, para ter o stream), defina `window.ELO_API_URL` antes de `header.js` em todas as páginas.
 11. **Antes de entregar, olhe.** O fluxo usado neste projeto: subir `python -m http.server 8765` na raiz, abrir cada página em 1440×900, 1000×700 e 390×844 nos dois temas, rolar até o fim (para os reveals dispararem) e conferir. Fluxos a testar sempre que tocar em sessão (com o backend no ar): login com email não cadastrado → mensagem, sem sessão; cadastro → painel → menu de perfil → sair; painel sem sessão → login; backend fora → login avisa e não entra.
 
@@ -311,6 +317,7 @@ Documentação completa em [api/README.md](api/README.md). O essencial:
 |---|---|---|
 | Vídeo demonstrativo | `pages/instrucoes.html` `<video>` | Gravar o vídeo novo e colocar `src`. O antigo mostrava o site velho e foi retirado. |
 | Link do artigo 5 | `pages/referencias.html` `.article-link` do card 5 | Artigos 1–4 têm DOI (vindos do Figma, conferidos na Crossref). O 5 (Hillesheim, UFSC) não tem link no Figma e não foi localizado; segue `href="#"` até a equipe informar. |
+| Chave de e-mail | `GMAIL_APP_PASSWORD` (ou `BREVO_API_KEY`) + `EMAIL_EMPRESA`, no projeto da Vercel e em `backend/.env` | Senha de App do Gmail da empresa (precisa de verificação em duas etapas na conta) ou chave gratuita da Brevo. Sem ela, contato e pedido continuam sendo salvos no banco (`GET /api/mensagens`), mas o e-mail só aparece no log — e sai depois com `backend/reenviar-mensagens.js`. |
 | Chave do Gemini | `GEMINI_API_KEY` no projeto da Vercel (e em `api/.env` para rodar local) | Gratuita em aistudio.google.com/apikey. Sem ela a Eloá responde no modo local (palavras-chave), nunca fica muda. |
 | Jogo sem a interface do gd.games | `jogo/index.html` | Exportar o jogo em HTML5 no GDevelop e copiar para a pasta `jogo/` (passo a passo no `LEIA-ME`). A página troca sozinha. |
 | Firmware da pochete | — | O backend já aceita os eventos (contrato em `backend/README.md`); falta o dispositivo mandar. Até lá, "Testar sem a pochete" no painel. |

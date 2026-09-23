@@ -137,7 +137,7 @@ ASSUNTOS = [
     {
         "id": "comercial", "nome": "como comprar",
         "pistas": ["comprar", "compra", "reservar", "reserva", "encomendar", "pedido", "entrega", "frete", "prazo", "nota fiscal", "desconto", "alugar", "aluguel", "pix", "cartao", "boleto", "onde compro", "loja"],
-        "fato": "Compra: a reserva é feita falando com a equipe pelo formulário da página Quem Somos (a página Produto tem o botão 'Quero uma ELO' que leva ao mesmo formulário); você fala direto com quem desenvolveu. Prazo e área de entrega, formas de pagamento, nota fiscal, desconto e aluguel NÃO estão publicados no site: a equipe fecha essas condições diretamente.",
+        "fato": "Compra: o pedido é feito no formulário 'Peça a sua ELO', na própria página Produto — o botão 'Quero uma ELO' leva até ele. Pede nome, e-mail, telefone, cidade, quantidade e forma de pagamento (à vista, 12x ou a combinar), e tem campo para observações. Nenhuma cobrança acontece no site: a mensagem chega à equipe, que responde por e-mail em até 2 dias úteis com formas de pagamento e prazo de entrega, e quem pediu recebe na hora um protocolo (por exemplo ELO-0007) e um e-mail de confirmação. Prazo e área de entrega, nota fiscal, desconto e aluguel NÃO estão publicados no site: a equipe fecha essas condições diretamente. Para dúvidas que não são pedido, o formulário é o da página Quem Somos.",
     },
     {
         "id": "garantia", "nome": "a garantia e o suporte",
@@ -167,7 +167,7 @@ ASSUNTOS = [
     {
         "id": "contato", "nome": "o contato",
         "pistas": ["contato", "falar com", "email", "e-mail", "telefone", "whatsapp", "instagram", "redes sociais", "formulario", "atendimento", "humano", "atendente"],
-        "fato": "Contato: o formulário na página Quem Somos, que cai direto com a equipe que desenvolveu o produto. Telefone, e-mail e redes sociais NÃO estão publicados no site; o formulário é o canal.",
+        "fato": "Contato: o formulário 'Entre em Contato', na página Quem Somos. Ele pede nome, e-mail, assunto, telefone (opcional) e a mensagem, e vai direto para a equipe que desenvolveu o produto: quem escreve recebe na hora um protocolo (por exemplo ELO-0007) e um e-mail de confirmação, e a resposta chega no mesmo e-mail em até 2 dias úteis. Telefone, e-mail e redes sociais NÃO estão publicados no site; o formulário é o canal. Para fazer um pedido, o formulário é o da página Produto.",
     },
     {
         "id": "componentes", "nome": "os componentes",
@@ -177,7 +177,7 @@ ASSUNTOS = [
     {
         "id": "site", "nome": "as páginas do site",
         "pistas": ["site", "pagina", "onde encontro", "onde vejo", "onde fica", "menu", "video", "3d", "modelo"],
-        "fato": "Páginas do site: Início (visão geral); Instruções (o manual, com a pochete em 3D anotada e o vídeo demonstrativo, que ainda está em produção); Produto (componentes, custos, modelo 3D, o que vem na caixa e o preço); Quem Somos (equipe, missão e formulário de contato); Referências (artigos científicos); Jogo (ELO: O Jogo, em desenvolvimento, sobre ser um cuidador); Eloá (esta conversa); e Entrar, que dá acesso ao painel do cuidador e aos relatórios.",
+        "fato": "Páginas do site: Início (visão geral); Instruções (o manual, com a pochete em 3D anotada e o vídeo demonstrativo, que ainda está em produção); Produto (componentes, custos, modelo 3D, o que vem na caixa, o preço e o formulário para fazer o pedido); Quem Somos (equipe, missão e o formulário de contato); Referências (artigos científicos); Jogo (ELO: O Jogo, em desenvolvimento, sobre ser um cuidador); Eloá (esta conversa); e Entrar, que dá acesso ao painel do cuidador e aos relatórios.",
     },
     {
         "id": "jogo", "nome": "o jogo",

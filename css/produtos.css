@@ -267,13 +267,128 @@ tfoot tr + tr td { border-top: 1px solid var(--line); }
 .offer-note { margin-top: .9rem; color: var(--text-3); font-size: .93rem; }
 
 /* --------------------------------------------------------------------------
-   6 · Responsivo
+   6 · Pedido — faixa de noite com o formulário que vai para a equipe
+   -------------------------------------------------------------------------- */
+.order-section {
+  --seta-baixo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+.main-container > .order-section {
+  width: 100%;
+  margin-top: var(--band-y);
+  padding: clamp(3rem, 6vw, 5rem) var(--edge);
+  scroll-margin-top: calc(var(--header-top) + var(--header-h) + 1rem);
+}
+
+.order-card {
+  width: min(100%, var(--page));
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: .85fr 1.15fr;
+  gap: clamp(1.8rem, 4vw, 3.5rem);
+  align-items: start;
+}
+
+.order-eyebrow { color: var(--cyan); font-weight: 600; font-size: .95rem; }
+.order-intro h2 { margin-top: .3rem; font-size: clamp(1.7rem, 3.2vw, 2.5rem); letter-spacing: -.02em; }
+.order-lead { margin-top: 1rem; color: var(--text-2); font-size: 1.05rem; line-height: 1.6; }
+
+.order-facts { list-style: none; margin: 1.8rem 0 0; padding: 0; display: grid; gap: .9rem; }
+.order-facts li { display: flex; align-items: center; gap: .8rem; color: var(--text-2); font-size: .98rem; }
+.order-facts i {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: .85rem;
+  color: var(--green-2);
+  background: color-mix(in srgb, var(--green) 14%, transparent);
+}
+
+.order-form {
+  display: grid;
+  gap: 1.1rem;
+  padding: clamp(1.5rem, 3.5vw, 2.4rem);
+  border-radius: var(--r-xl);
+  background: var(--bg-2);
+  border: 1px solid var(--line-2);
+  box-shadow: var(--shadow-2);
+}
+
+.order-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+.order-field { display: grid; gap: .45rem; }
+.order-field label { font-weight: 600; font-size: .95rem; }
+.order-optional { color: var(--text-3); font-weight: 400; }
+
+.order-field input, .order-field select, .order-field textarea {
+  width: 100%;
+  padding: .9rem 1.1rem;
+  border-radius: var(--r-md);
+  background: var(--bg-3);
+  border: 1px solid var(--line-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.order-field input::placeholder, .order-field textarea::placeholder { color: var(--text-3); }
+
+.order-field input:focus, .order-field select:focus, .order-field textarea:focus {
+  outline: 0;
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--cyan) 22%, transparent);
+}
+
+.order-field textarea { resize: vertical; min-height: 110px; }
+
+/* A seta do select é desenhada aqui (máscara + token de cor) para o campo ter
+   a mesma cara nos dois temas, em vez da seta do sistema */
+.order-select { position: relative; display: grid; }
+.order-field select { appearance: none; padding-right: 2.8rem; }
+
+.order-select::after {
+  content: "";
+  position: absolute;
+  right: 1.1rem;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+  background: var(--text-3);
+  -webkit-mask: var(--seta-baixo) center / contain no-repeat;
+  mask: var(--seta-baixo) center / contain no-repeat;
+  pointer-events: none;
+}
+
+/* Campo-armadilha contra robôs: sai da tela sem sumir do HTML */
+.order-trap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.order-submit { justify-self: start; margin-top: .4rem; }
+.order-submit:disabled { opacity: .65; cursor: progress; transform: none; }
+
+.order-status { min-height: 1.5em; color: var(--text-2); font-weight: 500; line-height: 1.5; }
+.order-status.is-ok { color: var(--green-2); }
+.order-status.is-error { color: var(--red); }
+
+/* --------------------------------------------------------------------------
+   7 · Responsivo
    -------------------------------------------------------------------------- */
 @media (max-width: 900px) {
   .banner-card { grid-template-columns: 1fr; grid-template-areas: "visual" "icon" "title" "text" "badges"; }
   .banner-visual { max-width: 520px; margin-bottom: 1rem; }
   .banner-icon { margin-top: .5rem; }
   .offer-card { grid-template-columns: 1fr; }
+  .order-card { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 700px) {
@@ -282,4 +397,6 @@ tfoot tr + tr td { border-top: 1px solid var(--line); }
   table { min-width: 0; }
   thead th, tbody td, tfoot td { padding-inline: 1rem; }
   .offer-btn { align-self: stretch; }
+  .order-row { grid-template-columns: 1fr; }
+  .order-submit { justify-self: stretch; }
 }

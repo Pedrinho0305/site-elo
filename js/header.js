@@ -110,9 +110,34 @@ document.addEventListener('DOMContentLoaded', () => {
    Endereço do backend: rodando o site na máquina (localhost ou arquivo
    aberto direto) é o npm start na porta 3000; publicado, é /api no mesmo
    domínio (função api/backend.js). window.ELO_API_URL, definido antes deste
-   arquivo, sobrescreve os dois. */
+   arquivo, sobrescreve os dois.
+
+   Atalho para desenvolver sem MySQL na máquina: abra qualquer página com
+   ?api=publicado e a ABA passa a falar com o backend do site publicado (as
+   mesmas contas de lá — cuidado, o que você criar é real). ?api=local volta
+   ao normal. Vale só enquanto a aba existir (sessionStorage) e só quando o
+   site roda na máquina; no site publicado não muda nada. */
+const ELO_API_PUBLICADA = 'https://site-elo-pi.vercel.app/api';
+const ELO_NA_MAQUINA = /^(localhost|127\.0\.0\.1|\[::1\]|)$/.test(location.hostname);
+
+// Guardado em sessionStorage, que pode estar bloqueado (arquivo aberto direto,
+// janela anônima): nada aqui pode derrubar o resto do header.
+const eloApiEscolhida = () => {
+  if (!ELO_NA_MAQUINA) return null;
+  try {
+    const escolha = new URLSearchParams(location.search).get('api');
+    if (escolha === 'publicado') sessionStorage.setItem('elo-api', ELO_API_PUBLICADA);
+    if (escolha === 'local') sessionStorage.removeItem('elo-api');
+    return sessionStorage.getItem('elo-api');
+  } catch { return null; }
+};
+
 window.ELO_API_URL = window.ELO_API_URL
-  || (/^(localhost|127\.0\.0\.1|\[::1\]|)$/.test(location.hostname) ? 'http://localhost:3000/api' : '/api');
+  || (ELO_NA_MAQUINA ? (eloApiEscolhida() || 'http://localhost:3000/api') : '/api');
+
+if (ELO_NA_MAQUINA && window.ELO_API_URL === ELO_API_PUBLICADA) {
+  console.warn('ELO: esta aba está falando com o backend PUBLICADO (%s). Contas e mensagens criadas aqui são reais. Use ?api=local para voltar ao servidor da máquina.', ELO_API_PUBLICADA);
+}
 
 window.EloSessao = {
   ler() {

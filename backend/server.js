@@ -7,6 +7,8 @@
      • eventos que a pochete manda (emergência, transporte, bateria, localização)
      • corridas de Uber: pedido → aprovação do cuidador → chamada à Uber
      • avisos no Telegram e em tempo real no painel (SSE)
+     • mensagens dos formulários do site (contato e pedido): guardadas no
+       banco e mandadas para o e-mail da empresa (email.js)
 
    Rodar:
      cd backend && npm install
@@ -37,6 +39,13 @@
      DELETE /api/telegram
      POST   /api/telegram/teste
 
+   ROTAS DOS FORMULÁRIOS DO SITE (sem login)
+     POST   /api/mensagens              { tipo: contato|pedido, nome, email, telefone?,
+                                          assunto, mensagem, detalhes? }  → 201 { mensagem }
+                                        Salva no banco E manda para o e-mail da empresa.
+     GET    /api/mensagens?tipo=&limite= Bearer de um e-mail em ADMIN_EMAILS → { mensagens }
+     PATCH  /api/mensagens/:id          Bearer (admin) { lida }            → { mensagem }
+
    ROTAS DA POCHETE (X-Pochete-Key: <chave>)
      POST   /api/pochete/evento          { tipo: emergencia|transporte|bateria|localizacao|teste,
                                            lat?, lng?, bateria?, destino?: { lat, lng, nome } }
@@ -59,6 +68,7 @@ import mysql from 'mysql2/promise';
 import * as uber from './uber.js';
 import * as telegram from './telegram.js';
 import * as sse from './eventos.js';
+import * as correio from './email.js';
 
 /* ------------------------------------------------------------------------
    Configuração
@@ -71,6 +81,12 @@ const CONFIG = {
   origens: (process.env.ALLOWED_ORIGINS || '*').split(',').map(o => o.trim()),
   sessaoDias: Number(process.env.SESSION_DAYS) || 30,
   bateriaBaixa: Number(process.env.BATERIA_BAIXA) || 20,
+  // Quem pode ler as mensagens do site em /api/mensagens. Sem a variável, só
+  // a conta com o e-mail da empresa (EMAIL_EMPRESA).
+  admins: (process.env.ADMIN_EMAILS || process.env.EMAIL_EMPRESA || '')
+    .split(',').map(e => e.trim().toLowerCase()).filter(Boolean),
+  // Quantas mensagens o mesmo e-mail (ou o mesmo IP) pode mandar por hora
+  mensagensPorHora: Number(process.env.MENSAGENS_POR_HORA) || 5,
   banco: {
     host: process.env.DB_HOST || 'localhost',
     port: Number(process.env.DB_PORT) || 3306,
@@ -193,6 +209,29 @@ async function conectarBanco() {
       CONSTRAINT fk_corrida_pochete FOREIGN KEY (pochete_id) REFERENCES pochetes(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
 
+  // O que chega pelos formulários do site (Quem Somos e Produto). Fica aqui
+  // mesmo quando o e-mail falha: o banco é o registro, o e-mail é o aviso.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS mensagens (
+      id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      tipo          VARCHAR(12)   NOT NULL DEFAULT 'contato',
+      nome          VARCHAR(120)  NOT NULL,
+      email         VARCHAR(190)  NOT NULL,
+      telefone      VARCHAR(20)   NULL,
+      assunto       VARCHAR(160)  NOT NULL,
+      mensagem      TEXT          NULL,
+      detalhes      JSON          NULL,
+      cuidador_id   INT UNSIGNED  NULL,
+      pagina        VARCHAR(160)  NULL,
+      ip            VARCHAR(45)   NULL,
+      email_status  VARCHAR(120)  NOT NULL DEFAULT 'pendente',
+      lida          TINYINT(1)    NOT NULL DEFAULT 0,
+      criado_em     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX (tipo, criado_em),
+      INDEX (email, criado_em),
+      CONSTRAINT fk_mensagem_cuidador FOREIGN KEY (cuidador_id) REFERENCES cuidadores(id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+
   const [colsCorridas] = await pool.query('SHOW COLUMNS FROM corridas');
   if (!colsCorridas.some(c => c.Field === 'solicitada_em')) await pool.query('ALTER TABLE corridas ADD COLUMN solicitada_em DATETIME NULL AFTER erro');
 }
@@ -263,6 +302,13 @@ const corridaPublica = c => ({
   destino: { lat: Number(c.destino_lat), lng: Number(c.destino_lng), nome: c.destino_nome },
   produto: c.produto, valor: c.valor, eta_min: c.eta_min, motorista: c.motorista, veiculo: c.veiculo, erro: c.erro,
   uber_request_id: c.uber_request_id, criado_em: c.criado_em, solicitada_em: c.solicitada_em, atualizado_em: c.atualizado_em,
+});
+const protocolo = id => 'ELO-' + String(id).padStart(4, '0');
+const mensagemPublica = m => ({
+  id: m.id, protocolo: protocolo(m.id), tipo: m.tipo, nome: m.nome, email: m.email,
+  telefone: m.telefone, assunto: m.assunto, mensagem: m.mensagem,
+  detalhes: typeof m.detalhes === 'string' ? JSON.parse(m.detalhes) : m.detalhes,
+  pagina: m.pagina, lida: Boolean(m.lida), email_status: m.email_status, criado_em: m.criado_em,
 });
 const mapa = (lat, lng) => `https://maps.google.com/?q=${lat},${lng}`;
 const STATUS_ATIVOS = ['pendente', 'aprovada', 'solicitada', 'a_caminho', 'em_andamento'];
@@ -442,6 +488,11 @@ const ROTAS = [
     ['POST', '/api/corridas/:id/recusar', 'Bearer → { corrida }'],
     ['POST', '/api/corridas/:id/cancelar', 'Bearer → cancela na Uber → { corrida }'],
   ]],
+  ['Formulários do site (contato e pedido)', [
+    ['POST', '/api/mensagens', '{ tipo: contato | pedido, nome, email, telefone?, assunto?, mensagem?, quantidade?, pagamento?, cidade?, pagina? } → 201 { mensagem, email }. Salva no banco e manda para o e-mail da empresa. Sem login.'],
+    ['GET', '/api/mensagens?tipo=&limite=', 'Bearer de uma conta em ADMIN_EMAILS → { mensagens }'],
+    ['PATCH', '/api/mensagens/:id', 'Bearer (equipe) { lida } → { mensagem }'],
+  ]],
   ['Telegram (cuidador)', [
     ['POST', '/api/telegram/codigo', 'Bearer → { codigo, bot, simulado, vinculado }'],
     ['POST', '/api/telegram/vincular', 'Bearer { chat_id } (só no modo simulado)'],
@@ -460,6 +511,7 @@ async function estadoServidor() {
     banco, host_banco: `${CONFIG.banco.user}@${CONFIG.banco.host}/${CONFIG.banco.database}`,
     uber: uber.simulado ? 'simulado' : 'real',
     telegram: telegram.simulado ? 'simulado' : 'bot @' + telegram.botUsername,
+    email: correio.simulado ? `simulado (${correio.motivo})` : `${correio.provedor} → ${correio.empresa}`,
     tempo_real: NA_VERCEL ? 'desligado (serverless)' : 'SSE ativo',
     ativo_ha_s: Math.round((Date.now() - INICIO) / 1000),
     node: process.version,
@@ -506,6 +558,7 @@ app.get(['/', '/api'], async (req, res, next) => {
     ${chip('Banco', estado.banco, ok ? 'ok' : 'bad')}
     ${chip('Uber', estado.uber, estado.uber === 'real' ? 'ok' : 'warn')}
     ${chip('Telegram', estado.telegram, estado.telegram === 'simulado' ? 'warn' : 'ok')}
+    ${chip('E-mail', estado.email, correio.simulado ? 'warn' : 'ok')}
     ${chip('Tempo real', estado.tempo_real, NA_VERCEL ? 'warn' : 'ok')}
     ${chip('Ambiente', estado.ambiente, 'ok')}
     ${chip('Ativo há', estado.ativo_ha_s + ' s', 'ok')}
@@ -522,7 +575,12 @@ app.get(['/', '/api'], async (req, res, next) => {
 app.get('/api/saude', async (_req, res, next) => {
   try {
     await pool.query('SELECT 1');
-    res.json({ ok: true, banco: 'conectado', uber: uber.simulado ? 'simulado' : 'real', telegram: telegram.simulado ? 'simulado' : 'real' });
+    res.json({
+      ok: true, banco: 'conectado',
+      uber: uber.simulado ? 'simulado' : 'real',
+      telegram: telegram.simulado ? 'simulado' : 'real',
+      email: correio.simulado ? 'simulado' : correio.provedor,
+    });
   } catch (e) { next(e); }
 });
 
@@ -812,6 +870,137 @@ app.post('/api/telegram/teste', autenticar, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+/* ------------------------------------------------------------------------
+   Mensagens dos formulários do site (Quem Somos e Produto)
+   ---------------------------------------------------------------------------
+   Qualquer pessoa pode mandar — não é rota de cuidador. O banco é o registro
+   (nada se perde se o e-mail falhar) e o e-mail é o aviso para a equipe.
+   ------------------------------------------------------------------------ */
+const TIPOS_MENSAGEM = ['contato', 'pedido'];
+const PAGAMENTOS = ['à vista', '12× sem juros', 'a combinar'];
+
+const limparTexto = (t, max) => String(t ?? '').replace(/\r/g, '').trim().slice(0, max);
+const ehAdmin = cuidador => CONFIG.admins.includes(String(cuidador.email || '').toLowerCase());
+const ipDoPedido = req => String(req.headers['x-forwarded-for'] || '').split(',')[0].trim()
+  || req.socket?.remoteAddress || null;
+
+// Quem está logado no site entra junto com a mensagem; quem não está, não é barrado
+async function cuidadorOpcional(req) {
+  const [tipo, token] = String(req.headers.authorization || '').split(' ');
+  if (tipo !== 'Bearer') return null;
+  try { return await carregarPorToken(token); } catch { return null; }
+}
+
+// Do pedido só interessam três coisas além dos campos comuns
+function lerDetalhes(corpo) {
+  const quantidade = Math.max(1, Math.min(50, Math.round(Number(corpo?.quantidade)) || 1));
+  const pagamento = PAGAMENTOS.includes(corpo?.pagamento) ? corpo.pagamento : 'a combinar';
+  const cidade = limparTexto(corpo?.cidade, 120) || null;
+  return { quantidade, pagamento, cidade };
+}
+
+app.post('/api/mensagens', async (req, res, next) => {
+  try {
+    const corpo = req.body || {};
+    const tipo = TIPOS_MENSAGEM.includes(String(corpo.tipo || 'contato')) ? String(corpo.tipo || 'contato') : null;
+    if (!tipo) throw erro(400, 'Tipo de mensagem desconhecido.');
+
+    // Campo-armadilha: fica escondido no formulário, então só robô preenche.
+    // Responde como se tivesse dado certo e não guarda nada.
+    if (limparTexto(corpo.site, 200)) return res.status(201).json({ ok: true, mensagem: null });
+
+    const nome = limparNome(corpo.nome);
+    const emailPessoa = limparEmail(corpo.email);
+    const telefone = limparTelefone(corpo.telefone);
+    const detalhes = tipo === 'pedido' ? lerDetalhes(corpo) : null;
+    const texto = limparTexto(corpo.mensagem, 4000);
+    const assunto = limparTexto(corpo.assunto, 160)
+      || (tipo === 'pedido' ? `Pedido de ${detalhes.quantidade} pochete(s)` : '');
+
+    if (nome.length < 2) throw erro(400, 'Diga seu nome para a gente saber com quem falar.');
+    if (!EMAIL.test(emailPessoa)) throw erro(400, 'Confira o e-mail: é por ele que vamos responder.');
+    if (!assunto) throw erro(400, 'Escreva o assunto da mensagem.');
+    if (tipo === 'contato' && texto.length < 5) throw erro(400, 'Escreva sua mensagem para a equipe.');
+
+    // Trava simples contra enxurrada: mesmo e-mail ou mesmo IP na última hora
+    const ip = ipDoPedido(req);
+    const [[{ recentes }]] = await pool.query(
+      `SELECT COUNT(*) AS recentes FROM mensagens
+        WHERE criado_em > (NOW() - INTERVAL 1 HOUR) AND (email = ? OR (ip IS NOT NULL AND ip = ?))`,
+      [emailPessoa, ip]);
+    if (recentes >= CONFIG.mensagensPorHora) {
+      throw erro(429, 'Você já mandou várias mensagens agora há pouco. Espere um pouco — vamos responder as anteriores.');
+    }
+
+    const cuidador = await cuidadorOpcional(req);
+    const pagina = limparTexto(corpo.pagina, 160) || null;
+
+    const [r] = await pool.query(
+      `INSERT INTO mensagens (tipo, nome, email, telefone, assunto, mensagem, detalhes, cuidador_id, pagina, ip)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [tipo, nome, emailPessoa, telefone, assunto, texto || null, detalhes ? JSON.stringify(detalhes) : null,
+       cuidador?.id || null, pagina, ip]);
+
+    const dados = {
+      tipo, nome, email: emailPessoa, telefone, assunto, mensagem: texto, detalhes,
+      protocolo: protocolo(r.insertId),
+      cuidador: cuidador ? `${cuidador.nome} (${cuidador.email})` : null,
+      em: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+    };
+
+    // O e-mail é esperado antes de responder: em serverless a função congela
+    // assim que a resposta sai, e o envio ficaria pela metade.
+    const paraEmpresa = correio.emailParaEmpresa(dados);
+    const envio = await correio.enviar({
+      para: correio.empresa,
+      assunto: paraEmpresa.assunto,
+      texto: paraEmpresa.texto,
+      html: paraEmpresa.html,
+      responderPara: emailPessoa,
+      nomeResponder: nome,
+    });
+
+    const status = envio.ok ? (envio.simulado ? 'simulado' : 'enviado') : 'falhou: ' + String(envio.erro).slice(0, 100);
+    await pool.query('UPDATE mensagens SET email_status = ? WHERE id = ?', [status, r.insertId]);
+
+    // Confirmação para quem escreveu: bom ter, mas nunca atrapalha o pedido
+    if (envio.ok && !envio.simulado && correio.copiaParaQuemEscreveu) {
+      const copia = correio.emailDeConfirmacao(dados);
+      correio.enviar({ para: emailPessoa, assunto: copia.assunto, texto: copia.texto, html: copia.html, responderPara: correio.empresa })
+        .catch(e => console.error('[e-mail confirmação]', e.message));
+    }
+
+    const [[linha]] = await pool.query('SELECT * FROM mensagens WHERE id = ?', [r.insertId]);
+    res.status(201).json({ ok: true, mensagem: mensagemPublica(linha), email: status });
+  } catch (e) { next(e); }
+});
+
+// Caixa de entrada da equipe. Sem ADMIN_EMAILS (ou EMAIL_EMPRESA), ninguém lê.
+app.get('/api/mensagens', autenticar, async (req, res, next) => {
+  try {
+    if (!ehAdmin(req.cuidador)) throw erro(403, 'Só a equipe da ELO vê as mensagens do site.');
+    const limite = Math.min(Math.max(Number(req.query.limite) || 50, 1), 200);
+    const tipo = TIPOS_MENSAGEM.includes(String(req.query.tipo)) ? String(req.query.tipo) : null;
+    const [linhas] = await pool.query(
+      `SELECT * FROM mensagens ${tipo ? 'WHERE tipo = ?' : ''} ORDER BY criado_em DESC LIMIT ?`,
+      tipo ? [tipo, limite] : [limite]);
+    res.json({ mensagens: linhas.map(mensagemPublica) });
+  } catch (e) { next(e); }
+});
+
+app.patch('/api/mensagens/:id', autenticar, async (req, res, next) => {
+  try {
+    if (!ehAdmin(req.cuidador)) throw erro(403, 'Só a equipe da ELO vê as mensagens do site.');
+    const [linhas] = await pool.query('SELECT * FROM mensagens WHERE id = ?', [Number(req.params.id)]);
+    if (!linhas.length) throw erro(404, 'Mensagem não encontrada.');
+    if (req.body?.lida !== undefined) {
+      await pool.query('UPDATE mensagens SET lida = ? WHERE id = ?', [req.body.lida ? 1 : 0, linhas[0].id]);
+    }
+    const [[atual]] = await pool.query('SELECT * FROM mensagens WHERE id = ?', [linhas[0].id]);
+    res.json({ mensagem: mensagemPublica(atual) });
+  } catch (e) { next(e); }
+});
+
 /* ---- 404 e erros ---- */
 app.use((req, res) => res.status(404).json({ erro: `Rota não encontrada: ${req.method} ${req.path}` }));
 
@@ -869,6 +1058,7 @@ if (!NA_VERCEL) {
     console.log(`  MySQL: ${CONFIG.banco.user}@${CONFIG.banco.host}/${CONFIG.banco.database}`);
     console.log(`  Uber: ${uber.simulado ? 'SIMULADO (defina UBER_CLIENT_ID e UBER_CLIENT_SECRET)' : 'real' + (process.env.UBER_SANDBOX === '1' ? ' (sandbox)' : '')}`);
     console.log(`  Telegram: ${telegram.simulado ? 'SIMULADO (defina TELEGRAM_BOT_TOKEN)' : 'bot @' + telegram.botUsername}`);
+    console.log(`  E-mail: ${correio.simulado ? `SIMULADO (${correio.motivo})` : `${correio.provedor} → ${correio.empresa}`}`);
   });
 }
 
