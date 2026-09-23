@@ -877,7 +877,19 @@ app.post('/api/telegram/teste', autenticar, async (req, res, next) => {
    (nada se perde se o e-mail falhar) e o e-mail é o aviso para a equipe.
    ------------------------------------------------------------------------ */
 const TIPOS_MENSAGEM = ['contato', 'pedido'];
-const PAGAMENTOS = ['à vista', '12× sem juros', 'a combinar'];
+
+// A forma de pagamento é escolhida num <select> do site, mas a comparação não
+// pode depender do acento nem do "×": qualquer diferença mínima jogaria a
+// escolha da pessoa para "a combinar" sem ninguém perceber. Compara-se uma
+// chave sem acento e só com letras e números; o que se guarda é o rótulo.
+const PAGAMENTOS = {
+  avista: 'à vista',
+  '12semjuros': '12× sem juros',
+  '12xsemjuros': '12× sem juros',
+  acombinar: 'a combinar',
+};
+const chaveSimples = t => String(t ?? '').toLowerCase().normalize('NFD')
+  .replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '');
 
 const limparTexto = (t, max) => String(t ?? '').replace(/\r/g, '').trim().slice(0, max);
 const ehAdmin = cuidador => CONFIG.admins.includes(String(cuidador.email || '').toLowerCase());
@@ -894,7 +906,7 @@ async function cuidadorOpcional(req) {
 // Do pedido só interessam três coisas além dos campos comuns
 function lerDetalhes(corpo) {
   const quantidade = Math.max(1, Math.min(50, Math.round(Number(corpo?.quantidade)) || 1));
-  const pagamento = PAGAMENTOS.includes(corpo?.pagamento) ? corpo.pagamento : 'a combinar';
+  const pagamento = PAGAMENTOS[chaveSimples(corpo?.pagamento)] || 'a combinar';
   const cidade = limparTexto(corpo?.cidade, 120) || null;
   return { quantidade, pagamento, cidade };
 }
