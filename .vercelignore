@@ -5,3 +5,5 @@ backend/node_modules
 api/.env
 backend/.env
 __pycache__
+app
+.github

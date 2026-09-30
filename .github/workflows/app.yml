@@ -1,0 +1,85 @@
+# App ELO (Flutter): compila Android e iOS na nuvem a cada push que mexe em app/.
+# Os arquivos ficam em Actions → (a execução) → Artifacts.
+#   elo-android: o APK para instalar direto no celular (e o .aab para a Play Store)
+#   elo-ios:     o app iOS compilado SEM assinatura (prova que compila); para
+#                instalar em iPhones é preciso assinar com uma conta Apple
+#                Developer (veja app/README.md, "iOS").
+name: App ELO
+
+on:
+  push:
+    branches: [main]
+    paths: ['app/**', '.github/workflows/app.yml']
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: '3.47.5'
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      # Assinatura da Play Store (opcional): com os segredos abaixo, o release
+      # sai assinado com a chave da ELO; sem eles, com a chave de depuração.
+      - name: Chave de assinatura (se configurada)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        if: env.KEYSTORE_BASE64 != ''
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/elo-release.jks
+          cat > android/key.properties <<EOF
+          storeFile=elo-release.jks
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+      - run: flutter build apk --release
+      - run: flutter build appbundle --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: elo-android
+          path: |
+            app/build/app/outputs/flutter-apk/app-release.apk
+            app/build/app/outputs/bundle/release/app-release.aab
+
+  ios:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter build ios --release --no-codesign
+      # Empacota como .ipa sem assinatura (para assinar depois, ou só para conferir)
+      - run: |
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qr elo-ios-sem-assinatura.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: elo-ios
+          path: app/elo-ios-sem-assinatura.ipa
