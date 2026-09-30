@@ -28,21 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let telegram = { vinculado: false, codigo: null, bot: '', simulado: true };
 
   /* ---------------------------------------------------------------------
-     Avisos na tela
+     Avisos na tela: o card de js/avisos.js, o mesmo das outras páginas.
+     Os eventos da pochete (emergência, carro, bateria, teste) vão inteiros
+     para EloAvisos, que monta o card com o mesmo texto do Telegram; os
+     recados do próprio painel (corrida, Telegram, erros) passam por aqui.
      --------------------------------------------------------------------- */
-  const ICONES = {
-    emergencia: '🚨', transporte: '🚕', bateria: '🔋', localizacao: '📍', teste: '✅', corrida: '🚗', telegram: '✈️'
-  };
-
+  const avisos = window.EloAvisos;
   function toast(tipo, titulo, texto, duracao = 8000) {
-    const el = document.createElement('div');
-    el.className = `toast toast--${tipo}`;
-    el.innerHTML = `<span class="toast-icon">${ICONES[tipo] || '•'}</span><div><strong></strong><p></p></div><button type="button" aria-label="Fechar">✕</button>`;
-    el.querySelector('strong').textContent = titulo;
-    el.querySelector('p').textContent = texto;
-    el.querySelector('button').addEventListener('click', () => el.remove());
-    $('toasts').prepend(el);
-    if (duracao) setTimeout(() => { el.classList.add('is-leaving'); setTimeout(() => el.remove(), 400); }, duracao);
+    avisos?.mostrar({ tipo, titulo, texto, duracao, fixo: duracao === 0 });
   }
 
   const hora = d => new Date(d || Date.now()).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -57,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (p.posicao) {
       $('tileLocal').textContent = 'Atualizada';
-      $('tileLocalNota').innerHTML = `${hora()} · <a href="${mapa(p.posicao)}" target="_blank" rel="noopener">ver no mapa</a>`;
+      $('tileLocalNota').innerHTML = `${hora()} · <a href="${mapa(p.posicao)}" target="_blank" rel="noopener" data-mapa="${p.posicao.lat},${p.posicao.lng}" data-mapa-titulo="Onde está ${p.nome_idoso || 'a pochete'}">ver no mapa</a>`;
     }
     $('tileStatus').textContent = '100%';
     $('tileStatusNota').textContent = `${p.nome_idoso || 'Pochete'} conectada`;
@@ -109,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
       <div class="ride-actions">
-        <a class="btn btn-outline" href="${mapa(c.origem)}" target="_blank" rel="noopener">Ver no mapa</a>
+        <a class="btn btn-outline" href="${mapa(c.origem)}" target="_blank" rel="noopener" data-mapa="${c.origem.lat},${c.origem.lng}" data-mapa-titulo="De onde a corrida sai">Ver no mapa</a>
         ${c.status === 'pendente' ? '<button type="button" class="btn btn-green" data-corrida="aprovar">Aprovar corrida</button><button type="button" class="btn btn-outline" data-corrida="recusar">Recusar</button>' : ''}
         ${['aprovada', 'solicitada', 'a_caminho'].includes(c.status) ? '<button type="button" class="btn btn-outline" data-corrida="cancelar">Cancelar corrida</button>' : ''}
         ${!ativa ? '<button type="button" class="btn btn-outline" data-corrida="fechar">Fechar</button>' : ''}
@@ -231,25 +224,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const fonte = new EventSource(`${window.ELO_API_URL}/eventos/stream?token=${encodeURIComponent(sessao.token)}`);
 
     fonte.addEventListener('emergencia', e => {
-      const { pochete } = JSON.parse(e.data).dados;
+      const { pochete, evento } = JSON.parse(e.data).dados;
       atualizarTiles(pochete);
       marcarAlerta('Emergência', `${pochete.nome_idoso}, ${hora()}`, 'tile--red');
-      toast('emergencia', `Emergência: ${pochete.nome_idoso}`, `Botão vermelho apertado às ${hora()}. O SAMU foi acionado.${pochete.posicao ? ' Toque em Localização para ver no mapa.' : ''}`, 0);
+      avisos?.evento(evento);
     });
     fonte.addEventListener('transporte', e => {
-      const { pochete, corrida } = JSON.parse(e.data).dados;
+      const { pochete, corrida, evento } = JSON.parse(e.data).dados;
       atualizarTiles(pochete);
       marcarAlerta('Pedido de carro', `${pochete.nome_idoso}, ${hora()}`, 'tile--orange');
-      toast('transporte', `${pochete.nome_idoso} pediu um carro`, 'Aprove ou recuse no painel de corrida, logo acima dos números.', 12000);
       if (corrida) renderCorrida(corrida);
+      avisos?.evento(evento);
     });
     fonte.addEventListener('bateria', e => {
-      const { pochete } = JSON.parse(e.data).dados;
+      const { pochete, evento } = JSON.parse(e.data).dados;
       atualizarTiles(pochete);
-      if (pochete.bateria <= 20) { marcarAlerta('Bateria baixa', `${pochete.bateria}%, ${hora()}`, 'tile--orange'); toast('bateria', 'Bateria baixa', `A pochete de ${pochete.nome_idoso} está com ${pochete.bateria}%.`); }
+      if (pochete.bateria <= 20) marcarAlerta('Bateria baixa', `${pochete.bateria}%, ${hora()}`, 'tile--orange');
+      avisos?.evento(evento);
     });
     fonte.addEventListener('localizacao', e => atualizarTiles(JSON.parse(e.data).dados.pochete));
-    fonte.addEventListener('teste', e => { const { pochete } = JSON.parse(e.data).dados; atualizarTiles(pochete); toast('teste', 'Teste recebido', `A pochete de ${pochete.nome_idoso} está funcionando.`); });
+    fonte.addEventListener('teste', e => { const { pochete, evento } = JSON.parse(e.data).dados; atualizarTiles(pochete); avisos?.evento(evento); });
     fonte.addEventListener('corrida', e => {
       const { corrida } = JSON.parse(e.data).dados;
       renderCorrida(corrida);
@@ -265,7 +259,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* Sem stream, o painel pergunta ao servidor a cada 10 s o que mudou:
-     eventos novos viram avisos, a corrida ativa é atualizada. */
+     eventos novos acendem o tile "Último alerta" e viram cards (EloAvisos
+     decide o que é novo, inclusive o que chegou enquanto se estava em outra
+     página); a corrida ativa é atualizada. */
   let consultando = false;
   let ultimoEventoId = null;
   function consultar() {
@@ -281,11 +277,11 @@ document.addEventListener('DOMContentLoaded', () => {
         for (const ev of novos.reverse()) {
           const p = pochetes.find(x => x.id === ev.pochete_id) || {};
           const nome = ev.nome_idoso || p.nome_idoso || 'A pochete';
-          if (ev.tipo === 'emergencia') { marcarAlerta('Emergência', `${nome}, ${hora(ev.criado_em)}`, 'tile--red'); toast('emergencia', `Emergência: ${nome}`, `Botão vermelho apertado às ${hora(ev.criado_em)}. O SAMU foi acionado.`, 0); }
-          if (ev.tipo === 'transporte') { marcarAlerta('Pedido de carro', `${nome}, ${hora(ev.criado_em)}`, 'tile--orange'); toast('transporte', `${nome} pediu um carro`, 'Aprove ou recuse no painel de corrida, logo acima dos números.', 12000); }
-          if (ev.tipo === 'bateria' && ev.dados?.bateria <= 20) { marcarAlerta('Bateria baixa', `${ev.dados.bateria}%, ${hora(ev.criado_em)}`, 'tile--orange'); toast('bateria', 'Bateria baixa', `A pochete de ${nome} está com ${ev.dados.bateria}%.`); }
-          if (ev.tipo === 'teste') toast('teste', 'Teste recebido', `A pochete de ${nome} está funcionando.`);
+          if (ev.tipo === 'emergencia') marcarAlerta('Emergência', `${nome}, ${hora(ev.criado_em)}`, 'tile--red');
+          if (ev.tipo === 'transporte') marcarAlerta('Pedido de carro', `${nome}, ${hora(ev.criado_em)}`, 'tile--orange');
+          if (ev.tipo === 'bateria' && ev.dados?.bateria <= 20) marcarAlerta('Bateria baixa', `${ev.dados.bateria}%, ${hora(ev.criado_em)}`, 'tile--orange');
         }
+        avisos?.chegaram(eventos);
         await carregarPochetes();
         await carregarCorridas();
       } catch (e) { console.warn('consulta', e.message); }
@@ -385,6 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       el.innerHTML = `<p>Abra o bot <a href="https://t.me/${telegram.bot}" target="_blank" rel="noopener">@${telegram.bot}</a> no Telegram e mande:</p>
         <code class="key-value">/start ${telegram.codigo}</code>
+        <div class="tg-actions"><a class="btn btn-green" href="https://t.me/${telegram.bot}?start=${telegram.codigo}" target="_blank" rel="noopener">Abrir o bot já com o código</a></div>
         <p class="muted">Assim que a mensagem chegar, esta tela confirma sozinha.</p>`;
     }
     el.querySelectorAll('[data-tg]').forEach(b => b.addEventListener('click', async () => {
@@ -396,8 +393,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
   }
 
+  /* Esperando o /start: pergunta ao servidor a cada 5 s. Em serverless é essa
+     consulta que faz o servidor ler a mensagem mandada ao bot. */
+  let esperandoTelegram = null;
   async function carregarTelegram() {
-    try { telegram = await api('telegram/codigo', { method: 'POST' }); renderTelegram(); }
+    try {
+      const antes = telegram.vinculado;
+      telegram = await api('telegram/codigo', { method: 'POST' });
+      if (telegram.vinculado && !antes && esperandoTelegram) toast('telegram', 'Telegram vinculado', 'Os avisos vão chegar lá também, inclusive o do botão vermelho.');
+      renderTelegram();
+      const esperar = !telegram.vinculado && !telegram.simulado;
+      if (esperar && !esperandoTelegram) esperandoTelegram = setInterval(() => { if (!document.hidden) carregarTelegram(); }, 5000);
+      if (!esperar && esperandoTelegram) { clearInterval(esperandoTelegram); esperandoTelegram = null; }
+    }
     catch (e) { $('telegramEstado').innerHTML = `<p class="muted">${e.message}</p>`; }
   }
 
@@ -411,8 +419,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const status = $('simularStatus');
     if (!p) { status.textContent = 'Vincule uma pochete primeiro.'; status.classList.add('is-visible'); return; }
     try {
-      await api(`pochetes/${p.id}/simular`, { method: 'POST', body: { tipo, ...POSICAO_TESTE, ...extra } });
-      status.textContent = `Enviado como ${p.nome_idoso}. O aviso chega em instantes.`;
+      const r = await api(`pochetes/${p.id}/simular`, { method: 'POST', body: { tipo, ...POSICAO_TESTE, ...extra } });
+      // o card aparece na hora, igual ao que chega no Telegram (sem esperar o stream)
+      avisos?.evento(r.evento, { sempre: true });
+      if (r.corrida) renderCorrida(r.corrida);
+      await carregarPochetes();
+      status.textContent = `Enviado como ${p.nome_idoso}. O mesmo aviso foi para o Telegram, se estiver vinculado.`;
     } catch (e) { status.textContent = e.message; }
     status.classList.add('is-visible');
     setTimeout(() => status.classList.remove('is-visible'), 5000);
@@ -422,13 +434,12 @@ document.addEventListener('DOMContentLoaded', () => {
     simular(b.dataset.simular, b.dataset.bateria ? { bateria: Number(b.dataset.bateria) } : {});
   }));
 
-  // A ação rápida "Enviar emergência" também passa pelo servidor quando há pochete
-  document.querySelector('.actions-grid .action--red')?.addEventListener('click', () => { if (pochetes[0]) simular('emergencia'); });
 
   /* ---------------------------------------------------------------------
      Início
      --------------------------------------------------------------------- */
-  ouvir();
+  // Sem stream no servidor (Vercel), nem tenta: evita o 501 no console e já consulta
+  api('saude').then(s => (s.tempo_real === false ? consultar() : ouvir())).catch(() => ouvir());
   carregarPochetes().then(carregarCorridas);
   carregarTelegram();
 });

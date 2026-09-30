@@ -101,7 +101,11 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {
       // o backend respondeu (email já usado, senha errada, conta inexistente,
       // banco fora) ou nem foi alcançado: em nenhum caso a pessoa entra
-      if (status) status.textContent = e.status ? e.message : 'Não consegui falar com o servidor da ELO. Confira sua conexão e tente de novo em instantes.';
+      // Na máquina, "sem servidor" quase sempre é o backend local desligado: diz como resolver
+      const local = window.ELO_API_URL.startsWith('http://localhost');
+      if (status) status.textContent = e.status ? e.message : local
+        ? 'Não consegui falar com o servidor da ELO na sua máquina. Rode "npm start" na pasta backend ou abra esta página com ?api=publicado no fim do endereço para usar o servidor do site publicado.'
+        : 'Não consegui falar com o servidor da ELO. Confira sua conexão e tente de novo em instantes.';
       button.disabled = false;
       button.textContent = rotulo;
       (e.status === 401 ? form.querySelector('#senha') : form.querySelector('#email'))?.focus();

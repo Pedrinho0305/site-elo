@@ -148,8 +148,8 @@
       id: 'eloa_emergencia', nome: 'se eu chamo o SAMU',
       fortes: ['voce chama o samu', 'voce pode chamar', 'chama o samu por mim', 'voce liga', 'me ajuda numa emergencia', 'voce aciona', 'voce avisa', 'voce manda ajuda', 'chame o samu', 'chama uma ambulancia', 'liga para o samu', 'preciso de socorro agora', 'estou passando mal', 'me socorre'],
       respostas: [
-        'Eu não aciono nada — sou só uma assistente de texto. Se for uma emergência agora, use o botão vermelho da pochete, que chama o SAMU e avisa o cuidador, ou ligue direto para o 192.',
-        'Não consigo chamar ajuda por aqui. Para emergência de verdade, o caminho é o botão vermelho da pochete ou o telefone 192 (SAMU). Eu só explico como as coisas funcionam.'
+        'Eu não aciono nada — sou só uma assistente de texto. Se for uma emergência agora, ligue direto para o 192 (SAMU). O botão vermelho da pochete avisa o cuidador na hora, com a localização, mas não chama o SAMU.',
+        'Não consigo chamar ajuda por aqui. Para emergência de verdade, ligue 192 (SAMU). O botão vermelho da pochete avisa quem cuida, e é essa pessoa que decide se chama o SAMU. Eu só explico como as coisas funcionam.'
       ]
     },
     {
@@ -174,8 +174,8 @@
       fortes: ['o que e a elo', 'o que e elo', 'o que e a pochete', 'como funciona a elo', 'como funciona a pochete', 'me fala da elo', 'me fale sobre a elo', 'explica a elo', 'o que a elo faz', 'resumo', 'pochete inteligente', 'me explica', 'me fala tudo', 'fala tudo', 'tudo sobre', 'sobre o projeto', 'o que e o projeto', 'do que se trata', 'me conta sobre', 'visao geral', 'em resumo', 'o que e isso'],
       fracas: ['pochete', 'projeto', 'produto', 'elo', 'sobre'],
       respostas: [
-        'A ELO é uma pochete inteligente feita para pessoas idosas, com um app para quem cuida.\n\nEla tem botão de emergência que aciona o SAMU (192), botão de transporte com aprovação do cuidador, comandos de voz, GPS em tempo real e bateria de até 48 horas. A ideia é dar autonomia para quem usa e tranquilidade para quem cuida.',
-        'Pensa numa pochete comum — só que com um botão que chama o SAMU, outro que pede um carro com a aprovação de quem cuida, comando de voz e GPS. Isso é a ELO. Ela deixa {pessoa} sair sozinha com segurança, e você acompanha tudo pelo app.'
+        'A ELO é uma pochete inteligente feita para pessoas idosas, com um app para quem cuida.\n\nEla tem botão de emergência que avisa o cuidador na hora com a localização, botão de transporte com aprovação do cuidador, comandos de voz, GPS em tempo real e bateria de até 48 horas. A ideia é dar autonomia para quem usa e tranquilidade para quem cuida.',
+        'Pensa numa pochete comum — só que com um botão que avisa você numa emergência, outro que pede um carro com a aprovação de quem cuida, comando de voz e GPS. Isso é a ELO. Ela deixa {pessoa} sair sozinha com segurança, e você acompanha tudo pelo app.'
       ],
       seguimento: { texto: 'Quer que eu liste todas as funcionalidades?', alvo: 'funcionalidades' }
     },
@@ -184,8 +184,8 @@
       fortes: ['funcionalidade', 'funcoes', 'funcao', 'recurso', 'feature', 'serve para que', 'para que serve', 'serve para', 'quero saber tudo', 'saber tudo', 'o que mais', 'mais alguma coisa', 'mais funcoes', 'outras funcoes', 'o que ela faz', 'o que a pochete faz', 'o que ela tem', 'o que tem', 'oferece', 'beneficio', 'vantagem', 'capaz de', 'consegue fazer', 'ela faz o que', 'faz o que', 'o que faz', 'o que da para fazer', 'o que posso fazer', 'principais', 'lista'],
       fracas: ['tudo', 'quais', 'todas', 'pode', 'serve'],
       respostas: [
-        'As principais funcionalidades da ELO são:\n\n• Botão de emergência — um toque chama o SAMU (192) e avisa o cuidador com a localização\n• Botão de transporte — pede um carro, e o cuidador aprova antes\n• Comandos de voz — "Oi ELO" para ligar, pedir carro, saber onde está ou chamar ajuda\n• Localização em tempo real — GPS no mapa do app, com histórico do dia\n• App do cuidador — alertas, aprovações, cadastro e notificações\n• Bateria de até 48 horas, com carga USB-C\n• Resistente a chuva e respingos (IP63)',
-        'Ela faz cinco coisas principais: chama o SAMU pelo botão vermelho, pede transporte pelo botão amarelo (com aprovação do cuidador), obedece a comandos de voz, mostra a localização em tempo real no app e avisa o cuidador de tudo isso. Fora isso, a bateria dura até 48 horas e ela aguenta chuva.'
+        'As principais funcionalidades da ELO são:\n\n• Botão de emergência — um toque avisa o cuidador na hora, com a localização (se for preciso, ele liga 192)\n• Botão de transporte — pede um carro, e o cuidador aprova antes\n• Comandos de voz — "Oi ELO" para ligar, pedir carro, saber onde está ou chamar ajuda\n• Localização em tempo real — GPS no mapa do app, com histórico do dia\n• App do cuidador — alertas, aprovações, cadastro e notificações\n• Bateria de até 48 horas, com carga USB-C\n• Resistente a chuva e respingos (IP63)',
+        'Ela faz cinco coisas principais: avisa o cuidador pelo botão vermelho, pede transporte pelo botão amarelo (com aprovação do cuidador), obedece a comandos de voz, mostra a localização em tempo real no app e avisa o cuidador de tudo isso. Fora isso, a bateria dura até 48 horas e ela aguenta chuva.'
       ],
       seguimento: { texto: 'Quer que eu detalhe alguma delas?', alvo: null }
     },
@@ -194,7 +194,7 @@
       fortes: ['diferencial', 'diferente', 'diferenca', 'e boa', 'e bom', 'vale a pena', 'compensa', 'recomenda', 'funciona bem', 'confiavel', 'e confiavel', 'qualidade', 'por que escolher', 'porque escolher', 'por que a elo', 'porque a elo', 'e melhor', 'melhor que', 'unica', 'unico', 'inovacao', 'inovador', 'o que tem de especial', 'especial', 'concorrente', 'outras marcas', 'existe algo parecido', 'no mercado', 'primeira'],
       fracas: ['melhor', 'vale a pena', 'compensa', 'destaque'],
       respostas: [
-        'O diferencial é a combinação: a ELO é a única solução que junta pochete inteligente com app integrado, oferecendo comandos de voz, aprovação de transporte pelo cuidador e acionamento direto do SAMU — tudo num objeto simples, sem tela.\n\nNão é só tecnologia: é cuidado humanizado. 100% do foco no idoso, monitoramento 24/7, e a primeira do mercado nesse formato.',
+        'O diferencial é a combinação: a ELO é a única solução que junta pochete inteligente com app integrado, oferecendo comandos de voz, aprovação de transporte pelo cuidador e alerta de emergência direto para quem cuida — tudo num objeto simples, sem tela.\n\nNão é só tecnologia: é cuidado humanizado. 100% do foco no idoso, monitoramento 24/7, e a primeira do mercado nesse formato.',
         'O que ela tem de diferente é não exigir que a pessoa idosa lide com tela nenhuma. São botões físicos e voz. E do outro lado, quem cuida tem o app com tudo: alertas, aprovação de corrida, localização. Essa dupla — objeto simples para quem usa, app completo para quem cuida — é o que não existe pronto no mercado.'
       ],
       seguimento: { texto: 'Quer saber por que isso é melhor que um celular ou um relógio?', alvo: 'comparacao' }
@@ -224,8 +224,8 @@
       fortes: ['emergenc', 'sos', '192', 'samu', 'socorro', 'botao vermelho', 'ambulancia'],
       fracas: ['vermelh', 'panico', 'alerta', 'acidente', 'queda', 'cair', 'caiu', 'passar mal', 'urgenc', 'hospital', 'ajuda'],
       respostas: [
-        'O botão vermelho é o de emergência. Um toque aciona o SAMU (192) e avisa o cuidador na hora, com a localização da pochete.\n\nAntes de usar de verdade, teste pelo modo demonstração no app — assim você confirma que está tudo funcionando sem chamar o SAMU.',
-        'É o botão vermelho. Quando {pessoa} aperta, duas coisas acontecem ao mesmo tempo: o SAMU (192) é acionado e você recebe um alerta no app com a localização.\n\nDá para testar em modo demonstração, sem chamar o SAMU de verdade — e é bom fazer isso assim que configurar.'
+        'O botão vermelho é o de emergência. Um toque avisa o cuidador na hora, no painel e no Telegram, com a localização da pochete. Ela não chama o SAMU sozinha: o aviso traz um atalho para o cuidador ligar 192, se for preciso.\n\nAntes de usar de verdade, teste pelo modo demonstração no app, para confirmar que o aviso chega.',
+        'É o botão vermelho. Quando {pessoa} aperta, você recebe na hora um alerta no painel e no Telegram, com a localização. O SAMU não é chamado sozinho: você vê a situação e, se for preciso, liga 192 pelo próprio aviso.\n\nDá para testar em modo demonstração, e é bom fazer isso assim que configurar.'
       ],
       seguimento: { texto: 'Quer que eu mostre como fazer esse teste pelo app?', alvo: 'configurar' }
     },
@@ -234,8 +234,8 @@
       fortes: ['sem querer', 'por engano', 'acidentalmente', 'cancelar', 'cancela', 'desfazer', 'demora', 'quanto tempo leva', 'chega o alerta', 'nao conseguir apertar', 'nao consegue apertar', 'nao apertar', 'nao aperta', 'cair e nao', 'desmaiar', 'desmaiou', 'detecta queda', 'detecta', 'sensor de queda', 'sozinha', 'automatico', 'automaticamente', 'o samu vem', 'vem mesmo', 'falso alarme'],
       fracas: ['apertar', 'apertou', 'aperta', 'botao', 'engano', 'tempo'],
       respostas: [
-        'Vou te dizer o que está no manual e o que não está.\n\nO que está: o acionamento é pelo botão — a pessoa aperta, o SAMU é chamado e o cuidador recebe o alerta com a localização. Para não disparar por engano nos testes, existe o modo demonstração no app, e a orientação é não pressionar em modo real sem necessidade.\n\nO que não está descrito: detecção automática de queda e como cancelar um chamado já feito. Se isso é importante para você, vale perguntar direto à equipe pelo formulário em Quem Somos.',
-        'Hoje o acionamento é manual: {pessoa} aperta o botão vermelho e o SAMU é chamado junto com o alerta para você. O site não descreve detecção automática de queda nem um passo para cancelar depois de acionado — então, para não te dar uma resposta inventada, o melhor é confirmar isso com a equipe. O formulário fica na página Quem Somos.'
+        'Vou te dizer o que está no manual e o que não está.\n\nO que está: o acionamento é pelo botão — a pessoa aperta e o cuidador recebe o alerta com a localização; se for preciso, é ele quem liga para o SAMU (192). Para não disparar por engano nos testes, existe o modo demonstração no app, e a orientação é não pressionar em modo real sem necessidade.\n\nO que não está descrito: detecção automática de queda e como cancelar um alerta já enviado. Se isso é importante para você, vale perguntar direto à equipe pelo formulário em Quem Somos.',
+        'Hoje o acionamento é manual: {pessoa} aperta o botão vermelho e você recebe o alerta com a localização; o SAMU só é chamado se você ligar. O site não descreve detecção automática de queda nem um passo para cancelar o alerta depois de enviado — então, para não te dar uma resposta inventada, o melhor é confirmar isso com a equipe. O formulário fica na página Quem Somos.'
       ]
     },
 
@@ -371,7 +371,7 @@
       fracas: ['conectar', 'passo', 'instru', 'manual', 'tutorial', 'comecar', 'ligar', 'liga', 'ligo', 'desligar', 'sincroniz', 'instalar', 'teste', 'setup'],
       respostas: [
         'Para começar:\n1. Carregue a pochete por completo (cerca de 2 horas).\n2. Ligue segurando o botão lateral por 3 segundos.\n3. Abra o app e conecte via Bluetooth, seguindo as instruções na tela.\n4. Faça um teste do botão de emergência em modo demonstração.\n\nA página de Instruções tem tudo isso com o modelo 3D da pochete mostrando cada parte.',
-        'É rápido. Carrega por completo, segura o botão lateral por 3 segundos até ligar, abre o app e conecta pelo Bluetooth. Por último, faz um teste do botão de emergência em modo demonstração — sem chamar o SAMU de verdade.\n\nSe quiser ver cada peça, a página de Instruções tem a pochete em 3D.'
+        'É rápido. Carrega por completo, segura o botão lateral por 3 segundos até ligar, abre o app e conecta pelo Bluetooth. Por último, faz um teste do botão de emergência em modo demonstração, para ver o aviso chegar.\n\nSe quiser ver cada peça, a página de Instruções tem a pochete em 3D.'
       ],
       seguimento: { texto: 'Ficou alguma dúvida em algum desses passos?', alvo: null }
     },
@@ -514,8 +514,8 @@
       id: 'preocupacao', nome: 'a sua preocupação',
       fortes: ['medo', 'preocup', 'aflit', 'ansios', 'caiu', 'queda', 'sozinh', 'alzheimer', 'demencia', 'esquec', 'se perd', 'perdeu', 'nervos', 'insegur', 'angust', 'receio', 'risco', 'nao confio', 'desconfio', 'fico com medo'],
       respostas: [
-        'Entendo a preocupação — é exatamente para isso que a ELO existe.\n\nSe {pessoa} precisar de ajuda, um toque no botão vermelho aciona o SAMU (192) e avisa você na hora, com a localização. E pelo app você acompanha onde {pessoa} está, em tempo real, sem precisar ficar ligando.',
-        'Faz todo sentido se preocupar. A ELO foi feita para essa situação: {pessoa} sai com a pochete, e se acontecer qualquer coisa, o botão de emergência chama o SAMU e avisa você com a localização exata. No dia a dia, o GPS mostra no app por onde {pessoa} anda.'
+        'Entendo a preocupação — é exatamente para isso que a ELO existe.\n\nSe {pessoa} precisar de ajuda, um toque no botão vermelho avisa você na hora, com a localização, e você decide se chama o SAMU (192). E pelo app você acompanha onde {pessoa} está, em tempo real, sem precisar ficar ligando.',
+        'Faz todo sentido se preocupar. A ELO foi feita para essa situação: {pessoa} sai com a pochete, e se acontecer qualquer coisa, o botão de emergência avisa você na hora com a localização exata. No dia a dia, o GPS mostra no app por onde {pessoa} anda.'
       ],
       seguimento: { texto: 'Quer que eu explique como o botão de emergência funciona?', alvo: 'emergencia' }
     }

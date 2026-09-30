@@ -31,7 +31,7 @@
      PATCH  /api/pochetes/:id            { nome_idoso?, telefone_idoso?, casa? }
      DELETE /api/pochetes/:id
      POST   /api/pochetes/:id/simular    { tipo, lat?, lng?, bateria?, destino? }  (testa sem o dispositivo)
-     GET    /api/eventos?limite=20                                          → { eventos }
+     GET    /api/eventos?limite=20&de=&ate=                                 → { eventos } (de/ate: período, para os Relatórios)
      GET    /api/eventos/stream?token=   SSE: emergencia, transporte, corrida, bateria, localizacao
      POST   /api/corridas                { pochete_id?, origem?, destino? } → chama o carro
                                         (com credenciais da Uber) ou devolve o link universal
@@ -315,6 +315,7 @@ const mensagemPublica = m => ({
   pagina: m.pagina, lida: Boolean(m.lida), email_status: m.email_status, criado_em: m.criado_em,
 });
 const mapa = (lat, lng) => `https://maps.google.com/?q=${lat},${lng}`;
+const horaBR = () => new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
 const STATUS_ATIVOS = ['pendente', 'aprovada', 'solicitada', 'a_caminho', 'em_andamento'];
 
 /* ------------------------------------------------------------------------
@@ -336,7 +337,7 @@ async function tratarEvento(pochete, cuidador, tipo, dados = {}, origem = 'poche
 
   switch (tipo) {
     case 'emergencia':
-      await telegram.enviar(cuidador.telegram_chat_id, `🚨 <b>EMERGÊNCIA</b>\n${pochete.nome_idoso} apertou o botão vermelho. O SAMU (192) foi acionado.${lugar}`);
+      await telegram.enviar(cuidador.telegram_chat_id, `🚨 <b>EMERGÊNCIA</b>\n${pochete.nome_idoso} apertou o botão vermelho às ${horaBR()}.\nVeja onde está e, se for preciso, ligue 192 (SAMU).${lugar}`);
       break;
 
     case 'transporte': {
@@ -484,7 +485,7 @@ const ROTAS = [
     ['GET', '/api/pochete/estado', '→ { pochete, cuidador, corrida } — para ela anunciar a corrida por voz.'],
   ]],
   ['Eventos e corridas (cuidador)', [
-    ['GET', '/api/eventos?limite=20', 'Bearer → { eventos }'],
+    ['GET', '/api/eventos?limite=20&de=&ate=', 'Bearer → { eventos }. de/ate (ISO) filtram o período; com eles o limite vai até 1000.'],
     ['GET', '/api/eventos/stream?token=', 'SSE: emergencia, transporte, bateria, localizacao, teste, corrida, telegram. Não funciona em serverless.'],
     ['POST', '/api/corridas', 'Bearer { pochete_id?, origem?: { lat, lng }, destino?: { lat, lng, nome } } — o botão "Chamar Uber" do painel. Com UBER_CLIENT_ID/SECRET: pede na Guest Rides API → 201 { modo: "api", corrida }. Sem credenciais: → { modo: "link", link } para abrir o app do Uber com partida e destino prontos.'],
     ['GET', '/api/corridas', 'Bearer → { corridas } (consulta a Uber e atualiza)'],
@@ -515,7 +516,7 @@ async function estadoServidor() {
     ambiente: NA_VERCEL ? 'vercel' : 'servidor',
     banco, host_banco: `${CONFIG.banco.user}@${CONFIG.banco.host}/${CONFIG.banco.database}`,
     uber: await uber.estado(),
-    telegram: telegram.simulado ? 'simulado' : 'bot @' + telegram.botUsername,
+    telegram: telegram.simulado ? 'simulado' : (await telegram.nomeDoBot()) ? 'bot @' + telegram.botUsername : 'token recusado pelo Telegram (confira TELEGRAM_BOT_TOKEN)',
     email: correio.simulado ? `simulado (${correio.motivo})` : `${correio.provedor} → ${correio.empresa}`,
     tempo_real: NA_VERCEL ? 'desligado (serverless)' : 'SSE ativo',
     ativo_ha_s: Math.round((Date.now() - INICIO) / 1000),
@@ -562,7 +563,7 @@ app.get(['/', '/api'], async (req, res, next) => {
   <div class="chips">
     ${chip('Banco', estado.banco, ok ? 'ok' : 'bad')}
     ${chip('Uber', estado.uber, estado.uber === 'real' ? 'ok' : 'warn')}
-    ${chip('Telegram', estado.telegram, estado.telegram === 'simulado' ? 'warn' : 'ok')}
+    ${chip('Telegram', estado.telegram, estado.telegram.startsWith('bot @') ? 'ok' : 'warn')}
     ${chip('E-mail', estado.email, correio.simulado ? 'warn' : 'ok')}
     ${chip('Tempo real', estado.tempo_real, NA_VERCEL ? 'warn' : 'ok')}
     ${chip('Ambiente', estado.ambiente, 'ok')}
@@ -582,6 +583,8 @@ app.get('/api/saude', async (_req, res, next) => {
     await pool.query('SELECT 1');
     res.json({
       ok: true, banco: 'conectado',
+      // o painel só abre o stream (SSE) quando ele existe; em serverless, consulta
+      tempo_real: !NA_VERCEL,
       uber: await uber.estado(),
       telegram: telegram.simulado ? 'simulado' : 'real',
       email: correio.simulado ? 'simulado' : correio.provedor,
@@ -751,10 +754,17 @@ app.get('/api/pochete/estado', autenticarPochete, async (req, res, next) => {
 /* ---- eventos ---- */
 app.get('/api/eventos', autenticar, async (req, res, next) => {
   try {
-    const limite = Math.min(100, Math.max(1, Number(req.query.limite) || 20));
+    // ?de=&ate= (datas ISO) filtram o período, para os Relatórios; aí o limite pode ser maior
+    const data = v => { const d = v ? new Date(String(v)) : null; return d && !Number.isNaN(d.getTime()) ? d : null; };
+    const de = data(req.query.de), ate = data(req.query.ate);
+    const limite = Math.min(de || ate ? 1000 : 100, Math.max(1, Number(req.query.limite) || 20));
+    const filtros = [req.cuidador.id];
+    let periodo = '';
+    if (de) { periodo += ' AND e.criado_em >= ?'; filtros.push(de); }
+    if (ate) { periodo += ' AND e.criado_em < ?'; filtros.push(ate); }
     const [linhas] = await pool.query(
       `SELECT e.*, p.nome_idoso FROM eventos e JOIN pochetes p ON p.id = e.pochete_id
-       WHERE p.cuidador_id = ? ORDER BY e.id DESC LIMIT ${limite}`, [req.cuidador.id]);
+       WHERE p.cuidador_id = ?${periodo} ORDER BY e.id DESC LIMIT ${limite}`, filtros);
     res.json({ eventos: linhas.map(e => ({ id: e.id, pochete_id: e.pochete_id, nome_idoso: e.nome_idoso, tipo: e.tipo, dados: typeof e.dados === 'string' ? JSON.parse(e.dados) : e.dados, criado_em: e.criado_em })) });
   } catch (e) { next(e); }
 });
@@ -907,14 +917,30 @@ app.post('/api/corridas/:id/cancelar', autenticar, async (req, res, next) => {
 });
 
 /* ---- telegram ---- */
+// Quem manda "/start CÓDIGO" para o bot fica vinculado
+async function vincularPorStart(codigo, chat) {
+  const [linhas] = await pool.query('SELECT id, nome FROM cuidadores WHERE telegram_codigo = ?', [codigo]);
+  if (!linhas.length) return null;
+  await pool.query('UPDATE cuidadores SET telegram_chat_id = ?, telegram_codigo = NULL WHERE id = ?', [chat.id, linhas[0].id]);
+  sse.publicar(linhas[0].id, 'telegram', { vinculado: true, chat: chat.nome });
+  return `Pronto, ${linhas[0].nome.split(' ')[0]}! Os avisos da pochete vão chegar aqui, inclusive quando o botão vermelho for apertado.`;
+}
+
 app.post('/api/telegram/codigo', autenticar, async (req, res, next) => {
   try {
-    let codigo = req.cuidador.telegram_codigo;
-    if (!codigo) {
+    let vinculado = Boolean(req.cuidador.telegram_chat_id);
+    // Sem polling (serverless), é aqui que o /start mandado ao bot é lido
+    if (!vinculado && !telegram.simulado && !telegram.ouvindo()) {
+      await telegram.verificarMensagens(vincularPorStart);
+      const [[c]] = await pool.query('SELECT telegram_chat_id FROM cuidadores WHERE id = ?', [req.cuidador.id]);
+      vinculado = Boolean(c?.telegram_chat_id);
+    }
+    let codigo = vinculado ? null : req.cuidador.telegram_codigo;
+    if (!vinculado && !codigo) {
       codigo = crypto.randomBytes(3).toString('hex').toUpperCase();
       await pool.query('UPDATE cuidadores SET telegram_codigo = ? WHERE id = ?', [codigo, req.cuidador.id]);
     }
-    res.json({ codigo, bot: telegram.botUsername, simulado: telegram.simulado, vinculado: Boolean(req.cuidador.telegram_chat_id) });
+    res.json({ codigo, bot: await telegram.nomeDoBot(), simulado: telegram.simulado, vinculado });
   } catch (e) { next(e); }
 });
 
@@ -1112,8 +1138,11 @@ try {
 } catch (e) {
   console.error('Não consegui conectar ao MySQL:', e.code || '', e.message);
   console.error('Confira DB_HOST, DB_USER, DB_PASSWORD e DB_NAME no backend/.env e se o MySQL está rodando.');
-  if (!NA_VERCEL) process.exit(1);
-  // na Vercel o app segue no ar: cada pedido tenta conectar de novo e a rota / mostra o erro
+  // O servidor segue no ar mesmo assim (na máquina e na Vercel): cada pedido
+  // tenta conectar de novo e responde 503 "banco indisponível", e a página /
+  // mostra o motivo. Antes, na máquina, o processo saía e o site só dizia
+  // "não consegui falar com o servidor", escondendo a causa.
+  if (!NA_VERCEL) console.error('O servidor vai subir assim mesmo; login e cadastro respondem 503 até o banco responder.');
 }
 
 // Tarefas contínuas: só onde existe um processo de verdade (não na Vercel)
@@ -1132,19 +1161,13 @@ if (!NA_VERCEL) {
   }, 10_000).unref();
 
   // Telegram: quem manda "/start CÓDIGO" para o bot fica vinculado
-  if (pool) telegram.iniciarPolling(async (codigo, chat) => {
-    const [linhas] = await pool.query('SELECT id, nome FROM cuidadores WHERE telegram_codigo = ?', [codigo]);
-    if (!linhas.length) return null;
-    await pool.query('UPDATE cuidadores SET telegram_chat_id = ?, telegram_codigo = NULL WHERE id = ?', [chat.id, linhas[0].id]);
-    sse.publicar(linhas[0].id, 'telegram', { vinculado: true, chat: chat.nome });
-    return `Pronto, ${linhas[0].nome.split(' ')[0]}! Os avisos da pochete vão chegar aqui.`;
-  });
+  if (pool) telegram.iniciarPolling(vincularPorStart);
 
   app.listen(CONFIG.porta, async () => {
     console.log(`ELO backend em http://localhost:${CONFIG.porta}  (rotas em /api, resumo em /)`);
     console.log(`  MySQL: ${CONFIG.banco.user}@${CONFIG.banco.host}/${CONFIG.banco.database}`);
     console.log(`  Uber: ${await uber.estado()}${process.env.UBER_SANDBOX === '1' ? ' (sandbox)' : ''}`);
-    console.log(`  Telegram: ${telegram.simulado ? 'SIMULADO (defina TELEGRAM_BOT_TOKEN)' : 'bot @' + telegram.botUsername}`);
+    console.log(`  Telegram: ${telegram.simulado ? 'SIMULADO (defina TELEGRAM_BOT_TOKEN)' : 'bot @' + await telegram.nomeDoBot()}`);
     console.log(`  E-mail: ${correio.simulado ? `SIMULADO (${correio.motivo})` : `${correio.provedor} → ${correio.empresa}`}`);
   });
 }

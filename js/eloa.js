@@ -99,7 +99,7 @@
 
   async function responderLocal(texto) {
     if (!local) {
-      return { resposta: 'Estou sem conexão com o meu servidor agora. Tenta de novo em instantes? Se for emergência, use o botão vermelho da pochete ou ligue 192.', fonte: 'offline', intencao: 'desconhecido', confianca: 0 };
+      return { resposta: 'Estou sem conexão com o meu servidor agora. Tenta de novo em instantes? Se for emergência, ligue 192 (SAMU); o botão vermelho da pochete avisa o cuidador.', fonte: 'offline', intencao: 'desconhecido', confianca: 0 };
     }
     const r = local.responder(texto);
     await esperar(tempoPensando(r.resposta.length));

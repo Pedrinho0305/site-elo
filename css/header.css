@@ -571,6 +571,277 @@ footer p:last-child { color: var(--text-3); justify-self: end; }
 }
 
 /* --------------------------------------------------------------------------
+   6b · Avisos da pochete (js/avisos.js)
+   O mesmo aviso que vai ao Telegram, em card, no canto de qualquer página.
+   Cada tipo acende a sua cor (--c) como o anel do botão físico: faixa de luz
+   no topo, ícone em anel, pino no mapa. Só a emergência pulsa e não some.
+   -------------------------------------------------------------------------- */
+.avisos {
+  position: fixed;
+  right: var(--edge);
+  bottom: 1.2rem;
+  z-index: 300;
+  display: grid;
+  gap: .75rem;
+  width: min(400px, calc(100vw - 2 * var(--edge)));
+  /* nunca sobe por cima do cabeçalho; se não couber, a pilha rola */
+  max-height: calc(100dvh - var(--header-top) - var(--header-h) - 2.2rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  pointer-events: none;
+}
+
+.avisos::-webkit-scrollbar { display: none; }
+
+.aviso {
+  --c: var(--cyan);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 1.05rem 1.1rem 1.1rem;
+  border-radius: var(--r-lg);
+  background:
+    radial-gradient(120% 70% at 0% 0%, color-mix(in srgb, var(--c) 16%, transparent), transparent 60%),
+    linear-gradient(165deg, var(--bg-3), var(--bg-2));
+  border: 1px solid color-mix(in srgb, var(--c) 38%, var(--line-2));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 10%, transparent), var(--shadow-2);
+  pointer-events: auto;
+  animation: aviso-entra .45s var(--ease) both;
+}
+
+/* faixa de luz no topo, na cor do aviso */
+.aviso::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--c) 30%, var(--c) 70%, transparent);
+}
+
+.aviso::after { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--gloss); pointer-events: none; }
+
+.aviso.is-saindo { animation: aviso-sai .3s var(--ease) forwards; }
+
+@keyframes aviso-entra {
+  from { opacity: 0; filter: blur(8px); transform: translateX(24px) scale(.97); }
+  to { opacity: 1; filter: blur(0); transform: none; }
+}
+
+@keyframes aviso-sai { to { opacity: 0; filter: blur(6px); transform: translateX(24px); } }
+
+.aviso--emergencia { --c: var(--red); }
+.aviso--transporte { --c: var(--orange); }
+.aviso--bateria { --c: var(--orange); }
+.aviso--teste { --c: var(--green); }
+.aviso--corrida { --c: var(--teal); }
+.aviso--telegram { --c: var(--blue-2); }
+.aviso--local { --c: var(--cyan); }
+
+.aviso-topo { display: grid; grid-template-columns: auto 1fr auto; gap: .85rem; align-items: start; }
+
+.aviso-icone {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: var(--c);
+  background: color-mix(in srgb, var(--c) 16%, transparent);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--c) 45%, transparent);
+}
+
+.aviso-icone svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+/* emergência: o anel do botão vermelho pulsando */
+.aviso--emergencia .aviso-icone::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  border: 2px solid var(--red);
+  animation: aviso-pulso 1.8s ease-out infinite;
+}
+
+@keyframes aviso-pulso {
+  0% { transform: scale(1); opacity: .9; }
+  100% { transform: scale(1.55); opacity: 0; }
+}
+
+.aviso-cabeca { min-width: 0; }
+
+.aviso-rotulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .35rem;
+  color: var(--c);
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+.aviso-rotulo span { color: var(--text-3); }
+.aviso-rotulo time { color: var(--text-3); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+.aviso-titulo {
+  margin-top: .15rem;
+  font-family: var(--font-text);
+  font-weight: 700;
+  font-size: 1.06rem;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--text);
+}
+
+.aviso-fechar {
+  width: 32px;
+  height: 32px;
+  margin: -.2rem -.3rem 0 0;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: background-color .2s, color .2s;
+}
+
+.aviso-fechar:hover { background: color-mix(in srgb, var(--text) 10%, transparent); color: var(--text); }
+.aviso-fechar svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+
+.aviso-texto { margin-top: .55rem; color: var(--text-2); font-size: .95rem; line-height: 1.5; }
+
+/* bateria: a barra na cor do aviso */
+.aviso-bateria { display: flex; align-items: center; gap: .7rem; margin-top: .75rem; }
+.aviso-bateria span { position: relative; flex: 1; height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--text) 10%, transparent); overflow: hidden; }
+.aviso-bateria span::before { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--v); border-radius: inherit; background: var(--c); }
+.aviso-bateria b { font-variant-numeric: tabular-nums; font-size: .9rem; }
+
+/* Google Maps pequeno dentro do card */
+.aviso-mapa {
+  position: relative;
+  display: block;
+  height: 150px;
+  margin-top: .8rem;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  text-decoration: none;
+}
+
+.aviso-mapa iframe, .mapa-janela-quadro iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+.aviso-coord {
+  position: absolute;
+  padding: .2rem .55rem;
+  border-radius: var(--r-pill);
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: var(--text);
+  font-size: .75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* canto de cima: embaixo fica o crédito do Google */
+.aviso-coord { right: .5rem; top: .5rem; pointer-events: none; }
+
+.aviso-acoes { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .85rem; }
+
+.aviso-acao {
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: .45rem 1rem;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-2);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+  color: var(--text);
+  font: inherit;
+  font-size: .92rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color .2s, background-color .2s, transform .2s var(--ease);
+}
+
+.aviso-acao:hover { border-color: var(--c); background: color-mix(in srgb, var(--c) 10%, transparent); }
+.aviso-acao:active { transform: scale(.97); }
+
+.aviso-acao--principal { background: var(--c); border-color: var(--c); color: var(--ink-on-brand); }
+.aviso-acao--principal:hover { background: color-mix(in srgb, var(--c) 86%, var(--text)); border-color: var(--c); }
+/* no vermelho e no laranja, texto claro lê melhor que o escuro */
+.aviso--emergencia .aviso-acao--principal { color: #fff; }
+
+.aviso-canal { display: flex; align-items: center; gap: .4rem; margin-top: .75rem; color: var(--text-3); font-size: .8rem; }
+.aviso-canal svg { width: 14px; height: 14px; fill: none; stroke: var(--blue-2); stroke-width: 1.9; stroke-linejoin: round; }
+
+/* tempo até sumir, na base do card; para enquanto o mouse está em cima */
+.aviso-tempo {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--c);
+  opacity: .55;
+  transform-origin: left;
+  animation: aviso-tempo linear forwards;
+}
+
+.aviso.is-pausado .aviso-tempo { animation-play-state: paused; }
+
+/* encolhido: só ícone, tipo e título; um clique abre de novo */
+.aviso.is-compacto { padding-block: .7rem; cursor: pointer; }
+.aviso.is-compacto :is(.aviso-texto, .aviso-bateria, .aviso-mapa, .aviso-acoes, .aviso-canal) { display: none; }
+.aviso.is-compacto .aviso-icone { width: 36px; height: 36px; border-radius: 12px; }
+.aviso.is-compacto .aviso-titulo { font-size: .96rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.aviso.is-compacto:hover { border-color: var(--c); }
+@keyframes aviso-tempo { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+/* Janela do mapa: o Google Maps dentro do site, tamanho médio */
+.mapa-janela {
+  width: min(620px, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 1.1rem;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line-2);
+  background: linear-gradient(165deg, var(--bg-3), var(--bg-2));
+  color: var(--text);
+  box-shadow: var(--shadow-2);
+  --c: var(--cyan);
+}
+
+.mapa-janela[open] { animation: aviso-entra .35s var(--ease) both; }
+.mapa-janela::backdrop { background: color-mix(in srgb, var(--bg) 70%, transparent); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.mapa-janela-topo { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.mapa-janela-titulo { font-family: var(--font-text); font-weight: 700; font-size: 1.15rem; letter-spacing: 0; }
+.mapa-janela-coord { margin-top: .15rem; color: var(--text-3); font-size: .88rem; font-variant-numeric: tabular-nums; }
+
+.mapa-janela-quadro {
+  position: relative;
+  height: min(380px, 55dvh);
+  margin-top: .9rem;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+
+@media (max-width: 560px) {
+  .avisos { right: .75rem; left: .75rem; bottom: .75rem; width: auto; }
+  .aviso-mapa { height: 110px; }
+  /* no celular o mapa fica só na emergência; os outros têm "Abrir no mapa" */
+  .aviso:not(.aviso--emergencia) .aviso-mapa { display: none; }
+}
+
+/* --------------------------------------------------------------------------
    7 · Movimento reduzido
    -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {

@@ -31,7 +31,7 @@ Como você fala:
 O que você não faz:
 - Você não inventa. Se o site não traz a informação (detecção de queda, plano de chip, nota fiscal, prazo de entrega, política de dados completa, cores, peso), diga o que se sabe e aponte a equipe: o formulário fica na página "Quem Somos". Nunca chute preço, prazo ou funcionalidade.
 - Você não é uma pessoa. Converse como uma, mas se perguntarem se você é humana, robô ou IA, diga com leveza que é a assistente virtual da ELO, feita para conversar como gente. Não finja ser humana.
-- Você não aciona nada. Se alguém relatar uma emergência acontecendo agora, diga na primeira frase para usar o botão vermelho da pochete ou ligar 192 (SAMU). Depois, se couber, ajude.
+- Você não aciona nada. Se alguém relatar uma emergência acontecendo agora, diga na primeira frase para ligar 192 (SAMU); o botão vermelho da pochete avisa o cuidador, mas não chama o SAMU. Depois, se couber, ajude.
 - Você não responde sobre assuntos fora da ELO (capital da França, receita de bolo, política). Diga com simpatia que só entende de ELO e pergunte se pode ajudar com a pochete. Exceção: conversa leve (oi, tudo bem, obrigado, elogio, piada leve) você responde normalmente, com humor.
 - Nunca use formatação Markdown (sem asteriscos, sem cerquilhas). Texto puro. Quebra de linha só entre parágrafos curtos ou itens de um passo a passo.
 """
@@ -42,17 +42,17 @@ ASSUNTOS = [
     {
         "id": "o_que_e_elo", "nome": "o que é a ELO",
         "pistas": ["o que e a elo", "o que e elo", "oq e a elo", "que e a elo", "me explica a elo", "o que e a pochete", "o que voces vendem", "o que e isso", "produto"],
-        "fato": "A ELO é uma pochete inteligente feita para pessoas idosas, com um app para quem cuida. Tem botão de emergência que aciona o SAMU (192), botão de transporte com aprovação do cuidador, comandos de voz, GPS em tempo real e bateria de até 48 horas. A ideia é dar autonomia para quem usa e tranquilidade para quem cuida. Não tem tela: são botões físicos e voz.",
+        "fato": "A ELO é uma pochete inteligente feita para pessoas idosas, com um app para quem cuida. Tem botão de emergência que avisa o cuidador na hora com a localização, botão de transporte com aprovação do cuidador, comandos de voz, GPS em tempo real e bateria de até 48 horas. A ideia é dar autonomia para quem usa e tranquilidade para quem cuida. Não tem tela: são botões físicos e voz.",
     },
     {
         "id": "funcionalidades", "nome": "as funcionalidades",
         "pistas": ["funcionalidade", "o que ela faz", "oq ela faz", "recursos", "o que a pochete faz", "para que serve", "pra que serve", "funcoes"],
-        "fato": "Funcionalidades: botão vermelho de emergência (um toque chama o SAMU 192 e avisa o cuidador com a localização); botão amarelo de transporte (pede um carro, o cuidador aprova antes); comandos de voz com a palavra de ativação 'Oi ELO' (ligar para alguém, saber onde está, chamar transporte, emergência); localização em tempo real no mapa do app com histórico do dia; app do cuidador com alertas, aprovações, cadastro e notificações; bateria de até 48 horas com carga USB-C; resistente a chuva e respingos (IP63).",
+        "fato": "Funcionalidades: botão vermelho de emergência (um toque avisa o cuidador na hora, com a localização; se for preciso, o cuidador liga para o SAMU 192); botão amarelo de transporte (pede um carro, o cuidador aprova antes); comandos de voz com a palavra de ativação 'Oi ELO' (ligar para alguém, saber onde está, chamar transporte, emergência); localização em tempo real no mapa do app com histórico do dia; app do cuidador com alertas, aprovações, cadastro e notificações; bateria de até 48 horas com carga USB-C; resistente a chuva e respingos (IP63).",
     },
     {
         "id": "diferencial", "nome": "o diferencial",
         "pistas": ["diferencial", "diferente", "vantagem", "por que a elo", "porque a elo", "melhor que", "concorrente", "unica"],
-        "fato": "O diferencial é a combinação: é a única solução que junta pochete inteligente com app integrado, com comandos de voz, aprovação de transporte pelo cuidador e acionamento direto do SAMU, num objeto simples e sem tela. Objeto simples para quem usa, app completo para quem cuida. O site fala em 100% do foco no idoso, monitoramento 24/7 e primeira do mercado nesse formato.",
+        "fato": "O diferencial é a combinação: é a única solução que junta pochete inteligente com app integrado, com comandos de voz, aprovação de transporte pelo cuidador e alerta de emergência direto para quem cuida, num objeto simples e sem tela. Objeto simples para quem usa, app completo para quem cuida. O site fala em 100% do foco no idoso, monitoramento 24/7 e primeira do mercado nesse formato.",
     },
     {
         "id": "comparacao", "nome": "a comparação com celular e relógio",
@@ -67,7 +67,7 @@ ASSUNTOS = [
     {
         "id": "emergencia", "nome": "o botão de emergência",
         "pistas": ["emergencia", "botao vermelho", "samu", "192", "socorro", "sos", "ajuda medica", "ambulancia", "passar mal", "queda", "caiu", "cair"],
-        "fato": "Botão de emergência (vermelho): um toque aciona o SAMU (192) e avisa o cuidador na hora, com a localização da pochete. Antes de usar de verdade, teste pelo modo demonstração no app, que confirma que tudo funciona sem chamar o SAMU. A orientação do manual é não pressionar em modo real sem necessidade. O site NÃO descreve detecção automática de queda nem como cancelar um chamado já feito; para isso, confirmar com a equipe.",
+        "fato": "Botão de emergência (vermelho): um toque avisa o cuidador na hora, no painel e no Telegram, com a localização da pochete. A pochete NÃO chama o SAMU sozinha: quem decide é o cuidador, que recebe no aviso um atalho para ligar 192 (SAMU). Em emergência grave acontecendo agora, o certo é ligar 192 direto. Antes de usar de verdade, teste pelo modo demonstração no app, que confirma que o aviso chega. A orientação do manual é não pressionar em modo real sem necessidade. O site NÃO descreve detecção automática de queda nem como cancelar um alerta já enviado; para isso, confirmar com a equipe.",
     },
     {
         "id": "alertas", "nome": "os alertas",
@@ -182,17 +182,17 @@ ASSUNTOS = [
     {
         "id": "jogo", "nome": "o jogo",
         "pistas": ["jogo", "game", "jogar", "gameplay", "fase"],
-        "fato": "ELO: O Jogo é uma jornada interativa sobre cuidado, conexão e tecnologia, feita pelo Guilherme no GDevelop. Você é um cuidador tecnológico numa cidade moderna e enfrenta cenários como ajudar dona Maria a chamar um Uber para a consulta ou responder ao alerta do Sr. João, que se perdeu no parque. Ensina como funcionam os alertas 192, a aprovação de transporte, os comandos de voz, a localização em tempo real e a comunicação entre cuidador e idoso. Dá para jogar direto na página Jogo do site (roda no navegador, sem instalar nada). O vídeo de demonstração ainda está em produção.",
+        "fato": "ELO: O Jogo é uma jornada interativa sobre cuidado, conexão e tecnologia, feita pelo Guilherme no GDevelop. Você é um cuidador tecnológico numa cidade moderna e enfrenta cenários como ajudar dona Maria a chamar um Uber para a consulta ou responder ao alerta do Sr. João, que se perdeu no parque. Ensina como funcionam os alertas de emergência, a aprovação de transporte, os comandos de voz, a localização em tempo real e a comunicação entre cuidador e idoso. Dá para jogar direto na página Jogo do site (roda no navegador, sem instalar nada). O vídeo de demonstração ainda está em produção.",
     },
     {
         "id": "painel", "nome": "o painel do cuidador",
         "pistas": ["painel", "login", "entrar", "senha", "perfil", "relatorio", "dashboard", "minha conta", "cadastro no site"],
-        "fato": "Painel do cuidador (no site, em Entrar, com conta criada em Cadastro): mostra o estado da pochete (bateria, último alerta, localização), avisa na hora quando a pochete aperta um botão, mostra o pedido de transporte para o cuidador aprovar ou recusar (só depois do ok a Uber é chamada) e acompanha a corrida (procurando motorista, a caminho, em viagem). Tem também o botão 'Chamar Uber' nas ações rápidas, para o próprio cuidador pedir o carro sem esperar a pochete: a partida é a última posição da pochete (ou a localização do navegador) e o destino é o endereço de casa cadastrado; no celular abre o aplicativo do Uber e no computador o site do Uber, com tudo preenchido. Lá também se vincula a pochete (gera a chave do dispositivo), o Telegram (para receber os avisos como mensagem) e dá para testar os botões sem a pochete. A página Relatórios ainda mostra dados ilustrativos.",
+        "fato": "Painel do cuidador (no site, em Entrar, com conta criada em Cadastro): mostra o estado da pochete (bateria, último alerta, localização), avisa na hora quando a pochete aperta um botão, mostra o pedido de transporte para o cuidador aprovar ou recusar (só depois do ok a Uber é chamada) e acompanha a corrida (procurando motorista, a caminho, em viagem). Tem também o botão 'Chamar Uber' nas ações rápidas, para o próprio cuidador pedir o carro sem esperar a pochete: a partida é a última posição da pochete (ou a localização do navegador) e o destino é o endereço de casa cadastrado; no celular abre o aplicativo do Uber e no computador o site do Uber, com tudo preenchido. Lá também se vincula a pochete (gera a chave do dispositivo), o Telegram (para receber os avisos como mensagem) e dá para testar os botões sem a pochete. A página Relatórios mostra os números e o registro do período escolhido (últimos 7 ou 30 dias, este mês, mês passado ou datas à escolha), com os dados reais da pochete e das corridas, e um mapa com a última localização que a pochete mandou, com links para abrir no Google Maps e traçar a rota até ela.",
     },
     {
         "id": "eloa", "nome": "eu mesma",
         "pistas": ["eloa", "quem e voce", "quem e vc", "seu nome", "voce e real", "voce e humana", "e um robo", "e uma ia", "inteligencia artificial", "como voce funciona", "chatgpt", "gemini", "o que voce faz", "o que voce sabe"],
-        "fato": "Sobre a Eloá: o nome vem de ELO, a ideia é ser o elo entre quem usa a pochete e quem cuida. É uma assistente virtual do projeto ELO, feita para conversar como uma pessoa, e responde dúvidas sobre a pochete, o app e o projeto. Funciona com um modelo de linguagem orientado por uma base de conhecimento montada pela equipe com o conteúdo do site. Não aciona nada: em emergência de verdade, o caminho é o botão vermelho da pochete ou o 192.",
+        "fato": "Sobre a Eloá: o nome vem de ELO, a ideia é ser o elo entre quem usa a pochete e quem cuida. É uma assistente virtual do projeto ELO, feita para conversar como uma pessoa, e responde dúvidas sobre a pochete, o app e o projeto. Funciona com um modelo de linguagem orientado por uma base de conhecimento montada pela equipe com o conteúdo do site. Não aciona nada: em emergência de verdade, o caminho é ligar 192 (SAMU); o botão vermelho da pochete avisa o cuidador.",
     },
 ]
 

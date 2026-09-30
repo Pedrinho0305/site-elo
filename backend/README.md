@@ -19,7 +19,7 @@ npm start                   # http://localhost:3000/api
 npm run dev                 # reinicia sozinho quando o código muda
 ```
 
-**A senha do MySQL é obrigatória.** Sem ela o terminal mostra `Access denied for user '…' (using password: NO)` e o processo sai: o `.env` precisa de um banco que você consiga acessar — o MySQL da sua máquina (`DB_HOST=localhost`, `DB_USER=root`) ou o da escola (`benserverplex.ddns.net`, usuário `alunos`, as mesmas contas do site publicado). O `.env.example` traz os dois blocos. Se não tiver nenhuma senha em mãos, dá para desenvolver sem backend local: abra o site com `?api=publicado` (README §6) e o navegador fala com o backend já publicado.
+**A senha do MySQL é obrigatória.** Sem ela o terminal mostra `Access denied for user '…'` e o servidor sobe assim mesmo, mas todas as rotas respondem `503 banco indisponível` (e a página `/` mostra o motivo) até o banco responder: o `.env` precisa de um banco que você consiga acessar — o MySQL da sua máquina (`DB_HOST=localhost`, `DB_USER=root`) ou o da escola (`benserverplex.ddns.net`, usuário `alunos`, as mesmas contas do site publicado). O `.env.example` traz os dois blocos. Se não tiver nenhuma senha em mãos, dá para desenvolver sem backend local: abra o site com `?api=publicado` (README §6) e o navegador fala com o backend já publicado.
 
 `npm run dev` lê o `.env` **uma vez, ao subir**; depois de editar o arquivo, pare (Ctrl+C) e rode de novo.
 
@@ -56,7 +56,7 @@ Os dois funcionam sem credencial nenhuma, em **modo simulado**, para o projeto s
 | **Uber** | Corridas pedidas pela pochete viram fictícias e avançam sozinhas: procurando motorista (20 s) → a caminho (60 s) → em viagem (150 s) → concluída. Motorista "Carlos (simulado)". O botão "Chamar Uber" do painel **não** simula: devolve o link universal (veja abaixo). | Guest Rides API: `UBER_CLIENT_ID` + `UBER_CLIENT_SECRET` (conta Uber for Business aprovada em developer.uber.com). `UBER_SANDBOX=1` usa o sandbox da Uber. |
 
 **Credencial não é acesso.** Dá para ter `UBER_CLIENT_ID` e `UBER_CLIENT_SECRET` corretos e a Uber ainda recusar o token com `invalid_scope`, porque o produto **Guest Rides** (escopo `guests.trips`) é liberado caso a caso, só para contas Uber for Business aprovadas. Por isso quem decide o caminho é `uber.disponivel()`, que pede um token de verdade: se a Uber não responder, o servidor volta ao modo simulado/link e guarda esse resultado por 10 minutos (para não bater na Uber a cada clique). A página `/api` mostra o motivo exato no chip **Uber** — por exemplo `credencial sem acesso à Guest Rides (scope(s) are invalid)`.
-| **Telegram** | Mensagens impressas no terminal do servidor; o painel vincula por um `chat_id` digitado. | `TELEGRAM_BOT_TOKEN` (crie com o @BotFather) + `TELEGRAM_BOT_USERNAME`. O cuidador manda `/start CÓDIGO` para o bot e fica vinculado. |
+| **Telegram** | Mensagens impressas no terminal do servidor; o painel vincula por um `chat_id` digitado. | `TELEGRAM_BOT_TOKEN` (crie com o @BotFather; o @ do bot vem do token, `TELEGRAM_BOT_USERNAME` é opcional). O cuidador manda `/start CÓDIGO` para o bot e fica vinculado — com `npm start` o polling ouve sempre; na Vercel o painel consulta `POST /api/telegram/codigo` a cada 5 s e essa chamada lê as mensagens do bot (`getUpdates` sem espera), sem webhook. |
 | **E-mail** | O e-mail aparece no terminal (com o motivo) e a mensagem continua salva no banco; `reenviar-mensagens.js` manda depois. | `EMAIL_EMPRESA` (para onde vai) + `GMAIL_APP_PASSWORD` (Senha de App do Gmail da empresa), **ou** `BREVO_API_KEY`, **ou** `RESEND_API_KEY`. |
 
 A Uber usa a **Guest Rides API** (`auth.uber.com/oauth/v2/token` com `client_credentials`, escopo `guests.trips`; `POST /v1/guests/trips/estimates`; `POST /v1/guests/trips`; `GET|DELETE /v1/guests/trips/{request_id}`). Ela pede corridas para um "convidado" (a pessoa idosa, que não precisa ter o app) a partir da conta da organização. A Uber precisa aprovar o app antes de liberar as credenciais.
@@ -92,7 +92,7 @@ X-Pochete-Key: elo_xxxxxxxxxxxxxxxx
 
 | `tipo` | Quando mandar | O que o servidor faz |
 |---|---|---|
-| `emergencia` | botão vermelho | Telegram 🚨 + aviso no painel (o acionamento do SAMU é da pochete) |
+| `emergencia` | botão vermelho | Telegram 🚨 + aviso no painel, com a localização e o atalho "Ligar 192". A pochete **não** chama o SAMU: quem decide é o cuidador |
 | `transporte` | botão amarelo | Cria a corrida **pendente** e avisa o cuidador para aprovar. Destino = `destino` do corpo ou o endereço de casa cadastrado no painel |
 | `bateria` | ao ligar e a cada X min | Guarda; abaixo de `BATERIA_BAIXA` (20%) avisa |
 | `localizacao` | a cada 1–5 min | Atualiza a posição no painel |
@@ -145,7 +145,7 @@ Enquanto o dispositivo não existe, o painel tem a seção **"Testar sem a poche
 | `POST` | `/api/pochetes/:id/chave` | — | `{ chave }` nova (a antiga morre) |
 | `PATCH` / `DELETE` | `/api/pochetes/:id` | `{ nome_idoso?, telefone_idoso?, casa? }` | |
 | `POST` | `/api/pochetes/:id/simular` | `{ tipo, lat?, lng?, bateria?, destino? }` | igual ao evento da pochete |
-| `GET` | `/api/eventos?limite=20` | — | `{ eventos }` |
+| `GET` | `/api/eventos?limite=20&de=&ate=` | — | `{ eventos }`. `de`/`ate` (datas ISO) filtram o período, como nos Relatórios; com eles o limite vai até 1000 |
 | `GET` | `/api/eventos/stream?token=` | — | **SSE**: eventos `emergencia`, `transporte`, `bateria`, `localizacao`, `teste`, `corrida`, `telegram` |
 | `POST` | `/api/corridas` | `{ pochete_id?, origem?: { lat, lng }, destino?: { lat, lng, nome } }` | chama o carro pelo painel: `201 { modo: "api", corrida }` com credenciais da Uber, ou `{ modo: "link", link, origem, destino, aviso? }` sem elas |
 | `GET` | `/api/corridas` · `/api/corridas/:id` | — | `{ corridas }` / `{ corrida }` (consulta a Uber e atualiza) |

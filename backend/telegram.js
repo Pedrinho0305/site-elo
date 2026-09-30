@@ -8,18 +8,23 @@
      receber   GET  https://api.telegram.org/bot<TOKEN>/getUpdates   (long polling)
 
    Como o cuidador se vincula: no painel ele pega um código, abre o bot no
-   Telegram e manda "/start CÓDIGO". O polling recebe a mensagem, casa o
-   código com a conta e guarda o chat_id. Não precisa de URL pública.
+   Telegram e manda "/start CÓDIGO". O servidor lê a mensagem, casa o código
+   com a conta e guarda o chat_id. Não precisa de URL pública (nem webhook):
+     · servidor contínuo (npm start): o polling fica ouvindo o tempo todo;
+     · serverless (Vercel): não há processo aberto, então cada consulta do
+       painel (POST /api/telegram/codigo) faz uma leitura rápida com
+       verificarMensagens() enquanto o vínculo não sai.
 
    Sem TELEGRAM_BOT_TOKEN, o módulo funciona em MODO SIMULAÇÃO: as mensagens
    vão para o console e o vínculo é feito direto pelo painel.
 
    Para criar um bot: fale com @BotFather no Telegram, /newbot, e copie o
-   token para TELEGRAM_BOT_TOKEN. O nome de usuário vai em TELEGRAM_BOT_USERNAME.
+   token para TELEGRAM_BOT_TOKEN. O nome de usuário do bot é descoberto pelo
+   próprio token (getMe); TELEGRAM_BOT_USERNAME só serve para forçar outro.
    ========================================================================== */
 const token = process.env.TELEGRAM_BOT_TOKEN || '';
 export const simulado = !token;
-export const botUsername = process.env.TELEGRAM_BOT_USERNAME || (simulado ? 'elo_bot_simulado' : '');
+export let botUsername = process.env.TELEGRAM_BOT_USERNAME || (simulado ? 'elo_bot_simulado' : '');
 
 const API = `https://api.telegram.org/bot${token}`;
 
@@ -50,13 +55,54 @@ export async function enviar(chatId, texto) {
   }
 }
 
+/* O @usuario do bot, perguntado ao Telegram uma vez (getMe) */
+export async function nomeDoBot() {
+  if (botUsername || simulado) return botUsername;
+  try { botUsername = (await api('getMe', {})).username || ''; }
+  catch (e) { console.error('[telegram getMe]', e.message); }
+  return botUsername;
+}
+
 /* ------------------------------------------------------------------------
-   Polling: fica esperando mensagens novas e chama aoStart(codigo, chat)
-   quando alguém manda "/start CÓDIGO". O retorno de aoStart é a resposta
-   enviada de volta (ou null para responder o padrão).
+   Mensagens recebidas: chama aoStart(codigo, chat) quando alguém manda
+   "/start CÓDIGO". O retorno de aoStart é a resposta enviada de volta (ou
+   null para responder o padrão).
    ------------------------------------------------------------------------ */
 let offset = 0;
 let rodando = false;
+export const ouvindo = () => rodando;
+
+async function tratarMensagem(msg, aoStart) {
+  if (!msg?.text) return;
+  const m = msg.text.trim().match(/^\/start(?:@\w+)?\s+([A-Za-z0-9-]{4,16})$/i);
+  const chat = { id: String(msg.chat.id), nome: [msg.from?.first_name, msg.from?.last_name].filter(Boolean).join(' ') };
+  if (m) {
+    const resposta = await aoStart(m[1].toUpperCase(), chat);
+    await enviar(chat.id, resposta || 'Não encontrei esse código. Pegue um novo no painel da ELO e mande /start CÓDIGO.');
+  } else {
+    await enviar(chat.id, 'Oi! Eu sou o bot da ELO. Para receber os avisos da pochete, pegue o código no painel e mande: /start CÓDIGO');
+  }
+}
+
+/* Leitura única, sem ficar esperando: é o que o serverless consegue fazer.
+   O Telegram guarda as mensagens até alguém confirmar (offset), então nada
+   se perde entre uma consulta e outra. */
+export async function verificarMensagens(aoStart) {
+  if (simulado || rodando) return;
+  try {
+    const updates = await api('getUpdates', { offset: offset || undefined, timeout: 0, allowed_updates: ['message'] });
+    for (const u of updates) {
+      offset = u.update_id + 1;
+      await tratarMensagem(u.message, aoStart);
+    }
+    // confirma as lidas, para outra instância não responder de novo
+    if (updates.length) await api('getUpdates', { offset, timeout: 0, limit: 1 });
+  } catch (e) {
+    console.error('[telegram getUpdates]', e.message);
+  }
+}
+
+/* Polling: servidor contínuo, fica esperando mensagens novas */
 
 export function iniciarPolling(aoStart) {
   if (simulado || rodando) return;
@@ -68,16 +114,7 @@ export function iniciarPolling(aoStart) {
         const updates = await api('getUpdates', { offset, timeout: 25, allowed_updates: ['message'] });
         for (const u of updates) {
           offset = u.update_id + 1;
-          const msg = u.message;
-          if (!msg?.text) continue;
-          const m = msg.text.trim().match(/^\/start(?:@\w+)?\s+([A-Za-z0-9-]{4,16})$/i);
-          const chat = { id: String(msg.chat.id), nome: [msg.from?.first_name, msg.from?.last_name].filter(Boolean).join(' ') };
-          if (m) {
-            const resposta = await aoStart(m[1].toUpperCase(), chat);
-            await enviar(chat.id, resposta || 'Não encontrei esse código. Pegue um novo no painel da ELO e mande /start CÓDIGO.');
-          } else {
-            await enviar(chat.id, 'Oi! Eu sou o bot da ELO. Para receber os avisos da pochete, pegue o código no painel e mande: /start CÓDIGO');
-          }
+          await tratarMensagem(u.message, aoStart);
         }
       } catch (e) {
         console.error('[telegram polling]', e.message);

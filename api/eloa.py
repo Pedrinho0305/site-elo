@@ -285,7 +285,7 @@ def responder_local(sessao: Sessao, pergunta: str) -> tuple[str, str, float]:
     else:
         # emergência acontecendo agora vem antes de qualquer assunto
         if re.search(r"\b(agora|socorro|urgente|caiu|desmaiou|passando mal)\b", texto):
-            resposta = ("Se é uma emergência agora, aperte o botão vermelho da pochete ou ligue 192 (SAMU). "
+            resposta = ("Se é uma emergência agora, ligue 192 (SAMU). O botão vermelho da pochete avisa o cuidador, mas não chama o SAMU. "
                         "Eu sou só uma assistente de texto e não aciono nada. Depois, se quiser, eu explico como o alerta funciona.")
             sessao.mensagens += [{"role": "user", "content": pergunta}, {"role": "assistant", "content": resposta}]
             return resposta, "emergencia_agora", 1.0
