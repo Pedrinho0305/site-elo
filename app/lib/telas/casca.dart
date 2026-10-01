@@ -69,7 +69,8 @@ class CascaEstado extends State<Casca> {
     ];
     return Scaffold(
       body: IndexedStack(index: aba, children: telas),
-      bottomNavigationBar: NavigationBar(
+      // a barra ouve a sessão: "Entrar" vira "Painel" assim que o login termina
+      bottomNavigationBar: ListenableBuilder(listenable: Sessao.i, builder: (context, _) => NavigationBar(
         selectedIndex: aba,
         onDestinationSelected: irPara,
         destinations: [
@@ -82,7 +83,7 @@ class CascaEstado extends State<Casca> {
           ),
           const NavigationDestination(icon: Icon(Icons.menu_rounded), label: 'Mais'),
         ],
-      ),
+      )),
     );
   }
 }

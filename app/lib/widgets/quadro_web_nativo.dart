@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../nucleo/config.dart';
+import '../nucleo/tema.dart';
 
 class QuadroWebImpl extends StatefulWidget {
   const QuadroWebImpl({super.key, this.url, this.html, required this.interativo});
@@ -24,15 +25,27 @@ class _QuadroWebImplState extends State<QuadroWebImpl> {
     super.initState();
     _c = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.transparent)
       ..setNavigationDelegate(NavigationDelegate(
         onPageFinished: (_) { if (mounted) setState(() => _carregando = false); },
+        // só páginas web: links intent://, geo: etc. (o "abrir no app" do
+        // Google) deixariam a WebView em branco
+        onNavigationRequest: (pedido) {
+          final esquema = Uri.tryParse(pedido.url)?.scheme ?? '';
+          return const {'http', 'https', 'about', 'data'}.contains(esquema) ? NavigationDecision.navigate : NavigationDecision.prevent;
+        },
       ));
     if (widget.url != null) {
       _c.loadRequest(Uri.parse(widget.url!));
     } else {
       _c.loadHtmlString(widget.html ?? '', baseUrl: siteBase);
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // fundo opaco: WebView transparente some em alguns Androids
+    _c.setBackgroundColor(context.cores.bg2);
   }
 
   @override

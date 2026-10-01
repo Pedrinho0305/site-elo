@@ -328,7 +328,7 @@ class MapaGoogle extends StatelessWidget {
         height: altura,
         decoration: BoxDecoration(color: c.bg, border: Border.all(color: c.line)),
         child: Stack(children: [
-          Positioned.fill(child: QuadroWeb(url: googleEmbed(lat, lng), interativo: interativo)),
+          Positioned.fill(child: QuadroWeb(url: googleEmbed(lat, lng), interativo: interativo, emIframe: true)),
           if (!interativo && aoTocar != null) Positioned.fill(child: Material(type: MaterialType.transparency, child: InkWell(onTap: aoTocar))),
           Positioned(right: 8, top: 8, child: IgnorePointer(child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
