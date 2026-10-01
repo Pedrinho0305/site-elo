@@ -31,7 +31,9 @@ class _QuadroWebImplState extends State<QuadroWebImpl> {
         // Google) deixariam a WebView em branco
         onNavigationRequest: (pedido) {
           final esquema = Uri.tryParse(pedido.url)?.scheme ?? '';
-          return const {'http', 'https', 'about', 'data'}.contains(esquema) ? NavigationDecision.navigate : NavigationDecision.prevent;
+          // http só quando o próprio site de desenvolvimento é http (emulador)
+          final permitidos = {'https', 'about', 'data', if (siteBase.startsWith('http:')) 'http'};
+          return permitidos.contains(esquema) ? NavigationDecision.navigate : NavigationDecision.prevent;
         },
       ));
     if (widget.url != null) {

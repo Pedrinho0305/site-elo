@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const d = e.dados || {};
     const nome = texto(e.nome_idoso || 'A pochete');
     const pelo = d.origem === 'painel' ? ' (teste pelo painel)' : '';
-    const onde = d.lat != null ? ` <a class="log-map" href="${linkMapa(d.lat, d.lng)}" target="_blank" rel="noopener" data-mapa="${d.lat},${d.lng}" data-mapa-titulo="${nome}, ${dataHora(new Date(e.criado_em))}">Ver no mapa</a>` : '';
+    const onde = d.lat != null && Number.isFinite(+d.lat) && Number.isFinite(+d.lng) ? ` <a class="log-map" href="${linkMapa(+d.lat, +d.lng)}" target="_blank" rel="noopener" data-mapa="${+d.lat},${+d.lng}" data-mapa-titulo="${nome}, ${dataHora(new Date(e.criado_em))}">Ver no mapa</a>` : '';
     const base = { quando: new Date(e.criado_em) };
     switch (e.tipo) {
       case 'emergencia': return { ...base, tipo: 'Emergência', cor: 'red', icone: ICONE.sino, texto: `${nome} apertou o botão vermelho${pelo}.${onde}` };

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'api.dart';
@@ -8,9 +9,16 @@ import 'api.dart';
 /// Sessão do cuidador, igual à do site: { nome, email, foto, token }.
 /// Só entra quem o backend reconhece (sem "demonstração local"); sem token
 /// não há sessão. Também guarda a escolha de tema.
+///
+/// O token (que dá acesso à conta) fica no cofre do sistema: Keystore no
+/// Android, Keychain no iOS. Nas preferências comuns, que qualquer backup ou
+/// celular com root lê em texto puro, ficam só nome, e-mail e foto.
 class Sessao extends ChangeNotifier {
   Sessao._();
   static final i = Sessao._();
+
+  static const _cofre = FlutterSecureStorage();
+  static const _chaveToken = 'elo-token';
 
   SharedPreferences? _prefs;
   String? token;
@@ -33,16 +41,30 @@ class Sessao extends ChangeNotifier {
     _prefs = await SharedPreferences.getInstance();
     temaEscuro = (_prefs!.getString('theme') ?? 'dark') == 'dark';
     final salvo = _prefs!.getString('elo-sessao');
+    String? tokenAntigo;
     if (salvo != null) {
       try {
         final dados = jsonDecode(salvo) as Map<String, dynamic>;
-        token = dados['token'] as String?;
+        tokenAntigo = dados['token'] as String?;
         cuidador = Map<String, dynamic>.from(dados['cuidador'] as Map? ?? {});
       } catch (_) {
-        token = null;
+        cuidador = {};
       }
     }
-    if (!logado) token = null;
+    try {
+      token = await _cofre.read(key: _chaveToken);
+    } catch (_) {
+      token = null; // cofre ilegível (ex.: chave do aparelho trocada): entra de novo
+    }
+    // Versão anterior guardava o token nas preferências: muda para o cofre
+    if (tokenAntigo != null && tokenAntigo.isNotEmpty) {
+      token ??= tokenAntigo;
+      await _gravar();
+    }
+    if (!logado) {
+      token = null;
+      cuidador = {};
+    }
   }
 
   /// Confere no servidor se a sessão ainda vale (derruba se vier 401)
@@ -78,6 +100,9 @@ class Sessao extends ChangeNotifier {
     token = null;
     cuidador = {};
     await _prefs?.remove('elo-sessao');
+    try {
+      await _cofre.delete(key: _chaveToken);
+    } catch (_) {}
     notifyListeners();
   }
 
@@ -88,7 +113,17 @@ class Sessao extends ChangeNotifier {
   }
 
   Future<void> _gravar() async {
-    await _prefs?.setString('elo-sessao', jsonEncode({'token': token, 'cuidador': cuidador}));
+    try {
+      if (token == null) {
+        await _cofre.delete(key: _chaveToken);
+      } else {
+        await _cofre.write(key: _chaveToken, value: token);
+      }
+    } catch (e) {
+      debugPrint('Cofre indisponível, a sessão vale só enquanto o app está aberto: $e');
+    }
+    // Sem o token: nas preferências fica só o que aparece na tela
+    await _prefs?.setString('elo-sessao', jsonEncode({'cuidador': cuidador}));
   }
 
   // Preferências pequenas usadas por outras partes (último aviso visto etc.)

@@ -48,22 +48,26 @@ document.addEventListener('DOMContentLoaded', () => {
   // O link "Entrar" aponta para login.html; a partir dele sabemos a pasta das páginas
   const base = (slot.getAttribute('href') || 'login.html').replace(/login\.html$/, '');
   const inicio = base ? 'index.html' : '../index.html'; // sem pasta = já estamos em /pages
-  const initials = session.nome.split(' ').filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join('');
+  // Nome, e-mail e foto vêm da conta: tudo passa por esc() antes de virar HTML
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fotoSegura = f => /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(String(f || '')) ? f : null;
+  const initials = esc(session.nome.split(' ').filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join(''));
+  const foto = fotoSegura(session.foto);
 
   const profile = document.createElement('div');
   profile.className = 'profile';
   profile.innerHTML = `
-    <button type="button" class="profile-chip" aria-haspopup="menu" aria-expanded="false" aria-label="Menu de ${session.nome}">
-      <span class="profile-avatar">${session.foto ? `<img src="${session.foto}" alt="">` : initials}</span>
-      <span class="profile-name">${session.nome.split(' ')[0]}</span>
+    <button type="button" class="profile-chip" aria-haspopup="menu" aria-expanded="false" aria-label="Menu de ${esc(session.nome)}">
+      <span class="profile-avatar">${foto ? `<img src="${foto}" alt="">` : initials}</span>
+      <span class="profile-name">${esc(session.nome.split(' ')[0])}</span>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
     </button>
     <div class="profile-menu" role="menu" hidden>
       <div class="profile-head">
-        <span class="profile-avatar profile-avatar--lg">${session.foto ? `<img src="${session.foto}" alt="">` : initials}</span>
+        <span class="profile-avatar profile-avatar--lg">${foto ? `<img src="${foto}" alt="">` : initials}</span>
         <div>
-          <strong>${session.nome}</strong>
-          <span>${session.email || 'Cuidador ELO'}</span>
+          <strong>${esc(session.nome)}</strong>
+          <span>${esc(session.email || 'Cuidador ELO')}</span>
         </div>
       </div>
       <a role="menuitem" href="${base}painel.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>Painel</a>

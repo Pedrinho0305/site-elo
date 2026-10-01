@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const sessao = window.EloSessao?.ler();
   const api = (rota, opcoes) => window.EloSessao.api(rota, opcoes);
   const $ = id => document.getElementById(id);
+  // Tudo que vem do servidor (nomes, destinos, mensagens de erro) e pode ter
+  // sido escrito por outra pessoa ou pela própria pochete passa por esc()
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const num = n => Number.isFinite(Number(n)) ? Number(n) : 0;
 
   const secao = $('pochete');
   if (!secao) return;
@@ -39,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const hora = d => new Date(d || Date.now()).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  const mapa = p => p ? `https://maps.google.com/?q=${p.lat},${p.lng}` : null;
+  const mapa = p => p ? `https://maps.google.com/?q=${num(p.lat)},${num(p.lng)}` : null;
 
   function atualizarTiles(p) {
     if (!p) return;
@@ -50,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (p.posicao) {
       $('tileLocal').textContent = 'Atualizada';
-      $('tileLocalNota').innerHTML = `${hora()} · <a href="${mapa(p.posicao)}" target="_blank" rel="noopener" data-mapa="${p.posicao.lat},${p.posicao.lng}" data-mapa-titulo="Onde está ${p.nome_idoso || 'a pochete'}">ver no mapa</a>`;
+      $('tileLocalNota').innerHTML = `${hora()} · <a href="${mapa(p.posicao)}" target="_blank" rel="noopener" data-mapa="${num(p.posicao.lat)},${num(p.posicao.lng)}" data-mapa-titulo="Onde está ${esc(p.nome_idoso || 'a pochete')}">ver no mapa</a>`;
     }
     $('tileStatus').textContent = '100%';
     $('tileStatusNota').textContent = `${p.nome_idoso || 'Pochete'} conectada`;
@@ -95,14 +99,14 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="ride-head">
         <span class="ride-icon" aria-hidden="true">🚕</span>
         <div>
-          <h2>${titulo}</h2>
-          <p>${pochete ? pochete.nome_idoso : 'A pochete'} pediu um carro para <strong>${c.destino.nome || 'o destino informado'}</strong> às ${hora(c.criado_em)}.
-             ${c.produto ? `${c.produto}${c.valor ? ', ' + c.valor : ''}.` : ''} ${c.eta_min != null && ativa ? `Chega em ~${c.eta_min} min.` : ''}
-             ${c.motorista ? `Motorista: ${c.motorista}${c.veiculo ? ' · ' + c.veiculo : ''}.` : ''} ${c.erro ? c.erro : nota}</p>
+          <h2>${esc(titulo)}</h2>
+          <p>${esc(pochete ? pochete.nome_idoso : 'A pochete')} pediu um carro para <strong>${esc(c.destino.nome || 'o destino informado')}</strong> às ${hora(c.criado_em)}.
+             ${c.produto ? `${esc(c.produto)}${c.valor ? ', ' + esc(c.valor) : ''}.` : ''} ${c.eta_min != null && ativa ? `Chega em ~${num(c.eta_min)} min.` : ''}
+             ${c.motorista ? `Motorista: ${esc(c.motorista)}${c.veiculo ? ' · ' + esc(c.veiculo) : ''}.` : ''} ${esc(c.erro ? c.erro : nota)}</p>
         </div>
       </div>
       <div class="ride-actions">
-        <a class="btn btn-outline" href="${mapa(c.origem)}" target="_blank" rel="noopener" data-mapa="${c.origem.lat},${c.origem.lng}" data-mapa-titulo="De onde a corrida sai">Ver no mapa</a>
+        <a class="btn btn-outline" href="${mapa(c.origem)}" target="_blank" rel="noopener" data-mapa="${num(c.origem.lat)},${num(c.origem.lng)}" data-mapa-titulo="De onde a corrida sai">Ver no mapa</a>
         ${c.status === 'pendente' ? '<button type="button" class="btn btn-green" data-corrida="aprovar">Aprovar corrida</button><button type="button" class="btn btn-outline" data-corrida="recusar">Recusar</button>' : ''}
         ${['aprovada', 'solicitada', 'a_caminho'].includes(c.status) ? '<button type="button" class="btn btn-outline" data-corrida="cancelar">Cancelar corrida</button>' : ''}
         ${!ativa ? '<button type="button" class="btn btn-outline" data-corrida="fechar">Fechar</button>' : ''}
@@ -157,13 +161,13 @@ document.addEventListener('DOMContentLoaded', () => {
         <span class="ride-icon" aria-hidden="true">🚕</span>
         <div>
           <h2>Uber pronto para pedir</h2>
-          <p>Abri o Uber ${destino ? `com destino <strong>${destino.nome || 'cadastrado'}</strong> já preenchido` : 'com a partida já preenchida'}.
+          <p>Abri o Uber ${destino ? `com destino <strong>${esc(destino.nome || 'cadastrado')}</strong> já preenchido` : 'com a partida já preenchida'}.
              No celular ele abre no aplicativo; no computador, no site do Uber. Confirme o carro por lá.
-             ${aviso ? `<br><span class="muted">${aviso}</span>` : ''}</p>
+             ${aviso ? `<br><span class="muted">${esc(aviso)}</span>` : ''}</p>
         </div>
       </div>
       <div class="ride-actions">
-        <a class="btn btn-green" href="${link}" target="_blank" rel="noopener">Abrir o Uber</a>
+        <a class="btn btn-green" href="${/^https:\/\/m\.uber\.com\//.test(link) ? esc(link) : 'https://m.uber.com/ul/'}" target="_blank" rel="noopener">Abrir o Uber</a>
         <button type="button" class="btn btn-outline" data-corrida="fechar">Fechar</button>
       </div>`;
     painel.querySelector('[data-corrida="fechar"]').addEventListener('click', () => { painel.hidden = true; });
@@ -297,10 +301,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const lista = $('pocheteLista');
     if (!pochetes.length) { lista.innerHTML = '<p class="muted">Nenhuma pochete vinculada ainda. Cadastre abaixo para receber a chave.</p>'; return; }
     lista.innerHTML = pochetes.map(p => `
-      <div class="pochete-item" data-id="${p.id}">
+      <div class="pochete-item" data-id="${num(p.id)}">
         <div>
-          <strong>${p.nome_idoso}</strong>
-          <span class="muted">${p.bateria != null ? `Bateria ${p.bateria}% · ` : ''}${p.ultimo_contato ? 'Último contato ' + hora(p.ultimo_contato) : 'Ainda não falou com o servidor'}${p.casa ? ' · Casa: ' + (p.casa.nome || 'cadastrada') : ' · Sem endereço de casa'}</span>
+          <strong>${esc(p.nome_idoso)}</strong>
+          <span class="muted">${p.bateria != null ? `Bateria ${num(p.bateria)}% · ` : ''}${p.ultimo_contato ? 'Último contato ' + hora(p.ultimo_contato) : 'Ainda não falou com o servidor'}${p.casa ? ' · Casa: ' + esc(p.casa.nome || 'cadastrada') : ' · Sem endereço de casa'}</span>
         </div>
         <div class="pochete-item-actions">
           <button type="button" class="btn btn-outline" data-acao="chave">Nova chave</button>
@@ -336,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderPochetes();
       if (pochetes[0]) atualizarTiles({ ...pochetes[0], nome_idoso: pochetes[0].nome_idoso });
       $('simularPanel').classList.toggle('is-disabled', !pochetes.length);
-    } catch (e) { $('pocheteLista').innerHTML = `<p class="muted">${e.message}</p>`; }
+    } catch (e) { $('pocheteLista').innerHTML = `<p class="muted">${esc(e.message)}</p>`; }
   }
 
   $('keyCopy').addEventListener('click', async () => {
@@ -379,9 +383,10 @@ document.addEventListener('DOMContentLoaded', () => {
       el.innerHTML = `<p class="muted">O bot do Telegram ainda não está configurado no servidor (<code>TELEGRAM_BOT_TOKEN</code>). Em modo simulado, as mensagens aparecem no terminal do servidor. Para testar o fluxo, informe um chat_id qualquer:</p>
         <div class="tg-form"><input type="text" id="tgChat" placeholder="chat_id (ex.: 123456789)" inputmode="numeric"><button type="button" class="btn btn-green" data-tg="vincular">Vincular</button></div>`;
     } else {
-      el.innerHTML = `<p>Abra o bot <a href="https://t.me/${telegram.bot}" target="_blank" rel="noopener">@${telegram.bot}</a> no Telegram e mande:</p>
-        <code class="key-value">/start ${telegram.codigo}</code>
-        <div class="tg-actions"><a class="btn btn-green" href="https://t.me/${telegram.bot}?start=${telegram.codigo}" target="_blank" rel="noopener">Abrir o bot já com o código</a></div>
+      const bot = String(telegram.bot || '').replace(/[^\w]/g, ''), codigo = String(telegram.codigo || '').replace(/[^\w-]/g, '');
+      el.innerHTML = `<p>Abra o bot <a href="https://t.me/${bot}" target="_blank" rel="noopener">@${bot}</a> no Telegram e mande:</p>
+        <code class="key-value">/start ${codigo}</code>
+        <div class="tg-actions"><a class="btn btn-green" href="https://t.me/${bot}?start=${codigo}" target="_blank" rel="noopener">Abrir o bot já com o código</a></div>
         <p class="muted">Assim que a mensagem chegar, esta tela confirma sozinha.</p>`;
     }
     el.querySelectorAll('[data-tg]').forEach(b => b.addEventListener('click', async () => {
@@ -406,7 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (esperar && !esperandoTelegram) esperandoTelegram = setInterval(() => { if (!document.hidden) carregarTelegram(); }, 5000);
       if (!esperar && esperandoTelegram) { clearInterval(esperandoTelegram); esperandoTelegram = null; }
     }
-    catch (e) { $('telegramEstado').innerHTML = `<p class="muted">${e.message}</p>`; }
+    catch (e) { $('telegramEstado').innerHTML = `<p class="muted">${esc(e.message)}</p>`; }
   }
 
   /* ---------------------------------------------------------------------

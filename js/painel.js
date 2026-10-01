@@ -43,8 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---- Meu perfil ---- */
   const avatar = document.getElementById('perfilAvatar');
-  const initials = session.nome.split(' ').filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join('');
-  const renderAvatar = () => { if (avatar) avatar.innerHTML = session.foto ? `<img src="${session.foto}" alt="">` : initials; };
+  const fotoSegura = f => /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(String(f || '')) ? f : null;
+  const initials = session.nome.split(' ').filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join('').replace(/[&<>"']/g, '');
+  const renderAvatar = () => { if (avatar) avatar.innerHTML = fotoSegura(session.foto) ? `<img src="${session.foto}" alt="">` : initials; };
   renderAvatar();
   const nomeEl = document.getElementById('perfilNome'); if (nomeEl) nomeEl.textContent = session.nome;
   const emailEl = document.getElementById('perfilEmail'); if (emailEl) emailEl.textContent = session.email || '';
@@ -68,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (perfilStatus) { perfilStatus.textContent = 'A foto ficou só neste navegador: ' + err.message; perfilStatus.classList.add('is-visible'); }
         });
         renderAvatar();
-        document.querySelectorAll('.profile .profile-avatar').forEach(a => { a.innerHTML = `<img src="${session.foto}" alt="">`; });
+        document.querySelectorAll('.profile .profile-avatar').forEach(a => { if (fotoSegura(session.foto)) a.innerHTML = `<img src="${session.foto}" alt="">`; });
         if (perfilStatus) { perfilStatus.textContent = 'Foto atualizada.'; perfilStatus.classList.add('is-visible'); }
       };
       img.src = reader.result;

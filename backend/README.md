@@ -205,10 +205,10 @@ node --env-file-if-exists=.env reenviar-mensagens.js --tudo   # inclusive as já
 
 ### Ler as mensagens
 
-`GET /api/mensagens` é para a equipe: só as contas cujo e-mail está em `ADMIN_EMAILS` (ou, sem essa variável, a conta com o e-mail de `EMAIL_EMPRESA`) recebem a lista; qualquer outro cuidador logado leva `403`. É a mesma sessão do painel:
+`GET /api/mensagens` é para a equipe e pede **duas coisas**: o login de uma conta cujo e-mail está em `ADMIN_EMAILS` (ou, sem essa variável, a de `EMAIL_EMPRESA`) **e** a chave `EQUIPE_CHAVE` no cabeçalho `X-Equipe-Chave`. O e-mail sozinho não basta porque o cadastro não confirma e-mail: qualquer pessoa poderia criar a conta com o endereço da empresa. Sem `EQUIPE_CHAVE` configurada, ninguém lê; qualquer outro caso leva `403`.
 
 ```bash
-curl -H "Authorization: Bearer SEU_TOKEN" https://seu-dominio/api/mensagens?tipo=pedido
+curl -H "Authorization: Bearer SEU_TOKEN" -H "X-Equipe-Chave: SUA_CHAVE" https://seu-dominio/api/mensagens?tipo=pedido
 ```
 
 ## Tabelas
@@ -220,9 +220,14 @@ pochetes    id, cuidador_id → cuidadores, nome_idoso, telefone_idoso, chave_ha
 eventos     id, pochete_id → pochetes, tipo, dados JSON, criado_em
 corridas    id, pochete_id → pochetes, status, origem_lat/lng, destino_lat/lng/nome, uber_request_id, uber_status, produto, valor, eta_min, motorista, veiculo, erro, solicitada_em, criado_em, atualizado_em
 mensagens   id, tipo (contato|pedido), nome, email, telefone, assunto, mensagem, detalhes JSON, cuidador_id → cuidadores, pagina, ip, email_status, lida, criado_em
+tentativas id, chave (ex.: login-email:…, login-ip:…, cadastro-ip:…, pochete-ip:…), criado_em
 ```
 
-Senhas com `scrypt` nativo (`scrypt$sal$chave`). A chave da pochete é guardada só como SHA-256; sessões são tokens de 64 hex com validade de `SESSION_DAYS`. Todas as datas em UTC (`SET time_zone = '+00:00'` em cada conexão).
+Senhas com `scrypt` nativo (`scrypt$sal$chave`), mínimo de 8 caracteres e sem as óbvias. A chave da pochete é guardada só como SHA-256; sessões são tokens de 64 hex com validade de `SESSION_DAYS`, e o banco guarda **só o SHA-256 do token** (sessões antigas, com o token puro, são convertidas no primeiro uso). Todas as datas em UTC (`SET time_zone = '+00:00'` em cada conexão).
+
+**Limites de tentativa** (tabela `tentativas`, respondem `429`): login, 8 erros por conta e 25 por IP a cada 15 min; cadastro, 30 por IP por hora; chave de pochete inválida, 30 por IP a cada 15 min. O IP vem do `X-Forwarded-For` só na Vercel (ou com `TRUST_PROXY=1`); fora disso, da conexão.
+
+**Cabeçalhos:** toda resposta sai com `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Content-Security-Policy` restritiva, `Referrer-Policy`, `Cache-Control: no-store` em `/api` e HSTS atrás de https. CORS: sem `ALLOWED_ORIGINS`, só o próprio domínio e `localhost` leem as respostas.
 
 ## Arquivos
 

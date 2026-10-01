@@ -82,15 +82,25 @@ const INICIO = Date.now();
 
 const CONFIG = {
   porta: Number(process.env.PORT) || 3000,
-  origens: (process.env.ALLOWED_ORIGINS || '*').split(',').map(o => o.trim()),
+  // Sem ALLOWED_ORIGINS: só o próprio domínio (o site publicado chama /api no
+  // mesmo endereço) e páginas abertas na máquina (localhost, para ?api=publicado).
+  // "*" libera qualquer site — só para testes.
+  origens: (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim()).filter(Boolean),
   sessaoDias: Number(process.env.SESSION_DAYS) || 30,
   bateriaBaixa: Number(process.env.BATERIA_BAIXA) || 20,
   // Quem pode ler as mensagens do site em /api/mensagens. Sem a variável, só
   // a conta com o e-mail da empresa (EMAIL_EMPRESA).
   admins: (process.env.ADMIN_EMAILS || process.env.EMAIL_EMPRESA || '')
     .split(',').map(e => e.trim().toLowerCase()).filter(Boolean),
+  // Segundo fator da caixa de entrada da equipe: o e-mail sozinho não basta,
+  // porque o cadastro não confirma e-mail (qualquer um poderia criar a conta
+  // com o endereço da empresa). Sem EQUIPE_CHAVE, GET /api/mensagens fica fechado.
+  equipeChave: process.env.EQUIPE_CHAVE || '',
   // Quantas mensagens o mesmo e-mail (ou o mesmo IP) pode mandar por hora
   mensagensPorHora: Number(process.env.MENSAGENS_POR_HORA) || 5,
+  // Só atrás de um proxy que reescreve X-Forwarded-For (a Vercel faz isso) o
+  // cabeçalho diz o IP de verdade; na máquina, qualquer um poderia inventá-lo.
+  confiarProxy: Boolean(process.env.VERCEL) || process.env.TRUST_PROXY === '1',
   banco: {
     host: process.env.DB_HOST || 'localhost',
     port: Number(process.env.DB_PORT) || 3306,
@@ -101,6 +111,7 @@ const CONFIG = {
 };
 
 const LIMITE_FOTO = 400 * 1024;
+const SENHA_MINIMA = 8;
 const scrypt = promisify(crypto.scrypt);
 
 /* ------------------------------------------------------------------------
@@ -236,6 +247,18 @@ async function conectarBanco() {
       CONSTRAINT fk_mensagem_cuidador FOREIGN KEY (cuidador_id) REFERENCES cuidadores(id) ON DELETE SET NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
 
+  // Tentativas recentes (login errado, cadastro, chave de pochete errada...).
+  // Fica no banco, não na memória, porque na Vercel cada pedido pode cair numa
+  // instância diferente e um contador em memória não seguraria ninguém.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS tentativas (
+      id         BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      chave      VARCHAR(220)  NOT NULL,
+      criado_em  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX (chave, criado_em),
+      INDEX (criado_em)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+
   const [colsCorridas] = await pool.query('SHOW COLUMNS FROM corridas');
   if (!colsCorridas.some(c => c.Field === 'solicitada_em')) await pool.query('ALTER TABLE corridas ADD COLUMN solicitada_em DATETIME NULL AFTER erro');
 }
@@ -250,19 +273,48 @@ async function gerarHash(senha) {
 }
 
 async function conferirSenha(senha, hash) {
-  const [, sal, esperado] = hash.split('$');
+  const [, sal, esperado] = String(hash || '').split('$');
   if (!sal || !esperado) return false;
   const chave = await scrypt(senha, sal, 64);
   const a = Buffer.from(esperado, 'hex');
   return a.length === chave.length && crypto.timingSafeEqual(a, chave);
 }
 
+// Login com e-mail que não existe gasta o mesmo tempo que um com senha
+// errada: assim o relógio não revela quem tem conta.
+const HASH_FALSO = 'scrypt$' + crypto.randomBytes(16).toString('hex') + '$' + '0'.repeat(128);
+
+// O token vai para o navegador; no banco fica só o SHA-256 dele. Quem ler a
+// tabela sessoes (backup vazado, por exemplo) não consegue entrar como ninguém.
+const hashToken = token => crypto.createHash('sha256').update(token).digest('hex');
+
 async function abrirSessao(cuidadorId) {
   const token = crypto.randomBytes(32).toString('hex');
   const expira = new Date(Date.now() + CONFIG.sessaoDias * 24 * 60 * 60 * 1000);
-  await pool.query('INSERT INTO sessoes (token, cuidador_id, expira_em) VALUES (?, ?, ?)', [token, cuidadorId, expira]);
+  await pool.query('INSERT INTO sessoes (token, cuidador_id, expira_em) VALUES (?, ?, ?)', [hashToken(token), cuidadorId, expira]);
   return token;
 }
+
+const iguaisComTempoFixo = (a, b) => {
+  const x = crypto.createHash('sha256').update(String(a)).digest();
+  const y = crypto.createHash('sha256').update(String(b)).digest();
+  return crypto.timingSafeEqual(x, y);
+};
+
+/* Limite de tentativas: conta quantas vezes a mesma chave (ex.: "login-ip:1.2.3.4")
+   apareceu na janela e recusa com 429 acima do máximo. registrar() anota uma. */
+async function excedeu(chave, maximo, minutos) {
+  const [[{ n }]] = await pool.query(
+    'SELECT COUNT(*) AS n FROM tentativas WHERE chave = ? AND criado_em > (NOW() - INTERVAL ? MINUTE)', [chave.slice(0, 220), minutos]);
+  return n >= maximo;
+}
+async function registrar(chave) {
+  await pool.query('INSERT INTO tentativas (chave) VALUES (?)', [chave.slice(0, 220)]);
+  // faxina de vez em quando (não há processo contínuo na Vercel)
+  if (Math.random() < 0.02) pool.query('DELETE FROM tentativas WHERE criado_em < (NOW() - INTERVAL 1 DAY)').catch(() => {});
+}
+const esquecer = chave => pool.query('DELETE FROM tentativas WHERE chave = ?', [chave.slice(0, 220)]);
+const calma = minutos => erro(429, `Muitas tentativas seguidas. Por segurança, espere ${minutos} minutos e tente de novo.`);
 
 // A chave da pochete é mostrada uma vez e guardada só como hash (como senha)
 function novaChavePochete() {
@@ -277,11 +329,22 @@ const hashChave = chave => crypto.createHash('sha256').update(chave).digest('hex
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const limparNome = n => String(n || '').trim().replace(/\s+/g, ' ');
 const limparEmail = e => String(e || '').trim().toLowerCase();
+// Senhas que caem em qualquer lista de "mais usadas", ou que repetem o e-mail/nome
+const SENHAS_COMUNS = new Set(['12345678', '123456789', '1234567890', 'password', 'senha123', 'senha1234', '12341234', '11111111', '00000000', 'qwertyui', 'qwerty123', 'abcd1234', 'abc12345', 'iloveyou', 'password1', 'brasil123', 'mudar123', 'elo12345', 'admin123']);
+function senhaFraca(senha, email, nome) {
+  const s = senha.toLowerCase();
+  if (SENHAS_COMUNS.has(s) || /^(.)\1+$/.test(s)) return true;
+  const usuario = email.split('@')[0];
+  if (usuario.length >= 4 && s.includes(usuario)) return true;
+  return nome.toLowerCase().replace(/\s+/g, '') === s;
+}
 const limparTelefone = t => (t == null || t === '') ? null : String(t).replace(/[^\d+]/g, '').slice(0, 20);
 
 function validarFoto(foto) {
   if (foto == null || foto === '') return null;
-  if (typeof foto !== 'string' || !/^data:image\/(jpeg|png|webp);base64,/.test(foto)) throw erro(400, 'A foto precisa ser uma imagem JPG, PNG ou WebP.');
+  // O texto inteiro precisa ser base64: só o prefixo deixaria passar aspas e
+  // HTML escondidos depois da vírgula (a foto vai para dentro de <img src>).
+  if (typeof foto !== 'string' || !/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(foto)) throw erro(400, 'A foto precisa ser uma imagem JPG, PNG ou WebP.');
   if (foto.length > LIMITE_FOTO) throw erro(400, 'A foto é grande demais. Escolha uma menor.');
   return foto;
 }
@@ -293,6 +356,11 @@ function validarCoordenada(lat, lng) {
 }
 
 function erro(status, mensagem) { return Object.assign(new Error(mensagem), { status }); }
+// Texto que vai para mensagem do Telegram (parse_mode HTML)
+const tg = t => String(t ?? '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+// IP de quem fez o pedido (só confia no X-Forwarded-For atrás de proxy confiável)
+const ipDoPedido = req => (CONFIG.confiarProxy && String(req.headers['x-forwarded-for'] || '').split(',')[0].trim())
+  || req.socket?.remoteAddress || 'desconhecido';
 const publico = c => ({ id: c.id, nome: c.nome, email: c.email, foto: c.foto || null, telefone: c.telefone || null, telegram: Boolean(c.telegram_chat_id) });
 const pochetePublica = p => ({
   id: p.id, nome_idoso: p.nome_idoso, telefone_idoso: p.telefone_idoso,
@@ -321,14 +389,22 @@ const STATUS_ATIVOS = ['pendente', 'aprovada', 'solicitada', 'a_caminho', 'em_an
 /* ------------------------------------------------------------------------
    O coração: um evento da pochete
    ------------------------------------------------------------------------ */
-async function tratarEvento(pochete, cuidador, tipo, dados = {}, origem = 'pochete') {
+async function tratarEvento(pochete, cuidador, tipo, corpo = {}, origem = 'pochete') {
+  // Só o que o contrato prevê vai para o banco e para o painel: nada de
+  // guardar o corpo inteiro que chegou (que poderia ter qualquer coisa).
+  const dados = {
+    lat: corpo?.lat, lng: corpo?.lng, bateria: corpo?.bateria,
+    destino: corpo?.destino && typeof corpo.destino === 'object'
+      ? { lat: corpo.destino.lat, lng: corpo.destino.lng, nome: limparTexto(corpo.destino.nome, 120) || undefined }
+      : undefined,
+  };
   const pos = validarCoordenada(dados.lat, dados.lng) || (pochete.lat != null ? { lat: Number(pochete.lat), lng: Number(pochete.lng) } : null);
-  const bateria = dados.bateria != null ? Math.max(0, Math.min(100, Math.round(Number(dados.bateria)))) : pochete.bateria;
+  const bateria = dados.bateria != null && Number.isFinite(Number(dados.bateria)) ? Math.max(0, Math.min(100, Math.round(Number(dados.bateria)))) : pochete.bateria;
 
   await pool.query('UPDATE pochetes SET lat = ?, lng = ?, bateria = ?, ultimo_contato = NOW() WHERE id = ?',
     [pos?.lat ?? null, pos?.lng ?? null, Number.isFinite(bateria) ? bateria : null, pochete.id]);
 
-  const registro = { ...dados, lat: pos?.lat, lng: pos?.lng, bateria, origem };
+  const registro = { lat: pos?.lat, lng: pos?.lng, bateria, origem, ...(dados.destino ? { destino: dados.destino } : {}) };
   const [r] = await pool.query('INSERT INTO eventos (pochete_id, tipo, dados) VALUES (?, ?, ?)', [pochete.id, tipo, JSON.stringify(registro)]);
   const evento = { id: r.insertId, pochete_id: pochete.id, nome_idoso: pochete.nome_idoso, tipo, dados: registro, criado_em: new Date().toISOString() };
 
@@ -337,7 +413,7 @@ async function tratarEvento(pochete, cuidador, tipo, dados = {}, origem = 'poche
 
   switch (tipo) {
     case 'emergencia':
-      await telegram.enviar(cuidador.telegram_chat_id, `🚨 <b>EMERGÊNCIA</b>\n${pochete.nome_idoso} apertou o botão vermelho às ${horaBR()}.\nVeja onde está e, se for preciso, ligue 192 (SAMU).${lugar}`);
+      await telegram.enviar(cuidador.telegram_chat_id, `🚨 <b>EMERGÊNCIA</b>\n${tg(pochete.nome_idoso)} apertou o botão vermelho às ${horaBR()}.\nVeja onde está e, se for preciso, ligue 192 (SAMU).${lugar}`);
       break;
 
     case 'transporte': {
@@ -356,18 +432,18 @@ async function tratarEvento(pochete, cuidador, tipo, dados = {}, origem = 'poche
         [pochete.id, pos.lat, pos.lng, destino.lat, destino.lng, destinoNome]);
       const [[linha]] = await pool.query('SELECT * FROM corridas WHERE id = ?', [c.insertId]);
       corrida = corridaPublica(linha);
-      await telegram.enviar(cuidador.telegram_chat_id, `🚕 <b>Pedido de transporte</b>\n${pochete.nome_idoso} quer um carro para ${destinoNome || 'o destino informado'}.\nAprove ou recuse no painel da ELO.${lugar}`);
+      await telegram.enviar(cuidador.telegram_chat_id, `🚕 <b>Pedido de transporte</b>\n${tg(pochete.nome_idoso)} quer um carro para ${tg(destinoNome || 'o destino informado')}.\nAprove ou recuse no painel da ELO.${lugar}`);
       break;
     }
 
     case 'bateria':
       if (bateria != null && bateria <= CONFIG.bateriaBaixa) {
-        await telegram.enviar(cuidador.telegram_chat_id, `🔋 A pochete de ${pochete.nome_idoso} está com ${bateria}% de bateria. Lembre de carregar hoje à noite.`);
+        await telegram.enviar(cuidador.telegram_chat_id, `🔋 A pochete de ${tg(pochete.nome_idoso)} está com ${bateria}% de bateria. Lembre de carregar hoje à noite.`);
       }
       break;
 
     case 'teste':
-      await telegram.enviar(cuidador.telegram_chat_id, `✅ Teste da pochete de ${pochete.nome_idoso}: tudo funcionando.${lugar}`);
+      await telegram.enviar(cuidador.telegram_chat_id, `✅ Teste da pochete de ${tg(pochete.nome_idoso)}: tudo funcionando.${lugar}`);
       break;
 
     // localizacao: só atualiza e avisa o painel
@@ -400,8 +476,42 @@ async function sincronizarCorrida(corrida, cuidadorId) {
    App
    ------------------------------------------------------------------------ */
 const app = express();
-app.use(cors({ origin: CONFIG.origens.includes('*') ? true : CONFIG.origens }));
-app.use(express.json({ limit: '1mb' }));
+app.disable('x-powered-by');
+app.set('trust proxy', CONFIG.confiarProxy);
+
+// Cabeçalhos de segurança em toda resposta do backend. São respostas JSON (e a
+// página de estado): nada aqui deve ser embutido, adivinhado ou guardado em cache.
+app.use((req, res, next) => {
+  res.set({
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'no-referrer',
+    'Cross-Origin-Resource-Policy': 'same-site',
+    'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
+  });
+  if (req.path.startsWith('/api')) res.set('Cache-Control', 'no-store');
+  if (req.secure || CONFIG.confiarProxy) res.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
+  next();
+});
+
+// O login é por token no cabeçalho Authorization (nunca cookie), então outro
+// site não consegue agir em nome de ninguém só por fazer o navegador chamar a
+// API: o CORS aqui decide quem LÊ as respostas, e ALLOWED_ORIGINS fecha isso.
+const ORIGEM_LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/;
+function origemPermitida(origem, req) {
+  if (!origem || origem === 'null') return true;            // app nativo, curl, arquivo aberto do disco
+  if (CONFIG.origens.includes('*') || CONFIG.origens.includes(origem)) return true;
+  if (ORIGEM_LOCAL.test(origem)) return true;
+  try { return new URL(origem).host === req.headers.host; } catch { return false; }
+}
+app.use((req, res, next) => cors({
+  origin: origemPermitida(req.headers.origin, req) ? true : false,
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Pochete-Key', 'X-Equipe-Chave'],
+  maxAge: 600,
+})(req, res, next));
+app.use(express.json({ limit: '600kb', strict: true }));
 
 // Sem banco não há rota que funcione: tenta conectar (de novo, se a primeira
 // vez falhou — comum em serverless) e responde 503 honesto se não der.
@@ -413,10 +523,15 @@ app.use('/api', async (req, _res, next) => {
 
 async function carregarPorToken(token) {
   if (!/^[a-f0-9]{64}$/.test(token || '')) throw erro(401, 'Faça login para continuar.');
+  const hash = hashToken(token);
   const [linhas] = await pool.query(
-    'SELECT c.* FROM sessoes s JOIN cuidadores c ON c.id = s.cuidador_id WHERE s.token = ? AND s.expira_em > NOW()', [token]);
+    'SELECT c.*, s.token AS s_token FROM sessoes s JOIN cuidadores c ON c.id = s.cuidador_id WHERE s.token IN (?, ?) AND s.expira_em > NOW()', [hash, token]);
   if (!linhas.length) throw erro(401, 'Sua sessão expirou. Entre de novo.');
-  return linhas[0];
+  const { s_token, ...cuidador } = linhas[0];
+  // Sessão aberta antes de os tokens virarem hash: troca na primeira vez que
+  // aparece, sem derrubar quem já estava logado.
+  if (s_token === token) await pool.query('UPDATE sessoes SET token = ? WHERE token = ?', [hash, token]);
+  return cuidador;
 }
 
 async function autenticar(req, _res, next) {
@@ -433,11 +548,13 @@ async function autenticar(req, _res, next) {
 async function autenticarPochete(req, _res, next) {
   try {
     const chave = String(req.headers['x-pochete-key'] || '');
-    if (!chave.startsWith('elo_')) throw erro(401, 'Chave da pochete ausente. Envie o cabeçalho X-Pochete-Key.');
+    if (!chave.startsWith('elo_') || chave.length > 80) throw erro(401, 'Chave da pochete ausente. Envie o cabeçalho X-Pochete-Key.');
+    const marca = 'pochete-ip:' + ipDoPedido(req);
+    if (await excedeu(marca, 30, 15)) throw calma(15);
     const [linhas] = await pool.query(
       'SELECT p.*, c.id AS c_id, c.nome AS c_nome, c.telegram_chat_id AS c_telegram FROM pochetes p JOIN cuidadores c ON c.id = p.cuidador_id WHERE p.chave_hash = ?',
       [hashChave(chave)]);
-    if (!linhas.length) throw erro(401, 'Chave da pochete inválida.');
+    if (!linhas.length) { await registrar(marca); throw erro(401, 'Chave da pochete inválida.'); }
     const p = linhas[0];
     req.pochete = p;
     req.cuidador = { id: p.c_id, nome: p.c_nome, telegram_chat_id: p.c_telegram };
@@ -509,18 +626,18 @@ const ROTAS = [
 
 async function estadoServidor() {
   let banco = 'conectado';
-  try { await (await garantirBanco()).query('SELECT 1'); } catch (e) { banco = 'indisponível: ' + (e.code || e.message); }
+  // só o código do erro: a mensagem do MySQL pode trazer usuário e endereço do servidor
+  try { await (await garantirBanco()).query('SELECT 1'); } catch (e) { banco = 'indisponível' + (e.code ? ': ' + e.code : ''); }
   return {
     nome: 'ELO backend',
     versao: '1.1.0',
     ambiente: NA_VERCEL ? 'vercel' : 'servidor',
-    banco, host_banco: `${CONFIG.banco.user}@${CONFIG.banco.host}/${CONFIG.banco.database}`,
+    banco,
     uber: await uber.estado(),
     telegram: telegram.simulado ? 'simulado' : (await telegram.nomeDoBot()) ? 'bot @' + telegram.botUsername : 'token recusado pelo Telegram (confira TELEGRAM_BOT_TOKEN)',
     email: correio.simulado ? `simulado (${correio.motivo})` : `${correio.provedor} → ${correio.empresa}`,
     tempo_real: NA_VERCEL ? 'desligado (serverless)' : 'SSE ativo',
     ativo_ha_s: Math.round((Date.now() - INICIO) / 1000),
-    node: process.version,
   };
 }
 
@@ -568,7 +685,6 @@ app.get(['/', '/api'], async (req, res, next) => {
     ${chip('Tempo real', estado.tempo_real, NA_VERCEL ? 'warn' : 'ok')}
     ${chip('Ambiente', estado.ambiente, 'ok')}
     ${chip('Ativo há', estado.ativo_ha_s + ' s', 'ok')}
-    ${chip('Node', estado.node, 'ok')}
   </div>
   ${grupos}
   ${NA_VERCEL ? `<div class="aviso"><b>Rodando na Vercel.</b> Funções serverless não mantêm processo aberto: o stream em tempo real (<code>/api/eventos/stream</code>), o bot do Telegram (que precisa ficar ouvindo o <code>/start</code>) e a sincronização automática das corridas ficam desligados; o painel do site consulta o servidor a cada 10 s no lugar do stream. Cadastro, login, pochetes, eventos, corridas e o envio de mensagens funcionam normalmente. Para o tempo real, rode o servidor num lugar com processo contínuo (Render, Railway, servidor da escola).</div>` : ''}
@@ -601,9 +717,15 @@ app.post('/api/cadastro', async (req, res, next) => {
     const foto = validarFoto(req.body?.foto);
 
     if (nome.length < 2 || nome.length > 120) throw erro(400, 'Digite seu nome completo.');
-    if (!EMAIL.test(email)) throw erro(400, 'Digite um email válido.');
-    if (senha.length < 6) throw erro(400, 'A senha precisa ter pelo menos 6 caracteres.');
+    if (!EMAIL.test(email) || email.length > 190) throw erro(400, 'Digite um email válido.');
+    if (senha.length < SENHA_MINIMA) throw erro(400, `A senha precisa ter pelo menos ${SENHA_MINIMA} caracteres.`);
     if (senha.length > 200) throw erro(400, 'A senha é longa demais.');
+    if (senhaFraca(senha, email, nome)) throw erro(400, 'Essa senha é fácil de adivinhar. Misture palavras, números ou símbolos.');
+
+    // Contas em massa saindo do mesmo lugar
+    const marca = 'cadastro-ip:' + ipDoPedido(req);
+    if (await excedeu(marca, 30, 60)) throw calma(60);
+    await registrar(marca);
 
     const [existe] = await pool.query('SELECT id FROM cuidadores WHERE email = ?', [email]);
     if (existe.length) throw erro(409, 'Já existe uma conta com esse email. Quer entrar?');
@@ -619,10 +741,20 @@ app.post('/api/login', async (req, res, next) => {
     const email = limparEmail(req.body?.email);
     const senha = String(req.body?.senha || '');
     if (!EMAIL.test(email) || !senha) throw erro(400, 'Digite seu email e sua senha.');
+    if (senha.length > 200) throw erro(401, 'Email ou senha incorretos.');
+
+    // Contra adivinhação de senha: poucas tentativas erradas por conta e por IP
+    const porConta = 'login-email:' + email, porIp = 'login-ip:' + ipDoPedido(req);
+    if (await excedeu(porConta, 8, 15) || await excedeu(porIp, 25, 15)) throw calma(15);
 
     const [linhas] = await pool.query('SELECT * FROM cuidadores WHERE email = ?', [email]);
     const cuidador = linhas[0];
-    if (!cuidador || !(await conferirSenha(senha, cuidador.senha_hash))) throw erro(401, 'Email ou senha incorretos.');
+    const certa = await conferirSenha(senha, cuidador?.senha_hash || HASH_FALSO);
+    if (!cuidador || !certa) {
+      await registrar(porConta); await registrar(porIp);
+      throw erro(401, 'Email ou senha incorretos.');
+    }
+    await esquecer(porConta);
 
     res.json({ token: await abrirSessao(cuidador.id), cuidador: publico(cuidador) });
   } catch (e) { next(e); }
@@ -651,7 +783,7 @@ app.patch('/api/me', autenticar, async (req, res, next) => {
 
 app.post('/api/logout', autenticar, async (req, res, next) => {
   try {
-    await pool.query('DELETE FROM sessoes WHERE token = ?', [req.token]);
+    await pool.query('DELETE FROM sessoes WHERE token IN (?, ?)', [hashToken(req.token), req.token]);
     res.json({ ok: true });
   } catch (e) { next(e); }
 });
@@ -667,15 +799,18 @@ app.get('/api/pochetes', autenticar, async (req, res, next) => {
 function lerCasa(casa) {
   if (casa === null) return { lat: null, lng: null, nome: null };
   if (casa === undefined) return undefined;
+  if (typeof casa !== 'object') throw erro(400, 'O endereço de casa precisa de latitude e longitude válidas.');
   const c = validarCoordenada(casa.lat, casa.lng);
   if (!c) throw erro(400, 'O endereço de casa precisa de latitude e longitude válidas.');
-  return { ...c, nome: String(casa.nome || 'Casa').slice(0, 200) };
+  return { ...c, nome: limparTexto(casa.nome, 200) || 'Casa' };
 }
 
 app.post('/api/pochetes', autenticar, async (req, res, next) => {
   try {
     const nome = limparNome(req.body?.nome_idoso);
-    if (nome.length < 2) throw erro(400, 'Digite o nome de quem vai usar a pochete.');
+    if (nome.length < 2 || nome.length > 120) throw erro(400, 'Digite o nome de quem vai usar a pochete.');
+    const [[{ total }]] = await pool.query('SELECT COUNT(*) AS total FROM pochetes WHERE cuidador_id = ?', [req.cuidador.id]);
+    if (total >= 20) throw erro(400, 'Limite de 20 pochetes por conta. Desvincule uma que não usa mais.');
     const casa = lerCasa(req.body?.casa) || { lat: null, lng: null, nome: null };
     const { chave, hash } = novaChavePochete();
     const [r] = await pool.query(
@@ -701,7 +836,7 @@ app.patch('/api/pochetes/:id', autenticar, async (req, res, next) => {
     const campos = [], valores = [];
     if (req.body?.nome_idoso !== undefined) {
       const nome = limparNome(req.body.nome_idoso);
-      if (nome.length < 2) throw erro(400, 'Digite o nome de quem vai usar a pochete.');
+      if (nome.length < 2 || nome.length > 120) throw erro(400, 'Digite o nome de quem vai usar a pochete.');
       campos.push('nome_idoso = ?'); valores.push(nome);
     }
     if (req.body?.telefone_idoso !== undefined) { campos.push('telefone_idoso = ?'); valores.push(limparTelefone(req.body.telefone_idoso)); }
@@ -809,7 +944,7 @@ async function pedirNaUber(corrida, pochete, cuidador) {
     });
     await pool.query('UPDATE corridas SET status = ?, uber_request_id = ?, produto = ?, valor = ?, eta_min = ?, solicitada_em = NOW() WHERE id = ?',
       [pedido.status, pedido.request_id, estimativa.nome, estimativa.valor, pedido.eta_min ?? estimativa.eta_min, corrida.id]);
-    await telegram.enviar(cuidador.telegram_chat_id, `✅ Corrida aprovada para ${pochete.nome_idoso}: ${estimativa.nome}, ${estimativa.valor || 'valor a confirmar'}. Chega em ~${pedido.eta_min ?? estimativa.eta_min ?? '?'} min.`);
+    await telegram.enviar(cuidador.telegram_chat_id, `✅ Corrida aprovada para ${tg(pochete.nome_idoso)}: ${tg(estimativa.nome)}, ${tg(estimativa.valor || 'valor a confirmar')}. Chega em ~${pedido.eta_min ?? estimativa.eta_min ?? '?'} min.`);
   } catch (e) {
     await pool.query('UPDATE corridas SET status = "erro", erro = ? WHERE id = ?', [String(e.message).slice(0, 200), corrida.id]);
     const [[falha]] = await pool.query('SELECT * FROM corridas WHERE id = ?', [corrida.id]);
@@ -923,7 +1058,7 @@ async function vincularPorStart(codigo, chat) {
   if (!linhas.length) return null;
   await pool.query('UPDATE cuidadores SET telegram_chat_id = ?, telegram_codigo = NULL WHERE id = ?', [chat.id, linhas[0].id]);
   sse.publicar(linhas[0].id, 'telegram', { vinculado: true, chat: chat.nome });
-  return `Pronto, ${linhas[0].nome.split(' ')[0]}! Os avisos da pochete vão chegar aqui, inclusive quando o botão vermelho for apertado.`;
+  return `Pronto, ${tg(linhas[0].nome.split(' ')[0])}! Os avisos da pochete vão chegar aqui, inclusive quando o botão vermelho for apertado.`;
 }
 
 app.post('/api/telegram/codigo', autenticar, async (req, res, next) => {
@@ -937,7 +1072,9 @@ app.post('/api/telegram/codigo', autenticar, async (req, res, next) => {
     }
     let codigo = vinculado ? null : req.cuidador.telegram_codigo;
     if (!vinculado && !codigo) {
-      codigo = crypto.randomBytes(3).toString('hex').toUpperCase();
+      // 12 caracteres: quem mandar /start com o código de outra pessoa passaria a
+      // receber a localização dela, então ele não pode ser adivinhável
+      codigo = crypto.randomBytes(6).toString('hex').toUpperCase();
       await pool.query('UPDATE cuidadores SET telegram_codigo = ? WHERE id = ?', [codigo, req.cuidador.id]);
     }
     res.json({ codigo, bot: await telegram.nomeDoBot(), simulado: telegram.simulado, vinculado });
@@ -965,7 +1102,7 @@ app.delete('/api/telegram', autenticar, async (req, res, next) => {
 app.post('/api/telegram/teste', autenticar, async (req, res, next) => {
   try {
     if (!req.cuidador.telegram_chat_id) throw erro(400, 'Vincule o Telegram primeiro.');
-    const ok = await telegram.enviar(req.cuidador.telegram_chat_id, `👋 Olá, ${req.cuidador.nome.split(' ')[0]}! Os avisos da ELO vão chegar aqui.`);
+    const ok = await telegram.enviar(req.cuidador.telegram_chat_id, `👋 Olá, ${tg(req.cuidador.nome.split(' ')[0])}! Os avisos da ELO vão chegar aqui.`);
     if (!ok) throw erro(502, 'O Telegram não aceitou a mensagem. Confira o token do bot.');
     res.json({ ok: true });
   } catch (e) { next(e); }
@@ -993,9 +1130,10 @@ const chaveSimples = t => String(t ?? '').toLowerCase().normalize('NFD')
   .replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '');
 
 const limparTexto = (t, max) => String(t ?? '').replace(/\r/g, '').trim().slice(0, max);
-const ehAdmin = cuidador => CONFIG.admins.includes(String(cuidador.email || '').toLowerCase());
-const ipDoPedido = req => String(req.headers['x-forwarded-for'] || '').split(',')[0].trim()
-  || req.socket?.remoteAddress || null;
+// Equipe = e-mail na lista E a chave da equipe no cabeçalho X-Equipe-Chave
+const ehAdmin = req => CONFIG.equipeChave.length >= 16
+  && CONFIG.admins.includes(String(req.cuidador?.email || '').toLowerCase())
+  && iguaisComTempoFixo(req.headers['x-equipe-chave'] || '', CONFIG.equipeChave);
 
 // Quem está logado no site entra junto com a mensagem; quem não está, não é barrado
 async function cuidadorOpcional(req) {
@@ -1022,7 +1160,7 @@ app.post('/api/mensagens', async (req, res, next) => {
     // Responde como se tivesse dado certo e não guarda nada.
     if (limparTexto(corpo.site, 200)) return res.status(201).json({ ok: true, mensagem: null });
 
-    const nome = limparNome(corpo.nome);
+    const nome = limparNome(corpo.nome).slice(0, 120);
     const emailPessoa = limparEmail(corpo.email);
     const telefone = limparTelefone(corpo.telefone);
     const detalhes = tipo === 'pedido' ? lerDetalhes(corpo) : null;
@@ -1031,7 +1169,7 @@ app.post('/api/mensagens', async (req, res, next) => {
       || (tipo === 'pedido' ? `Pedido de ${detalhes.quantidade} pochete(s)` : '');
 
     if (nome.length < 2) throw erro(400, 'Diga seu nome para a gente saber com quem falar.');
-    if (!EMAIL.test(emailPessoa)) throw erro(400, 'Confira o e-mail: é por ele que vamos responder.');
+    if (!EMAIL.test(emailPessoa) || emailPessoa.length > 190) throw erro(400, 'Confira o e-mail: é por ele que vamos responder.');
     if (!assunto) throw erro(400, 'Escreva o assunto da mensagem.');
     if (tipo === 'contato' && texto.length < 5) throw erro(400, 'Escreva sua mensagem para a equipe.');
 
@@ -1091,7 +1229,7 @@ app.post('/api/mensagens', async (req, res, next) => {
 // Caixa de entrada da equipe. Sem ADMIN_EMAILS (ou EMAIL_EMPRESA), ninguém lê.
 app.get('/api/mensagens', autenticar, async (req, res, next) => {
   try {
-    if (!ehAdmin(req.cuidador)) throw erro(403, 'Só a equipe da ELO vê as mensagens do site.');
+    if (!ehAdmin(req)) throw erro(403, 'Só a equipe da ELO vê as mensagens do site.');
     const limite = Math.min(Math.max(Number(req.query.limite) || 50, 1), 200);
     const tipo = TIPOS_MENSAGEM.includes(String(req.query.tipo)) ? String(req.query.tipo) : null;
     const [linhas] = await pool.query(
@@ -1103,7 +1241,7 @@ app.get('/api/mensagens', autenticar, async (req, res, next) => {
 
 app.patch('/api/mensagens/:id', autenticar, async (req, res, next) => {
   try {
-    if (!ehAdmin(req.cuidador)) throw erro(403, 'Só a equipe da ELO vê as mensagens do site.');
+    if (!ehAdmin(req)) throw erro(403, 'Só a equipe da ELO vê as mensagens do site.');
     const [linhas] = await pool.query('SELECT * FROM mensagens WHERE id = ?', [Number(req.params.id)]);
     if (!linhas.length) throw erro(404, 'Mensagem não encontrada.');
     if (req.body?.lida !== undefined) {
@@ -1115,7 +1253,7 @@ app.patch('/api/mensagens/:id', autenticar, async (req, res, next) => {
 });
 
 /* ---- 404 e erros ---- */
-app.use((req, res) => res.status(404).json({ erro: `Rota não encontrada: ${req.method} ${req.path}` }));
+app.use((req, res) => res.status(404).json({ erro: `Rota não encontrada: ${req.method} ${req.path.slice(0, 120)}` }));
 
 app.use((e, _req, res, _next) => {
   if (e instanceof TypeError && !pool) return res.status(503).json({ erro: 'O banco de dados não está configurado neste servidor.' });

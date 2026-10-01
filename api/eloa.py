@@ -41,12 +41,17 @@ Variáveis opcionais:
     ELOA_MODELO   modelo; padrão por provedor: claude-opus-5, gemini-3.5-flash,
                   llama-3.3-70b-versatile, gpt-4o-mini, anthropic/claude-opus-5
     ELOA_ESFORCO  low | medium | high (padrão: low; chat curto não precisa de mais)
-    ELOA_ORIGENS  origens permitidas no CORS, separadas por vírgula (padrão: *)
+    ELOA_ORIGENS  outros sites que podem chamar a Eloá, separados por vírgula
+                  (padrão: só o próprio domínio e páginas em localhost; * libera todos)
+    ELOA_POR_MINUTO / ELOA_POR_DIA  perguntas ao MODELO por IP (padrão 15 / 300).
+                  Passou disso, a pessoa continua sendo atendida no modo local:
+                  ninguém consegue gastar a cota gratuita do provedor sozinho.
 """
 from __future__ import annotations
 
 import logging
 import os
+from collections import deque
 import random
 import re
 import sys
@@ -71,7 +76,7 @@ if os.path.exists(_env):
 
 import anthropic
 import openai
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -99,6 +104,10 @@ ESFORCO = os.environ.get("ELOA_ESFORCO", "low")
 VALIDADE_SESSAO = 30 * 60          # segundos
 MAX_TURNOS = 40                    # mensagens guardadas por sessão (user + assistant)
 MAX_TOKENS_RESPOSTA = 1500         # respostas de chat são curtas por desenho (persona)
+MAX_CARACTERES_HISTORICO = 16000   # memória mandada pelo cliente: o que passar disso fica de fora
+MAX_SESSOES = 5000                 # sessões em memória (servidor contínuo): acima disso, as mais velhas saem
+POR_MINUTO = int(os.environ.get("ELOA_POR_MINUTO", "15"))
+POR_DIA = int(os.environ.get("ELOA_POR_DIA", "300"))
 
 log = logging.getLogger("eloa")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -129,6 +138,8 @@ def obter_sessao(id_sessao: str | None) -> tuple[str, Sessao]:
         # limpa as paradas
         for sid in [s for s, v in _sessoes.items() if agora - v.tocada_em > VALIDADE_SESSAO]:
             del _sessoes[sid]
+        while len(_sessoes) >= MAX_SESSOES:
+            del _sessoes[min(_sessoes, key=lambda k: _sessoes[k].tocada_em)]
         if id_sessao and id_sessao in _sessoes:
             s = _sessoes[id_sessao]
             s.tocada_em = agora
@@ -312,13 +323,57 @@ def responder_local(sessao: Sessao, pergunta: str) -> tuple[str, str, float]:
 # ---------------------------------------------------------------------------
 # HTTP
 # ---------------------------------------------------------------------------
-app = FastAPI(title="Eloá", version=VERSAO, docs_url=None, redoc_url=None)
+app = FastAPI(title="Eloá", version=VERSAO, docs_url=None, redoc_url=None, openapi_url=None)
+# O site publicado chama /api/eloa no mesmo domínio (não precisa de CORS); o
+# app nativo não manda Origin. Sobram as páginas abertas na máquina.
+_origens = [o.strip() for o in os.environ.get("ELOA_ORIGENS", "").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[o.strip() for o in os.environ.get("ELOA_ORIGENS", "*").split(",")],
+    allow_origins=_origens,
+    allow_origin_regex=None if _origens else r"^https?://(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$",
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type"],
 )
+
+
+@app.middleware("http")
+async def cabecalhos_de_seguranca(request: Request, chamar_rota):
+    resposta = await chamar_rota(request)
+    resposta.headers["X-Content-Type-Options"] = "nosniff"
+    resposta.headers["X-Frame-Options"] = "DENY"
+    resposta.headers["Referrer-Policy"] = "no-referrer"
+    resposta.headers["Cache-Control"] = "no-store"
+    resposta.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
+    return resposta
+
+
+# Quantas perguntas cada IP fez ao modelo (por instância; na Vercel cada
+# instância conta a sua parte, o que já corta o abuso em rajada).
+_uso_por_ip: dict[str, deque] = {}
+_trava_uso = threading.Lock()
+
+
+def ip_de(request: Request) -> str:
+    if os.environ.get("VERCEL") or os.environ.get("TRUST_PROXY") == "1":
+        encaminhado = request.headers.get("x-forwarded-for", "").split(",")[0].strip()
+        if encaminhado:
+            return encaminhado
+    return request.client.host if request.client else "desconhecido"
+
+
+def pode_usar_modelo(ip: str) -> bool:
+    agora = time.time()
+    with _trava_uso:
+        if len(_uso_por_ip) > 20000:
+            _uso_por_ip.clear()
+        fila = _uso_por_ip.setdefault(ip, deque())
+        while fila and agora - fila[0] > 86400:
+            fila.popleft()
+        no_minuto = sum(1 for t in fila if agora - t < 60)
+        if no_minuto >= POR_MINUTO or len(fila) >= POR_DIA:
+            return False
+        fila.append(agora)
+        return True
 
 
 class Mensagem(BaseModel):
@@ -328,7 +383,7 @@ class Mensagem(BaseModel):
 
 class Pergunta(BaseModel):
     pergunta: str = Field(min_length=1, max_length=4000)
-    sessao: str | None = None
+    sessao: str | None = Field(default=None, max_length=64)
     # memória guardada no navegador (serverless não lembra entre chamadas)
     historico: list[Mensagem] | None = Field(default=None, max_length=MAX_TURNOS)
 
@@ -343,7 +398,7 @@ def saude():
 
 
 @rotas.post("/perguntar")
-def perguntar(dados: Pergunta):
+def perguntar(dados: Pergunta, request: Request):
     pergunta = dados.pergunta.strip()
     if not pergunta:
         return {"status": "erro", "mensagem": 'O campo "pergunta" precisa ser um texto.'}
@@ -361,9 +416,12 @@ def perguntar(dados: Pergunta):
             limpo.append({"role": m.role, "content": m.content.strip()})
         if limpo and limpo[-1]["role"] == "user":
             limpo.pop()
+        # memória longa demais custa caro no modelo: fica só o fim da conversa
+        while limpo and sum(len(m["content"]) for m in limpo) > MAX_CARACTERES_HISTORICO:
+            limpo = limpo[2:]
         sessao.mensagens = limpo
 
-    if modelo_disponivel():
+    if modelo_disponivel() and pode_usar_modelo(ip_de(request)):
         texto = responder_com_modelo(sessao, pergunta)
         if texto:
             return {"status": "sucesso", "resposta_da_ia": texto, "intencao": "conversa", "confianca": 1.0, "fonte": "modelo", "sessao": id_sessao}
@@ -389,4 +447,6 @@ if __name__ == "__main__":
 
     porta = int(os.environ.get("PORT", "8000"))
     log.info("Eloá respondendo em http://localhost:%s/perguntar (provedor: %s, modelo: %s, esforço: %s)", porta, PROVEDOR or "nenhum", MODELO, ESFORCO)
-    uvicorn.run(app, host="0.0.0.0", port=porta, log_level="warning")
+    # Só a própria máquina por padrão (o emulador Android chega por 10.0.2.2,
+    # que é o localhost do computador). ELOA_HOST=0.0.0.0 abre para a rede.
+    uvicorn.run(app, host=os.environ.get("ELOA_HOST", "127.0.0.1"), port=porta, log_level="warning")

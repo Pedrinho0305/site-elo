@@ -102,7 +102,7 @@ class _TelaEntrarState extends State<TelaEntrar> {
                     ),
                     validator: (v) {
                       if ((v ?? '').isEmpty) return 'Digite sua senha.';
-                      if (_cadastro && v!.length < 6) return 'A senha precisa ter pelo menos 6 caracteres.';
+                      if (_cadastro && v!.length < 8) return 'A senha precisa ter pelo menos 8 caracteres.';
                       return null;
                     },
                   ),
