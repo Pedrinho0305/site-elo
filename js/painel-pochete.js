@@ -347,28 +347,40 @@ document.addEventListener('DOMContentLoaded', () => {
     try { await navigator.clipboard.writeText($('keyValue').textContent); $('keyCopy').textContent = 'Copiada'; setTimeout(() => { $('keyCopy').textContent = 'Copiar'; }, 2000); } catch {}
   });
 
-  $('pUsarLocal').addEventListener('click', () => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(pos => {
-      $('pCasaLat').value = pos.coords.latitude.toFixed(6);
-      $('pCasaLng').value = pos.coords.longitude.toFixed(6);
-    }, () => { $('pocheteStatus').textContent = 'Não consegui pegar a localização. Digite as coordenadas.'; $('pocheteStatus').classList.add('is-visible'); });
+  /* Endereço da casa: o cuidador escreve como escreveria para um taxista e o
+     servidor acha no mapa. "Usar o lugar onde estou" guarda a posição do
+     navegador; se o texto for mexido depois, vale o texto. */
+  let casaAqui = null;
+  const LUGAR_ATUAL = 'Casa (lugar marcado agora)';
+  const avisoForm = texto => { const s = $('pocheteStatus'); s.textContent = texto; s.classList.toggle('is-visible', !!texto); };
+
+  $('pCasaEndereco').addEventListener('input', () => { casaAqui = null; });
+
+  $('pUsarLocal').addEventListener('click', async () => {
+    avisoForm('Procurando onde você está…');
+    casaAqui = await posicaoDoNavegador();
+    if (!casaAqui) return avisoForm('Não consegui achar sua localização. Escreva o endereço no campo acima.');
+    $('pCasaEndereco').value = LUGAR_ATUAL;
+    avisoForm('Pronto: a casa dela fica marcada onde você está agora.');
   });
 
   $('pocheteForm').addEventListener('submit', async e => {
     e.preventDefault();
-    const status = $('pocheteStatus');
     const nome = $('pIdoso').value.trim();
-    if (nome.length < 2) { status.textContent = 'Digite o nome de quem vai usar.'; status.classList.add('is-visible'); return; }
-    const lat = parseFloat($('pCasaLat').value.replace(',', '.')), lng = parseFloat($('pCasaLng').value.replace(',', '.'));
-    const casa = Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng, nome: $('pCasaNome').value.trim() || 'Casa' } : undefined;
+    if (nome.length < 2) return avisoForm('Digite o nome de quem vai usar.');
+    const endereco = $('pCasaEndereco').value.trim();
+    const casa = casaAqui ? { ...casaAqui, nome: 'Casa' } : endereco ? { endereco } : undefined;
+    const botao = e.target.querySelector('[type="submit"]');
+    botao.disabled = true;
+    if (casa?.endereco) avisoForm('Procurando o endereço no mapa…');
     try {
       const { chave } = await api('pochetes', { method: 'POST', body: { nome_idoso: nome, telefone_idoso: $('pTelefone').value || null, casa } });
-      e.target.reset(); $('pCasaNome').value = 'Casa';
-      status.textContent = ''; status.classList.remove('is-visible');
+      e.target.reset(); casaAqui = null;
+      avisoForm('');
       await carregarPochetes();
       mostrarChave(chave);
-    } catch (err) { status.textContent = err.message; status.classList.add('is-visible'); }
+    } catch (err) { avisoForm(err.message); }
+    finally { botao.disabled = false; }
   });
 
   /* ---------------------------------------------------------------------

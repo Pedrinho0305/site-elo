@@ -756,7 +756,7 @@ a.action { text-decoration: none; }
 
 .pochete-form { margin-top: .4rem; display: grid; gap: .9rem; }
 .pochete-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
-.pochete-form .form-row--3 { grid-template-columns: 1.4fr 1fr 1fr; }
+.pochete-form .field-optional { font-weight: 400; color: var(--text-3); }
 .pochete-form .form-field { display: grid; gap: .35rem; }
 .pochete-form label { font-weight: 600; font-size: .88rem; }
 .pochete-form input, .tg-form input {
@@ -786,6 +786,6 @@ a.action { text-decoration: none; }
 
 @media (max-width: 1080px) { .pochete-grid { grid-template-columns: 1fr 1fr; } #pochetePanel { grid-column: 1 / -1; } }
 @media (max-width: 700px) {
-  .pochete-grid, .pochete-form .form-row, .pochete-form .form-row--3, .simular-grid { grid-template-columns: 1fr; }
+  .pochete-grid, .pochete-form .form-row, .simular-grid { grid-template-columns: 1fr; }
   .ride-actions .btn { flex: 1 1 100%; }
 }

@@ -141,7 +141,7 @@ Enquanto o dispositivo não existe, o painel tem a seção **"Testar sem a poche
 | `GET` / `PATCH` | `/api/me` | `{ nome?, foto?, telefone? }` | `{ cuidador }` |
 | `POST` | `/api/logout` | — | `{ ok }` |
 | `GET` | `/api/pochetes` | — | `{ pochetes }` |
-| `POST` | `/api/pochetes` | `{ nome_idoso, telefone_idoso?, casa?: { lat, lng, nome } }` | `201 { pochete, chave }` — a chave só aparece aqui |
+| `POST` | `/api/pochetes` | `{ nome_idoso, telefone_idoso?, casa?: { endereco } ou { lat, lng, nome } }` | `201 { pochete, chave }` — a chave só aparece aqui. `casa.endereco` é texto livre ("Rua das Flores, 123, São Paulo"): o servidor acha as coordenadas pelo Nominatim (OpenStreetMap, gratuito, sem chave) e devolve 400 se não encontrar |
 | `POST` | `/api/pochetes/:id/chave` | — | `{ chave }` nova (a antiga morre) |
 | `PATCH` / `DELETE` | `/api/pochetes/:id` | `{ nome_idoso?, telefone_idoso?, casa? }` | |
 | `POST` | `/api/pochetes/:id/simular` | `{ tipo, lat?, lng?, bateria?, destino? }` | igual ao evento da pochete |

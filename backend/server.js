@@ -796,13 +796,34 @@ app.get('/api/pochetes', autenticar, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-function lerCasa(casa) {
+/* Endereço escrito → coordenadas, pelo Nominatim (OpenStreetMap): gratuito,
+   sem chave; a política de uso pede um User-Agent que identifique o app. */
+async function buscarEndereco(endereco) {
+  const url = new URL('https://nominatim.openstreetmap.org/search');
+  url.search = new URLSearchParams({ q: endereco, format: 'jsonv2', limit: '1', countrycodes: 'br', 'accept-language': 'pt-BR' });
+  try {
+    const r = await fetch(url, { headers: { 'User-Agent': 'ELO-pochete/1.0 (painel do cuidador)' }, signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return null;
+    const [achado] = await r.json();
+    return achado ? validarCoordenada(achado.lat, achado.lon) : null;
+  } catch { return null; }
+}
+
+/* A casa chega de dois jeitos: { endereco } escrito pelo cuidador (o servidor
+   acha no mapa) ou { lat, lng, nome } (botão "estou na casa agora"). */
+async function lerCasa(casa) {
   if (casa === null) return { lat: null, lng: null, nome: null };
   if (casa === undefined) return undefined;
-  if (typeof casa !== 'object') throw erro(400, 'O endereço de casa precisa de latitude e longitude válidas.');
+  if (typeof casa !== 'object') throw erro(400, 'Escreva o endereço de casa.');
+  const endereco = limparTexto(casa.endereco, 200);
+  if (endereco && (casa.lat == null || casa.lng == null)) {
+    const c = await buscarEndereco(endereco);
+    if (!c) throw erro(400, 'Não encontrei esse endereço no mapa. Escreva rua, número e cidade, por exemplo: Rua das Flores, 123, São Paulo.');
+    return { ...c, nome: endereco };
+  }
   const c = validarCoordenada(casa.lat, casa.lng);
-  if (!c) throw erro(400, 'O endereço de casa precisa de latitude e longitude válidas.');
-  return { ...c, nome: limparTexto(casa.nome, 200) || 'Casa' };
+  if (!c) throw erro(400, 'Escreva o endereço de casa.');
+  return { ...c, nome: endereco || limparTexto(casa.nome, 200) || 'Casa' };
 }
 
 app.post('/api/pochetes', autenticar, async (req, res, next) => {
@@ -811,7 +832,7 @@ app.post('/api/pochetes', autenticar, async (req, res, next) => {
     if (nome.length < 2 || nome.length > 120) throw erro(400, 'Digite o nome de quem vai usar a pochete.');
     const [[{ total }]] = await pool.query('SELECT COUNT(*) AS total FROM pochetes WHERE cuidador_id = ?', [req.cuidador.id]);
     if (total >= 20) throw erro(400, 'Limite de 20 pochetes por conta. Desvincule uma que não usa mais.');
-    const casa = lerCasa(req.body?.casa) || { lat: null, lng: null, nome: null };
+    const casa = (await lerCasa(req.body?.casa)) || { lat: null, lng: null, nome: null };
     const { chave, hash } = novaChavePochete();
     const [r] = await pool.query(
       'INSERT INTO pochetes (cuidador_id, nome_idoso, telefone_idoso, chave_hash, casa_lat, casa_lng, casa_nome) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -840,7 +861,7 @@ app.patch('/api/pochetes/:id', autenticar, async (req, res, next) => {
       campos.push('nome_idoso = ?'); valores.push(nome);
     }
     if (req.body?.telefone_idoso !== undefined) { campos.push('telefone_idoso = ?'); valores.push(limparTelefone(req.body.telefone_idoso)); }
-    const casa = lerCasa(req.body?.casa);
+    const casa = await lerCasa(req.body?.casa);
     if (casa) { campos.push('casa_lat = ?', 'casa_lng = ?', 'casa_nome = ?'); valores.push(casa.lat, casa.lng, casa.nome); }
     if (!campos.length) throw erro(400, 'Nada para atualizar.');
     valores.push(p.id);

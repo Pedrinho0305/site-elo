@@ -154,36 +154,26 @@
                         <h4>Vincular uma pochete</h4>
                         <div class="form-row">
                             <div class="form-field">
-                                <label for="pIdoso">Quem vai usar</label>
-                                <input type="text" id="pIdoso" placeholder="Nome da pessoa idosa" required>
+                                <label for="pIdoso">Nome de quem vai usar</label>
+                                <input type="text" id="pIdoso" placeholder="Ex.: Dona Maria" autocomplete="off" required>
                             </div>
                             <div class="form-field">
-                                <label for="pTelefone">Telefone dela (para o motorista)</label>
-                                <input type="tel" id="pTelefone" placeholder="+55 11 99999-0000">
+                                <label for="pTelefone">Celular dela <span class="field-optional">(opcional)</span></label>
+                                <input type="tel" id="pTelefone" placeholder="(11) 99999-0000" autocomplete="off">
                             </div>
                         </div>
-                        <div class="form-row form-row--3">
-                            <div class="form-field">
-                                <label for="pCasaNome">Endereço de casa</label>
-                                <input type="text" id="pCasaNome" placeholder="Rua das Flores, 123" value="Casa">
-                            </div>
-                            <div class="form-field">
-                                <label for="pCasaLat">Latitude</label>
-                                <input type="text" id="pCasaLat" placeholder="-23.5505" inputmode="decimal">
-                            </div>
-                            <div class="form-field">
-                                <label for="pCasaLng">Longitude</label>
-                                <input type="text" id="pCasaLng" placeholder="-46.6333" inputmode="decimal">
-                            </div>
+                        <div class="form-field">
+                            <label for="pCasaEndereco">Endereço da casa dela <span class="field-optional">(opcional)</span></label>
+                            <input type="text" id="pCasaEndereco" placeholder="Rua, número e cidade. Ex.: Rua das Flores, 123, São Paulo" autocomplete="street-address">
                         </div>
-                        <p class="muted">Casa é o destino padrão quando o botão de transporte é apertado. Pegue as coordenadas no Google Maps (clique com o botão direito no lugar) ou <button type="button" class="link-btn" id="pUsarLocal">use a minha localização</button>.</p>
+                        <p class="muted">É para lá que o carro leva quando ela aperta o botão amarelo. Está na casa dela agora? <button type="button" class="link-btn" id="pUsarLocal">Usar o lugar onde estou</button>.</p>
                         <button type="submit" class="btn btn-green">Vincular pochete</button>
                         <p class="action-status" id="pocheteStatus" role="status" aria-live="polite"></p>
                     </form>
 
                     <div class="key-box" id="keyBox" hidden>
                         <h4>Chave da pochete</h4>
-                        <p>Copie e grave no código da pochete (cabeçalho <code>X-Pochete-Key</code>). Ela aparece <strong>só agora</strong>; depois dá para gerar outra.</p>
+                        <p>É a senha que liga a pochete à sua conta. Copie e entregue a quem configura a pochete. Ela aparece <strong>só agora</strong>; se perder, é só gerar outra.</p>
                         <code class="key-value" id="keyValue"></code>
                         <button type="button" class="btn btn-outline" id="keyCopy">Copiar</button>
                     </div>
