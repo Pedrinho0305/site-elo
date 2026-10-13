@@ -93,7 +93,7 @@ X-Pochete-Key: elo_xxxxxxxxxxxxxxxx
 | `tipo` | Quando mandar | O que o servidor faz |
 |---|---|---|
 | `emergencia` | botão vermelho | Telegram 🚨 + aviso no painel, com a localização e o atalho "Ligar 192", e e-mail para os familiares marcados com "avisar" (no máximo 1 por familiar a cada 10 min). A pochete **não** chama o SAMU: quem decide é o cuidador |
-| `transporte` | botão amarelo | Cria a corrida **pendente** e avisa o cuidador para aprovar. Destino = `destino` do corpo ou o endereço de casa cadastrado no painel |
+| `transporte` | botão preto | Cria a corrida **pendente** e avisa o cuidador para aprovar. Destino = `destino` do corpo ou o endereço de casa cadastrado no painel |
 | `bateria` | ao ligar e a cada X min | Guarda; abaixo de `BATERIA_BAIXA` (20%) avisa |
 | `localizacao` | a cada 1–5 min | Atualiza a posição no painel |
 | `teste` | botão de teste / primeira ligação | Telegram ✅ "tudo funcionando" |
@@ -113,7 +113,7 @@ Status possíveis da corrida: `pendente` → `aprovada` → `solicitada` → `a_
 
 4. **Confirmar a mensagem** quando a pessoa apertar um botão com ela tocando: `POST /api/pochete/recados/:id/confirmar` (mesmo cabeçalho, corpo `{}`). O painel mostra "ouviu" e o Telegram do cuidador recebe 💬. `audio` é o número do arquivo gravado no cartão do módulo de som (`0001.mp3` a `0005.mp3` para as mensagens prontas); `null` = texto livre, que toca o aviso genérico de mensagem nova.
 
-**Firmware pronto:** [`firmware/pochete/`](../firmware/pochete/) implementa este contrato inteiro para ESP32 (botões, GPS, bateria, anel de LED, buzzer ou módulo de som, fila sem internet, https com certificado conferido). Instruções em [`firmware/README.md`](../firmware/README.md).
+**Firmware pronto:** [`firmware/pochete/`](../firmware/pochete/) implementa este contrato para ESP32 na montagem atual: botão vermelho (emergência) e preto (Uber) segurados por 3 s, GPS, buzzer, mensagens confirmadas com um toque, emergência que tenta de novo sem internet e https com certificado conferido. Ainda não mede a bateria. Instruções em [`firmware/README.md`](../firmware/README.md).
 
 Enquanto o dispositivo não existe, o painel tem a seção **"Testar sem a pochete"**, que manda exatamente os mesmos eventos pelo caminho `POST /api/pochetes/:id/simular`.
 

@@ -12,4 +12,4 @@ __pycache__/
 .vercel/
 
 # Firmware: a configuração tem senha do Wi-Fi e a chave da pochete
-firmware/pochete/config.h
+firmware/*/config.h

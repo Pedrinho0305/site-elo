@@ -22,14 +22,6 @@
 // (ou "Nova chave"). Começa com elo_
 #define POCHETE_CHAVE "elo_COLE_A_CHAVE_AQUI"
 
-// ---- Opcionais ----
-// 1 = módulo de som DFPlayer Mini ligado (toca as mensagens gravadas no
-//     cartão SD: veja firmware/README.md). 0 = só o buzzer.
-#define USAR_DFPLAYER 0
-
-// Fator de calibração do divisor de tensão da bateria (meça com multímetro:
-// tensão real / tensão que o Serial mostra). 1.0 se não souber.
-#define BATERIA_CALIBRACAO 1.0f
-
+// ---- Opcional ----
 // 1 = mostra tudo no Monitor Serial (115200)
 #define DEPURAR 1
