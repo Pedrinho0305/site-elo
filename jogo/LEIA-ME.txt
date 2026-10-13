@@ -15,6 +15,11 @@ Passo a passo no GDevelop (quem publicou: Guilherme):
      que fique  jogo/index.html  ao lado deste LEIA-ME.
   6. Abra pages/jogo.html: o jogo aparece sozinho, sem interface externa.
 
+Exportou para Windows (pasta com Tcc.exe, .dll, resources/app.asar)?
+Nao copie essa pasta para ca. O jogo HTML5 esta dentro do app.asar, na
+pasta "app": extraia (npx @electron/asar extract app.asar saida) e copie
+o conteudo de saida/app para ca.
+
 Republicou o jogo? Repita os passos e substitua os arquivos.
 
 Link atual do gd.games (usado so como reserva):

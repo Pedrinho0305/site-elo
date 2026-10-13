@@ -252,7 +252,11 @@
   box-shadow: var(--shadow-2);
 }
 
-.game-stage:fullscreen { border-radius: 0; border: 0; }
+.game-stage:fullscreen { border-radius: 0; border: 0; display: grid; place-items: center; }
+
+/* Tela cheia: o jogo é 16:9 (1280×720) e corta a direita em telas mais
+   estreitas, então o iframe fica 16:9 com faixas pretas em volta. */
+.game-stage:fullscreen iframe { width: min(100vw, 100vh * 16 / 9); height: auto; aspect-ratio: 16 / 9; }
 
 .game-stage iframe {
   display: block;
@@ -310,7 +314,7 @@
   .game-hero-actions .btn { width: 100%; }
   .stage-head { flex-wrap: wrap; }
   .stage-hint { flex-basis: 100%; order: 3; }
-  .game-stage { aspect-ratio: 4 / 3; }
+  .game-stage.is-empty { aspect-ratio: 4 / 3; }   /* com o jogo carregado fica 16:9: o jogo corta o que não cabe */
   .game-stage-empty .btn { width: 100%; }
   .game-art figcaption { position: static; margin-top: .8rem; padding: 0 1rem 1rem; }
   .demo-play { width: 64px; height: 64px; }
