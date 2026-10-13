@@ -152,7 +152,7 @@ backend/
   server.js · uber.js · telegram.js · eventos.js · email.js · reenviar-mensagens.js · package.json · .env.example · README.md   contas, pochete, Uber, Telegram, e-mail dos formulários (Express 5 + MySQL)
   api/index.js · vercel.json             só para publicar o backend como projeto separado (não é o caminho padrão)
 jogo/LEIA-ME.txt                         onde colocar a exportação HTML5 do jogo (jogo/index.html)
-firmware/                                código da POCHETE (ESP32, Arduino): pochete.ino, certificados.h, config.example.h — ver firmware/README.md; fora do deploy
+firmware/                                código da POCHETE (ESP32, C++ em classes na pasta src/, Arduino IDE) e teste-gps/ — ver firmware/README.md; fora do deploy
 app/                                     o site inteiro como APP (Flutter/Dart, Android e iOS) — ver app/README.md; fora do deploy da Vercel (.vercelignore)
 .github/workflows/app.yml                compila o app na nuvem (APK/AAB no Linux, iOS sem assinatura num Mac) a cada push que mexe em app/
 vercel.json · package.json · requirements.txt · .vercelignore   deploy: rotas das funções, dependências Node (workspace backend) e Python

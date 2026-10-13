@@ -113,7 +113,7 @@ Status possíveis da corrida: `pendente` → `aprovada` → `solicitada` → `a_
 
 4. **Confirmar a mensagem** quando a pessoa apertar um botão com ela tocando: `POST /api/pochete/recados/:id/confirmar` (mesmo cabeçalho, corpo `{}`). O painel mostra "ouviu" e o Telegram do cuidador recebe 💬. `audio` é o número do arquivo gravado no cartão do módulo de som (`0001.mp3` a `0005.mp3` para as mensagens prontas); `null` = texto livre, que toca o aviso genérico de mensagem nova.
 
-**Firmware pronto:** [`firmware/pochete/`](../firmware/pochete/) implementa este contrato para ESP32 na montagem atual: botão vermelho (emergência) e preto (Uber) segurados por 3 s, GPS, buzzer, mensagens confirmadas com um toque, emergência que tenta de novo sem internet e https com certificado conferido. Ainda não mede a bateria. Instruções em [`firmware/README.md`](../firmware/README.md).
+**Firmware pronto:** [`firmware/pochete/`](../firmware/pochete/) implementa este contrato para ESP32 na montagem atual: botão vermelho (emergência) e preto (Uber) segurados por 3 s, GPS, buzzer, mensagens confirmadas com um toque curto, emergência que tenta de novo sem internet, bateria opcional e https com certificado conferido. C++ em classes (`src/`). Instruções em [`firmware/README.md`](../firmware/README.md).
 
 Enquanto o dispositivo não existe, o painel tem a seção **"Testar sem a pochete"**, que manda exatamente os mesmos eventos pelo caminho `POST /api/pochetes/:id/simular`.
 
