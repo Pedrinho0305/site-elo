@@ -184,7 +184,7 @@
       fortes: ['funcionalidade', 'funcoes', 'funcao', 'recurso', 'feature', 'serve para que', 'para que serve', 'serve para', 'quero saber tudo', 'saber tudo', 'o que mais', 'mais alguma coisa', 'mais funcoes', 'outras funcoes', 'o que ela faz', 'o que a pochete faz', 'o que ela tem', 'o que tem', 'oferece', 'beneficio', 'vantagem', 'capaz de', 'consegue fazer', 'ela faz o que', 'faz o que', 'o que faz', 'o que da para fazer', 'o que posso fazer', 'principais', 'lista'],
       fracas: ['tudo', 'quais', 'todas', 'pode', 'serve'],
       respostas: [
-        'As principais funcionalidades da ELO são:\n\n• Botão de emergência — um toque avisa o cuidador na hora, com a localização (se for preciso, ele liga 192)\n• Botão de transporte — pede um carro, e o cuidador aprova antes\n• Comandos de voz — "Oi ELO" para ligar, pedir carro, saber onde está ou chamar ajuda\n• Localização em tempo real — GPS no mapa do app, com histórico do dia\n• App do cuidador — alertas, aprovações, cadastro e notificações\n• Bateria de até 48 horas, com carga USB-C\n• Resistente a chuva e respingos (IP63)',
+        'As principais funcionalidades da ELO são:\n\n• Botão de emergência — segurar por 3 segundos avisa o cuidador na hora, com a localização (se for preciso, ele liga 192)\n• Botão de transporte — pede um carro, e o cuidador aprova antes\n• Comandos de voz — "Oi ELO" para ligar, pedir carro, saber onde está ou chamar ajuda\n• Localização em tempo real — GPS no mapa do app, com histórico do dia\n• App do cuidador — alertas, aprovações, cadastro e notificações\n• Bateria de até 48 horas, com carga USB-C\n• Resistente a chuva e respingos (IP63)',
         'Ela faz cinco coisas principais: avisa o cuidador pelo botão vermelho, pede transporte pelo botão preto (com aprovação do cuidador), obedece a comandos de voz, mostra a localização em tempo real no app e avisa o cuidador de tudo isso. Fora isso, a bateria dura até 48 horas e ela aguenta chuva.'
       ],
       seguimento: { texto: 'Quer que eu detalhe alguma delas?', alvo: null }
@@ -204,7 +204,7 @@
       fortes: ['celular', 'smartwatch', 'relogio', 'pulseira', 'smartphone', 'por que nao usar', 'porque nao usar', 'melhor que', 'em vez de', 'ao inves de', 'alternativa', 'apple watch', 'galaxy watch', 'telefone comum', 'so um telefone'],
       fracas: ['comparar', 'diferenca', 'vantagem', 'usar'],
       respostas: [
-        'A diferença está em quem vai usar. Celular e relógio inteligente pedem tela, toque, menus, senha — e é justamente isso que trava muita gente idosa. A ELO tem botões físicos grandes e comando de voz: para chamar ajuda é um toque, para pedir carro é outro.\n\nE tem a parte de quem cuida: o cuidador aprova a corrida antes de sair e recebe a localização no alerta. Isso um celular comum não faz.',
+        'A diferença está em quem vai usar. Celular e relógio inteligente pedem tela, toque, menus, senha — e é justamente isso que trava muita gente idosa. A ELO tem botões físicos grandes e comando de voz: para chamar ajuda é segurar um botão por 3 segundos, para pedir carro é segurar o outro.\n\nE tem a parte de quem cuida: o cuidador aprova a corrida antes de sair e recebe a localização no alerta. Isso um celular comum não faz.',
         'Um celular exige que a pessoa saiba usar celular. A ELO não exige nada: um botão vermelho para emergência, um preto para transporte, e a voz para o resto. Foi feita para quem tem dificuldade com tecnologia — e para a família acompanhar sem precisar ficar ligando.'
       ]
     },
@@ -224,7 +224,7 @@
       fortes: ['emergenc', 'sos', '192', 'samu', 'socorro', 'botao vermelho', 'ambulancia'],
       fracas: ['vermelh', 'panico', 'alerta', 'acidente', 'queda', 'cair', 'caiu', 'passar mal', 'urgenc', 'hospital', 'ajuda'],
       respostas: [
-        'O botão vermelho é o de emergência. Um toque avisa o cuidador na hora, no painel e no Telegram, com a localização da pochete. Ela não chama o SAMU sozinha: o aviso traz um atalho para o cuidador ligar 192, se for preciso.\n\nAntes de usar de verdade, teste pelo modo demonstração no app, para confirmar que o aviso chega.',
+        'O botão vermelho é o de emergência. Segurar por 3 segundos avisa o cuidador na hora, no painel e no Telegram, com a localização da pochete. Ela não chama o SAMU sozinha: o aviso traz um atalho para o cuidador ligar 192, se for preciso.\n\nAntes de usar de verdade, teste pelo modo demonstração no app, para confirmar que o aviso chega.',
         'É o botão vermelho. Quando {pessoa} aperta, você recebe na hora um alerta no painel e no Telegram, com a localização. O SAMU não é chamado sozinho: você vê a situação e, se for preciso, liga 192 pelo próprio aviso.\n\nDá para testar em modo demonstração, e é bom fazer isso assim que configurar.'
       ],
       seguimento: { texto: 'Quer que eu mostre como fazer esse teste pelo app?', alvo: 'configurar' }
@@ -288,7 +288,7 @@
       fracas: ['entende', 'ouve', 'escutar', 'reconhecer'],
       respostas: [
         'O reconhecimento é por voz, com a palavra de ativação "Oi ELO", em português. Sobre sotaque forte, voz baixa ou lugares barulhentos, o site não traz testes — então não vou te garantir.\n\nO que eu posso garantir: os botões físicos funcionam sempre, independente da voz. Emergência e transporte nunca dependem de a pochete entender a fala.',
-        'A voz é uma comodidade; os botões são a garantia. Se {pessoa} fala baixo ou o lugar está barulhento, o botão vermelho e o preto continuam funcionando com um toque. Sobre a precisão do reconhecimento em cada situação, quem pode detalhar é a equipe.'
+        'A voz é uma comodidade; os botões são a garantia. Se {pessoa} fala baixo ou o lugar está barulhento, o botão vermelho e o preto continuam funcionando: é só segurar por 3 segundos. Sobre a precisão do reconhecimento em cada situação, quem pode detalhar é a equipe.'
       ]
     },
 
@@ -514,7 +514,7 @@
       id: 'preocupacao', nome: 'a sua preocupação',
       fortes: ['medo', 'preocup', 'aflit', 'ansios', 'caiu', 'queda', 'sozinh', 'alzheimer', 'demencia', 'esquec', 'se perd', 'perdeu', 'nervos', 'insegur', 'angust', 'receio', 'risco', 'nao confio', 'desconfio', 'fico com medo'],
       respostas: [
-        'Entendo a preocupação — é exatamente para isso que a ELO existe.\n\nSe {pessoa} precisar de ajuda, um toque no botão vermelho avisa você na hora, com a localização, e você decide se chama o SAMU (192). E pelo app você acompanha onde {pessoa} está, em tempo real, sem precisar ficar ligando.',
+        'Entendo a preocupação — é exatamente para isso que a ELO existe.\n\nSe {pessoa} precisar de ajuda, segurar o botão vermelho por 3 segundos avisa você na hora, com a localização, e você decide se chama o SAMU (192). E pelo app você acompanha onde {pessoa} está, em tempo real, sem precisar ficar ligando.',
         'Faz todo sentido se preocupar. A ELO foi feita para essa situação: {pessoa} sai com a pochete, e se acontecer qualquer coisa, o botão de emergência avisa você na hora com a localização exata. No dia a dia, o GPS mostra no app por onde {pessoa} anda.'
       ],
       seguimento: { texto: 'Quer que eu explique como o botão de emergência funciona?', alvo: 'emergencia' }

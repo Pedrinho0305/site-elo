@@ -18,8 +18,8 @@ class _TelaInstrucoesState extends State<TelaInstrucoes> {
   bool _ver3d = false;
 
   static const _partes = [
-    ('Botão de emergência', 'Um toque avisa o cuidador na hora, com a localização. Se for preciso, ele liga para o SAMU (192).'),
-    ('Botão de transporte', 'Pede um carro. O cuidador aprova ou recusa pelo app antes de a corrida ser chamada.'),
+    ('Botão de emergência', 'Segure por 3 segundos e o cuidador é avisado na hora, com a localização. Se for preciso, ele liga para o SAMU (192).'),
+    ('Botão de transporte', 'Segure por 3 segundos para pedir um carro. O cuidador aprova ou recusa pelo app antes de a corrida ser chamada.'),
     ('Microfone e alto-falante', 'Diga "Oi ELO" para ligar para alguém, saber onde está ou chamar ajuda. A pochete responde em voz.'),
     ('GPS e conexão com o app', 'Por dentro, o módulo GPS envia a localização em tempo real e mantém a pochete ligada ao app do cuidador.'),
     ('Entrada USB-C e bateria', 'Uma carga de cerca de 2 horas dura até 48 horas de uso. Recarregue todo dia à noite.'),

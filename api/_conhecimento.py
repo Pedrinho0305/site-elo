@@ -47,7 +47,7 @@ ASSUNTOS = [
     {
         "id": "funcionalidades", "nome": "as funcionalidades",
         "pistas": ["funcionalidade", "o que ela faz", "oq ela faz", "recursos", "o que a pochete faz", "para que serve", "pra que serve", "funcoes"],
-        "fato": "Funcionalidades: botão vermelho de emergência (um toque avisa o cuidador na hora, com a localização; se for preciso, o cuidador liga para o SAMU 192); botão preto de transporte (pede um carro, o cuidador aprova antes); comandos de voz com a palavra de ativação 'Oi ELO' (ligar para alguém, saber onde está, chamar transporte, emergência); localização em tempo real no mapa do app com histórico do dia; app do cuidador com alertas, aprovações, cadastro e notificações; bateria de até 48 horas com carga USB-C; resistente a chuva e respingos (IP63).",
+        "fato": "Funcionalidades: botão vermelho de emergência (segurar por 3 segundos avisa o cuidador na hora, com a localização; se for preciso, o cuidador liga para o SAMU 192); botão preto de transporte (pede um carro, o cuidador aprova antes); comandos de voz com a palavra de ativação 'Oi ELO' (ligar para alguém, saber onde está, chamar transporte, emergência); localização em tempo real no mapa do app com histórico do dia; app do cuidador com alertas, aprovações, cadastro e notificações; bateria de até 48 horas com carga USB-C; resistente a chuva e respingos (IP63).",
     },
     {
         "id": "diferencial", "nome": "o diferencial",
@@ -57,7 +57,7 @@ ASSUNTOS = [
     {
         "id": "comparacao", "nome": "a comparação com celular e relógio",
         "pistas": ["celular", "smartphone", "relogio", "smartwatch", "apple watch", "por que nao usar", "porque nao usar", "em vez de", "ao inves de", "nao e melhor"],
-        "fato": "Comparação com celular e relógio inteligente: eles pedem tela, toque, menus e senha, e é isso que trava muita gente idosa. A ELO tem botões físicos grandes e comando de voz: para chamar ajuda é um toque, para pedir carro é outro. E o cuidador aprova a corrida antes de sair e recebe a localização no alerta, o que um celular comum não faz.",
+        "fato": "Comparação com celular e relógio inteligente: eles pedem tela, toque, menus e senha, e é isso que trava muita gente idosa. A ELO tem botões físicos grandes e comando de voz: para chamar ajuda é segurar um botão por 3 segundos, para pedir carro é segurar o outro. E o cuidador aprova a corrida antes de sair e recebe a localização no alerta, o que um celular comum não faz.",
     },
     {
         "id": "missao", "nome": "a missão",
@@ -67,7 +67,7 @@ ASSUNTOS = [
     {
         "id": "emergencia", "nome": "o botão de emergência",
         "pistas": ["emergencia", "botao vermelho", "samu", "192", "socorro", "sos", "ajuda medica", "ambulancia", "passar mal", "queda", "caiu", "cair"],
-        "fato": "Botão de emergência (vermelho): um toque avisa o cuidador na hora, no painel e no Telegram, com a localização da pochete. A pochete NÃO chama o SAMU sozinha: quem decide é o cuidador, que recebe no aviso um atalho para ligar 192 (SAMU). Em emergência grave acontecendo agora, o certo é ligar 192 direto. Antes de usar de verdade, teste pelo modo demonstração no app, que confirma que o aviso chega. A orientação do manual é não pressionar em modo real sem necessidade. O site NÃO descreve detecção automática de queda nem como cancelar um alerta já enviado; para isso, confirmar com a equipe.",
+        "fato": "Botão de emergência (vermelho): segurar por 3 segundos avisa o cuidador na hora, no painel e no Telegram, com a localização da pochete. Os dois botões só disparam se forem segurados por 3 segundos (a pochete dá um bipe por segundo), para evitar aperto sem querer; um aperto rápido não envia nada. A pochete NÃO chama o SAMU sozinha: quem decide é o cuidador, que recebe no aviso um atalho para ligar 192 (SAMU). Em emergência grave acontecendo agora, o certo é ligar 192 direto. Antes de usar de verdade, teste pelo modo demonstração no app, que confirma que o aviso chega. A orientação do manual é não pressionar em modo real sem necessidade. O site NÃO descreve detecção automática de queda nem como cancelar um alerta já enviado; para isso, confirmar com a equipe.",
     },
     {
         "id": "alertas", "nome": "os alertas",

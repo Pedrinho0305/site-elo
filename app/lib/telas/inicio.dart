@@ -49,7 +49,7 @@ class TelaInicio extends StatelessWidget {
         const TituloSecao('Tecnologia que Cuida', apoio: 'Recursos desenvolvidos pensando na segurança e autonomia dos idosos'),
         const Respiro(18),
         _Recurso(Icons.notification_important_rounded, c.red, 'Botão de Alerta',
-            'Em caso de emergência, um simples toque avisa o cuidador na hora, com a localização. Se for preciso, ele liga para o SAMU (192).', destaque: true),
+            'Em caso de emergência, basta segurar o botão vermelho por 3 segundos para avisar o cuidador na hora, com a localização. Se for preciso, ele liga para o SAMU (192).', destaque: true),
         _Recurso(Icons.directions_car_rounded, c.orange, 'Uber com Aprovação', 'Solicite transporte com um botão. O cuidador recebe notificação e pode aprovar ou negar a corrida.'),
         _Recurso(Icons.mic_rounded, c.purple, 'Comandos de Voz', 'Interface por voz e áudio para facilitar o uso, mesmo para quem tem dificuldades com tecnologia.'),
         _Recurso(Icons.phone_iphone_rounded, c.green, 'App do Cuidador', 'Aplicativo completo para cadastrar idosos, receber alertas e monitorar atividades em tempo real.'),
