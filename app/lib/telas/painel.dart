@@ -470,7 +470,7 @@ class _TelaPainelState extends State<TelaPainel> {
   Widget _testes(EloCores c) {
     final botoes = [
       _Acao(Icons.notification_important_rounded, c.red, 'Botão vermelho', 'Emergência', () => _simular('emergencia')),
-      _Acao(Icons.directions_car_rounded, c.orange, 'Botão amarelo', 'Pedir carro', () => _simular('transporte')),
+      _Acao(Icons.directions_car_rounded, c.orange, 'Botão preto', 'Pedir carro', () => _simular('transporte')),
       _Acao(Icons.battery_alert_rounded, c.blue2, 'Bateria baixa', '12% de carga', () => _simular('bateria', bateria: 12)),
       _Acao(Icons.place_rounded, c.green, 'Localização', 'Atualizar posição', () => _simular('localizacao')),
     ];
@@ -654,7 +654,7 @@ class _FormVincularState extends State<_FormVincular> {
           const SizedBox(height: 12),
           TextField(controller: _endereco, keyboardType: TextInputType.streetAddress, decoration: const InputDecoration(labelText: 'Endereço da casa dela (opcional)', hintText: 'Rua das Flores, 123, São Paulo')),
           const SizedBox(height: 8),
-          Text('É para lá que o carro leva quando ela aperta o botão amarelo. Escreva rua, número e cidade.', style: TextStyle(color: c.text3, fontSize: 13)),
+          Text('É para lá que o carro leva quando ela aperta o botão preto. Escreva rua, número e cidade.', style: TextStyle(color: c.text3, fontSize: 13)),
           const SizedBox(height: 16),
           BotaoMarca(texto: 'Vincular pochete', carregando: _enviando, aoTocar: _enviar, expandir: true),
           if (_erro != null) StatusFormulario(texto: _erro!, ok: false),

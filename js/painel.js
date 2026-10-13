@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const AVISO = {
       emergencia: ['Emergência', 'botão vermelho apertado', 'red'],
-      transporte: ['Pedido de carro', 'botão amarelo apertado', 'orange'],
+      transporte: ['Pedido de carro', 'botão preto apertado', 'orange'],
       bateria: ['Bateria baixa', '', 'orange'],
     };
     const ehAviso = e => e.tipo === 'emergencia' || e.tipo === 'transporte' || (e.tipo === 'bateria' && e.dados?.bateria <= 20);

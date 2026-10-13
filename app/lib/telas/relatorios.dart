@@ -338,7 +338,7 @@ class _TelaRelatoriosState extends State<TelaRelatorios> {
       case 'emergencia': return _Linha(quando, 'Emergência', c.red, Icons.notification_important_rounded, '$nome apertou o botão vermelho$pelo.', lat, lng);
       case 'transporte':
         final destino = (d['destino'] as Map?)?['nome'];
-        return _Linha(quando, 'Pedido de carro', c.orange, Icons.directions_car_rounded, '$nome apertou o botão amarelo e pediu um carro${destino != null ? ' para $destino' : ''}$pelo.', lat, lng);
+        return _Linha(quando, 'Pedido de carro', c.orange, Icons.directions_car_rounded, '$nome apertou o botão preto e pediu um carro${destino != null ? ' para $destino' : ''}$pelo.', lat, lng);
       case 'bateria':
         final b = d['bateria'] as num?;
         final baixa = b != null && b <= 20;

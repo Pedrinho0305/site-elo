@@ -438,7 +438,7 @@ class _FormEditarPocheteState extends State<_FormEditarPochete> {
           const SizedBox(height: 14),
           TextField(controller: _endereco, keyboardType: TextInputType.streetAddress, decoration: const InputDecoration(labelText: 'Endereço de casa', hintText: 'Rua das Flores, 123, Jardim Paulista, São Paulo')),
           const SizedBox(height: 6),
-          Text('Rua, número, bairro e cidade. É o destino quando o botão amarelo pede um carro; o mapa é achado sozinho.', style: TextStyle(color: c.text3, fontSize: 13)),
+          Text('Rua, número, bairro e cidade. É o destino quando o botão preto pede um carro; o mapa é achado sozinho.', style: TextStyle(color: c.text3, fontSize: 13)),
           const SizedBox(height: 12),
           TextField(controller: _telefone, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Telefone dela')),
           const SizedBox(height: 16),

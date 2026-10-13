@@ -47,7 +47,7 @@ ASSUNTOS = [
     {
         "id": "funcionalidades", "nome": "as funcionalidades",
         "pistas": ["funcionalidade", "o que ela faz", "oq ela faz", "recursos", "o que a pochete faz", "para que serve", "pra que serve", "funcoes"],
-        "fato": "Funcionalidades: botão vermelho de emergência (um toque avisa o cuidador na hora, com a localização; se for preciso, o cuidador liga para o SAMU 192); botão amarelo de transporte (pede um carro, o cuidador aprova antes); comandos de voz com a palavra de ativação 'Oi ELO' (ligar para alguém, saber onde está, chamar transporte, emergência); localização em tempo real no mapa do app com histórico do dia; app do cuidador com alertas, aprovações, cadastro e notificações; bateria de até 48 horas com carga USB-C; resistente a chuva e respingos (IP63).",
+        "fato": "Funcionalidades: botão vermelho de emergência (um toque avisa o cuidador na hora, com a localização; se for preciso, o cuidador liga para o SAMU 192); botão preto de transporte (pede um carro, o cuidador aprova antes); comandos de voz com a palavra de ativação 'Oi ELO' (ligar para alguém, saber onde está, chamar transporte, emergência); localização em tempo real no mapa do app com histórico do dia; app do cuidador com alertas, aprovações, cadastro e notificações; bateria de até 48 horas com carga USB-C; resistente a chuva e respingos (IP63).",
     },
     {
         "id": "diferencial", "nome": "o diferencial",
@@ -76,8 +76,8 @@ ASSUNTOS = [
     },
     {
         "id": "transporte", "nome": "o transporte",
-        "pistas": ["transporte", "uber", "corrida", "carro", "taxi", "botao amarelo", "99", "chamar um carro", "pedir carro", "aprovar", "aprovacao"],
-        "fato": "Botão de transporte (amarelo): pede um carro. Quando a pessoa aperta, o cuidador recebe uma notificação no app e pode aprovar ou recusar a corrida antes de ela ser chamada; sem o ok, nada é chamado. Para funcionar, o cuidador vincula uma conta Uber no app e define as permissões; a corrida é cobrada nessa conta Uber. Outros apps (99 etc.) NÃO aparecem no site.",
+        "pistas": ["transporte", "uber", "corrida", "carro", "taxi", "botao preto", "99", "chamar um carro", "pedir carro", "aprovar", "aprovacao"],
+        "fato": "Botão de transporte (preto): pede um carro. Quando a pessoa aperta, o cuidador recebe uma notificação no app e pode aprovar ou recusar a corrida antes de ela ser chamada; sem o ok, nada é chamado. Para funcionar, o cuidador vincula uma conta Uber no app e define as permissões; a corrida é cobrada nessa conta Uber. Outros apps (99 etc.) NÃO aparecem no site.",
     },
     {
         "id": "voz", "nome": "os comandos de voz",

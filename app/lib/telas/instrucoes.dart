@@ -30,7 +30,7 @@ class _TelaInstrucoesState extends State<TelaInstrucoes> {
     ('Cadastro no App', 'Baixe o app ELO na App Store ou Google Play. Crie sua conta como cuidador e cadastre os dados do idoso (nome, idade, contatos de emergência e informações médicas importantes).'),
     ('Configure a Pochete', 'Ligue a pochete ELO pressionando o botão lateral por 3 segundos. Conecte via Bluetooth ao aplicativo seguindo as instruções na tela. A pochete deve ser carregada completamente antes do primeiro uso (cerca de 2 horas).'),
     ('Teste o Botão de Emergência', 'O botão vermelho envia um alerta ao cuidador, com a localização; é ele quem decide se liga para o SAMU (192). Faça um teste (modo demonstração no app) para garantir que tudo funciona. IMPORTANTE: Não pressione em modo real sem necessidade.'),
-    ('Configure Uber', 'No app, vincule uma conta Uber e defina as permissões. Quando o idoso pressionar o botão amarelo na pochete, você receberá uma notificação para aprovar ou negar a corrida antes dela ser solicitada.'),
+    ('Configure Uber', 'No app, vincule uma conta Uber e defina as permissões. Quando o idoso pressionar o botão preto na pochete, você receberá uma notificação para aprovar ou negar a corrida antes dela ser solicitada.'),
     ('Ative Comandos de Voz', 'Diga "Oi ELO" para ativar o assistente por voz. Comandos disponíveis: "Ligar para [nome]", "Onde estou?", "Chamar transporte", "Emergência". A pochete responde com confirmações em áudio.'),
     ('Uso Diário', 'O idoso deve usar a pochete sempre que sair. A bateria dura até 48 horas. Recarregue diariamente. O app mostra localização em tempo real e histórico de atividades. Configure notificações de acordo com suas preferências.'),
   ];

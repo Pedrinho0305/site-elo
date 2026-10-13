@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const base = { quando: new Date(e.criado_em) };
     switch (e.tipo) {
       case 'emergencia': return { ...base, tipo: 'Emergência', cor: 'red', icone: ICONE.sino, texto: `${nome} apertou o botão vermelho${pelo}.${onde}` };
-      case 'transporte': return { ...base, tipo: 'Pedido de carro', cor: 'orange', icone: ICONE.carro, texto: `${nome} apertou o botão amarelo e pediu um carro${d.destino?.nome ? ` para ${texto(d.destino.nome)}` : ''}${pelo}.${onde}` };
+      case 'transporte': return { ...base, tipo: 'Pedido de carro', cor: 'orange', icone: ICONE.carro, texto: `${nome} apertou o botão preto e pediu um carro${d.destino?.nome ? ` para ${texto(d.destino.nome)}` : ''}${pelo}.${onde}` };
       case 'bateria': {
         const baixa = d.bateria != null && d.bateria <= 20;
         return { ...base, tipo: baixa ? 'Bateria baixa' : 'Bateria', cor: baixa ? 'orange' : 'blue', icone: ICONE.bateria, texto: `Pochete de ${nome} com ${d.bateria ?? '?'}% de bateria${pelo}.` };

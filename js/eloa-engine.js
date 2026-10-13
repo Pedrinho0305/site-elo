@@ -185,7 +185,7 @@
       fracas: ['tudo', 'quais', 'todas', 'pode', 'serve'],
       respostas: [
         'As principais funcionalidades da ELO são:\n\n• Botão de emergência — um toque avisa o cuidador na hora, com a localização (se for preciso, ele liga 192)\n• Botão de transporte — pede um carro, e o cuidador aprova antes\n• Comandos de voz — "Oi ELO" para ligar, pedir carro, saber onde está ou chamar ajuda\n• Localização em tempo real — GPS no mapa do app, com histórico do dia\n• App do cuidador — alertas, aprovações, cadastro e notificações\n• Bateria de até 48 horas, com carga USB-C\n• Resistente a chuva e respingos (IP63)',
-        'Ela faz cinco coisas principais: avisa o cuidador pelo botão vermelho, pede transporte pelo botão amarelo (com aprovação do cuidador), obedece a comandos de voz, mostra a localização em tempo real no app e avisa o cuidador de tudo isso. Fora isso, a bateria dura até 48 horas e ela aguenta chuva.'
+        'Ela faz cinco coisas principais: avisa o cuidador pelo botão vermelho, pede transporte pelo botão preto (com aprovação do cuidador), obedece a comandos de voz, mostra a localização em tempo real no app e avisa o cuidador de tudo isso. Fora isso, a bateria dura até 48 horas e ela aguenta chuva.'
       ],
       seguimento: { texto: 'Quer que eu detalhe alguma delas?', alvo: null }
     },
@@ -205,7 +205,7 @@
       fracas: ['comparar', 'diferenca', 'vantagem', 'usar'],
       respostas: [
         'A diferença está em quem vai usar. Celular e relógio inteligente pedem tela, toque, menus, senha — e é justamente isso que trava muita gente idosa. A ELO tem botões físicos grandes e comando de voz: para chamar ajuda é um toque, para pedir carro é outro.\n\nE tem a parte de quem cuida: o cuidador aprova a corrida antes de sair e recebe a localização no alerta. Isso um celular comum não faz.',
-        'Um celular exige que a pessoa saiba usar celular. A ELO não exige nada: um botão vermelho para emergência, um amarelo para transporte, e a voz para o resto. Foi feita para quem tem dificuldade com tecnologia — e para a família acompanhar sem precisar ficar ligando.'
+        'Um celular exige que a pessoa saiba usar celular. A ELO não exige nada: um botão vermelho para emergência, um preto para transporte, e a voz para o resto. Foi feita para quem tem dificuldade com tecnologia — e para a família acompanhar sem precisar ficar ligando.'
       ]
     },
     {
@@ -253,11 +253,11 @@
     /* ---- transporte ---------------------------------------------------- */
     {
       id: 'transporte', nome: 'o botão de transporte',
-      fortes: ['uber', 'corrida', 'transport', 'botao amarelo', 'pedir carro', 'chamar carro', 'chamar um carro', 'taxi', 'motorista'],
-      fracas: ['amarel', 'aprov', 'recus', 'negar', 'viagem', 'buscar', 'levar', 'ir ate', 'carro', 'locomo'],
+      fortes: ['uber', 'corrida', 'transport', 'botao preto', 'pedir carro', 'chamar carro', 'chamar um carro', 'taxi', 'motorista'],
+      fracas: ['preto', 'aprov', 'recus', 'negar', 'viagem', 'buscar', 'levar', 'ir ate', 'carro', 'locomo'],
       respostas: [
-        'O botão amarelo pede um carro. Quando {pessoa} aperta, você recebe uma notificação no app e pode aprovar ou recusar a corrida antes de ela ser chamada.\n\nPara funcionar, é só vincular uma conta Uber no app e definir as permissões.',
-        'Funciona assim: {pessoa} aperta o botão amarelo, e a corrida não sai na hora — primeiro chega uma notificação para você aprovar ou recusar. Só depois do seu ok o carro é chamado.\n\nVocê vincula a conta Uber uma vez, no app, e pronto.'
+        'O botão preto pede um carro. Quando {pessoa} aperta, você recebe uma notificação no app e pode aprovar ou recusar a corrida antes de ela ser chamada.\n\nPara funcionar, é só vincular uma conta Uber no app e definir as permissões.',
+        'Funciona assim: {pessoa} aperta o botão preto, e a corrida não sai na hora — primeiro chega uma notificação para você aprovar ou recusar. Só depois do seu ok o carro é chamado.\n\nVocê vincula a conta Uber uma vez, no app, e pronto.'
       ],
       seguimento: { texto: 'Quer saber como configurar isso no app?', alvo: 'app' }
     },
@@ -288,7 +288,7 @@
       fracas: ['entende', 'ouve', 'escutar', 'reconhecer'],
       respostas: [
         'O reconhecimento é por voz, com a palavra de ativação "Oi ELO", em português. Sobre sotaque forte, voz baixa ou lugares barulhentos, o site não traz testes — então não vou te garantir.\n\nO que eu posso garantir: os botões físicos funcionam sempre, independente da voz. Emergência e transporte nunca dependem de a pochete entender a fala.',
-        'A voz é uma comodidade; os botões são a garantia. Se {pessoa} fala baixo ou o lugar está barulhento, o botão vermelho e o amarelo continuam funcionando com um toque. Sobre a precisão do reconhecimento em cada situação, quem pode detalhar é a equipe.'
+        'A voz é uma comodidade; os botões são a garantia. Se {pessoa} fala baixo ou o lugar está barulhento, o botão vermelho e o preto continuam funcionando com um toque. Sobre a precisão do reconhecimento em cada situação, quem pode detalhar é a equipe.'
       ]
     },
 

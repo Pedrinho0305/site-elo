@@ -377,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } });
         const semMapa = pochete.endereco && !pochete.casa;
         toast('teste', semMapa ? 'Salvo, mas não achei o endereço no mapa' : 'Pochete atualizada',
-          semMapa ? 'O Uber vai receber o endereço escrito. Se puder, confira o número e a cidade.' : 'O endereço é o destino quando o botão amarelo pede um carro.');
+          semMapa ? 'O Uber vai receber o endereço escrito. Se puder, confira o número e a cidade.' : 'O endereço é o destino quando o botão preto pede um carro.');
         await carregarPochetes();
       } catch (err) { aviso.textContent = err.message; botao.disabled = false; }
     });
