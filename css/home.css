@@ -268,8 +268,21 @@
   transition: opacity .5s var(--ease);
 }
 
+/* reveal.css (carregado depois) troca a transition de .animate-on-scroll só
+   por opacity/filter, e o hover ficava sem animação: junta as duas aqui. */
+.card.animate-on-scroll {
+  transition: opacity .8s var(--ease), filter .8s var(--ease), transform .5s var(--ease), border-color .3s;
+}
+
 .card:hover { transform: translateY(-4px); border-color: var(--line-2); }
 .card:hover::after { opacity: 1; }
+
+/* Movimento reduzido: header.css zera todas as transições; o hover do card
+   (subir 4px e acender) é discreto, então fica, curto. O anel não gira. */
+@media (prefers-reduced-motion: reduce) {
+  .card.animate-on-scroll { transition-property: transform, border-color !important; transition-duration: .3s !important; }
+  .card.animate-on-scroll::after { transition-duration: .3s !important; }
+}
 
 .card h3 {
   margin-top: 1.2rem;
