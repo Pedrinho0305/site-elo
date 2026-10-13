@@ -346,10 +346,10 @@
     /* ---- app ----------------------------------------------------------- */
     {
       id: 'app', nome: 'o app do cuidador',
-      fortes: ['aplicativo', 'app', 'play store', 'app store', 'google play', 'notific', 'baixar', 'instalar o app', 'cadastr', 'loja de aplicativo'],
+      fortes: ['aplicativo', 'app', 'play store', 'app store', 'google play', 'notific', 'baixar', 'instalar o app', 'cadastr', 'loja de aplicativo', 'familiar', 'mandar mensagem', 'mensagem para a pochete', 'enviar mensagem'],
       fracas: ['celular', 'conta', 'instalar', 'cuidador', 'login', 'senha', 'perfil', 'tela'],
       respostas: [
-        'O app ELO está na App Store e no Google Play. Você cria a conta como cuidador e cadastra os dados de {pessoa}: nome, idade, contatos de emergência e informações médicas importantes.\n\nPelo app você recebe os alertas, aprova corridas, acompanha a localização e configura as notificações.',
+        'O app ELO está na App Store e no Google Play. Você cria a conta como cuidador e cadastra os dados de {pessoa}: nome, idade, contatos de emergência e informações médicas importantes.\n\nPelo app você recebe os alertas, aprova corridas, acompanha a localização e configura as notificações. No painel também dá para cadastrar familiares (quem tiver e-mail pode ser avisado numa emergência), ligar para {pessoa} ou para o 192 e mandar mensagens para a pochete: as prontas tocam com voz gravada e você vê quando {pessoa} ouviu.',
         'Baixa na App Store ou no Google Play, cria sua conta de cuidador e cadastra {pessoa} — nome, idade, contatos de emergência e o que for importante de saúde.\n\nDepois é por lá que tudo acontece: alertas, aprovação de corrida, localização. E dá para cadastrar mais de um contato de emergência.'
       ],
       seguimento: { texto: 'Quer que eu passe o passo a passo para conectar a pochete ao app?', alvo: 'configurar' }

@@ -21,10 +21,18 @@
    localStorage['elo-avisos-ultimo'] guarda o último evento mostrado, para
    trocar de página não repetir nem perder aviso (só os da última meia hora).
 
-   API: window.EloAvisos = { mostrar(opcoes), evento(ev, { sempre }), chegaram(eventos), abrirMapa(local) }
+   Ligar no computador: um link tel: no celular abre o discador; no
+   computador não há discador, e o Chrome só abria uma aba vazia. Por isso,
+   em tela com mouse, todo link tel: (e EloAvisos.ligar) abre uma janela com
+   o número grande, um QR Code que o celular lê e já liga (js/qr.js, carregado
+   na hora), copiar o número, WhatsApp (menos para o 192) e a opção de usar o
+   app do Windows que liga pelo celular (Vincular ao Celular).
+
+   API: window.EloAvisos = { mostrar(opcoes), evento(ev, { sempre }), chegaram(eventos), abrirMapa(local), ligar({ numero, nome }) }
    mostrar({ tipo, rotulo?, titulo, texto, duracao?, fixo?, cor?, icone?, mapa?, acoes?: [{ texto, href?, aoClicar?, principal?, manter? }] })
    ========================================================================== */
 (() => {
+  const ESTE_ARQUIVO = document.currentScript?.src || '';
   const CHAVE_ULTIMO = 'elo-avisos-ultimo';
   const maxVisiveis = () => (matchMedia('(max-width: 560px)').matches ? 2 : 3); // no celular, 2
   const RECENTE_MS = 30 * 60 * 1000;
@@ -278,7 +286,111 @@
       .forEach(mostrarEvento);
   }
 
-  window.EloAvisos = { mostrar, evento, chegaram, abrirMapa };
+  /* ---------------------------------------------------------------------
+     Ligar: discador no celular, janela com QR Code no computador
+     --------------------------------------------------------------------- */
+  const ehCelular = () => /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+    || (matchMedia('(pointer: coarse)').matches && !matchMedia('(hover: hover)').matches);
+  const EMERGENCIA = ['190', '192', '193', '199', '100', '180', '188'];
+
+  // "+55 (11) 99999-0000" → { discar: '+5511999990000', mostrar: '(11) 99999-0000', whatsapp: '5511999990000' }
+  function numeroDe(bruto) {
+    const digitos = String(bruto || '').replace(/[^\d+]/g, '');
+    const so = digitos.replace(/\D/g, '');
+    if (EMERGENCIA.includes(so)) return { discar: so, mostrar: so, whatsapp: null, emergencia: true };
+    let nacional = so;
+    if (digitos.startsWith('+55') || (so.startsWith('55') && so.length >= 12)) nacional = so.slice(2);
+    else if (digitos.startsWith('+')) return { discar: digitos, mostrar: digitos, whatsapp: so, emergencia: false };
+    nacional = nacional.replace(/^0/, '');
+    const ddd = nacional.slice(0, 2), resto = nacional.slice(2);
+    const local = resto.length === 9 ? `${resto.slice(0, 5)}-${resto.slice(5)}` : resto.length === 8 ? `${resto.slice(0, 4)}-${resto.slice(4)}` : resto;
+    const valido = nacional.length >= 10 && nacional.length <= 11;
+    return {
+      discar: valido ? `+55${nacional}` : so,
+      mostrar: valido ? `(${ddd}) ${local}` : so,
+      whatsapp: valido ? `55${nacional}` : null,
+      emergencia: false,
+    };
+  }
+
+  let qrPronto = null;
+  function carregarQR() {
+    if (window.EloQR) return Promise.resolve();
+    qrPronto ??= new Promise((ok, falha) => {
+      const s = document.createElement('script');
+      s.src = new URL('qr.js', ESTE_ARQUIVO || location.href).href;
+      s.onload = ok; s.onerror = falha;
+      document.head.append(s);
+    });
+    return qrPronto;
+  }
+
+  let janelaLigar;
+  function ligar({ numero, nome } = {}) {
+    const n = numeroDe(numero);
+    if (!n.discar) return;
+    if (ehCelular()) { location.href = `tel:${n.discar}`; return; }
+
+    if (!janelaLigar?.isConnected) {
+      janelaLigar = document.createElement('dialog');
+      janelaLigar.className = 'mapa-janela ligar-janela';
+      janelaLigar.innerHTML = `
+        <div class="mapa-janela-topo">
+          <div><h2 class="mapa-janela-titulo"></h2><p class="ligar-numero"></p></div>
+          <button type="button" class="aviso-fechar" data-fechar aria-label="Fechar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
+        <div class="ligar-corpo">
+          <div class="ligar-qr" aria-hidden="true"></div>
+          <div class="ligar-texto">
+            <p><strong>Ligue pelo celular:</strong> aponte a câmera para o código. A ligação abre pronta, é só tocar em ligar.</p>
+            <p class="ligar-nota"></p>
+          </div>
+        </div>
+        <div class="aviso-acoes">
+          <button type="button" class="aviso-acao aviso-acao--principal" data-copiar>Copiar número</button>
+          <a class="aviso-acao" data-whats target="_blank" rel="noopener">Chamar no WhatsApp</a>
+          <a class="aviso-acao" data-discar>Ligar pelo app do computador</a>
+        </div>`;
+      janelaLigar.querySelector('[data-fechar]').addEventListener('click', () => janelaLigar.close());
+      janelaLigar.addEventListener('click', e => { if (e.target === janelaLigar) janelaLigar.close(); });
+      // o link tel: daqui é de propósito: não abre a janela de novo
+      janelaLigar.querySelector('[data-discar]').dataset.direto = '';
+      document.body.append(janelaLigar);
+    }
+    const j = janelaLigar;
+    j.querySelector('.mapa-janela-titulo').textContent = n.emergencia ? `Ligar ${n.mostrar}${n.mostrar === '192' ? ' · SAMU' : ''}` : `Ligar para ${nome || 'este número'}`;
+    j.querySelector('.ligar-numero').textContent = n.mostrar;
+    j.querySelector('.ligar-nota').textContent = n.emergencia
+      ? 'Os números de emergência só atendem por telefone. Ligue do celular ou de um telefone fixo.'
+      : 'No computador, "Ligar pelo app" funciona quando o Windows está ligado ao seu celular (app Vincular ao Celular) ou tem um app de chamadas instalado.';
+    const copiar = j.querySelector('[data-copiar]');
+    copiar.textContent = 'Copiar número';
+    copiar.onclick = async () => {
+      try { await navigator.clipboard.writeText(n.discar); copiar.textContent = 'Número copiado'; }
+      catch { copiar.textContent = n.discar; }
+    };
+    const whats = j.querySelector('[data-whats]');
+    whats.hidden = !n.whatsapp;
+    if (n.whatsapp) whats.href = `https://wa.me/${n.whatsapp}`;
+    j.querySelector('[data-discar]').href = `tel:${n.discar}`;
+
+    const quadro = j.querySelector('.ligar-qr');
+    quadro.innerHTML = '';
+    carregarQR().then(() => { quadro.innerHTML = window.EloQR.svg(`tel:${n.discar}`); })
+      .catch(() => { quadro.textContent = n.mostrar; });
+    if (!j.open) j.showModal();
+  }
+
+  // Todo link tel: da página (Ligar 192 do painel e dos avisos, telefones de
+  // familiares) passa por aqui no computador
+  document.addEventListener('click', e => {
+    const link = e.target.closest('a[href^="tel:"]');
+    if (!link || 'direto' in link.dataset || ehCelular() || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    e.preventDefault();
+    ligar({ numero: decodeURIComponent(link.getAttribute('href').slice(4)), nome: link.dataset.ligarNome });
+  });
+
+  window.EloAvisos = { mostrar, evento, chegaram, abrirMapa, ligar };
 
   /* ---------------------------------------------------------------------
      Consulta nas páginas que não são o Painel

@@ -42,6 +42,11 @@
      POST   /api/telegram/vincular       { chat_id }   (só no modo simulado)
      DELETE /api/telegram
      POST   /api/telegram/teste
+     GET    /api/familiares · POST /api/familiares   { nome, parentesco, telefone?, email?, avisar? }
+     PATCH  /api/familiares/:id · DELETE /api/familiares/:id
+     GET    /api/pochetes/:id/recados                                       → { recados, prontos }
+     POST   /api/pochetes/:id/recados    { texto }  mensagem para a pochete tocar
+     POST   /api/pochetes/:id/recados/:rid/confirmar   (simula a pochete confirmando)
 
    ROTAS DOS FORMULÁRIOS DO SITE (sem login)
      POST   /api/mensagens              { tipo: contato|pedido, nome, email, telefone?,
@@ -53,7 +58,8 @@
    ROTAS DA POCHETE (X-Pochete-Key: <chave>)
      POST   /api/pochete/evento          { tipo: emergencia|transporte|bateria|localizacao|teste,
                                            lat?, lng?, bateria?, destino?: { lat, lng, nome } }
-     GET    /api/pochete/estado          → { pochete, corrida }   (para ela anunciar "corrida aprovada")
+     GET    /api/pochete/estado          → { pochete, corrida, recados }   (corrida ativa e mensagens novas)
+     POST   /api/pochete/recados/:id/confirmar   a pessoa apertou um botão: mensagem recebida
 
    Erros: { erro: "mensagem em português" } com o status HTTP certo.
 
@@ -247,6 +253,39 @@ async function conectarBanco() {
       CONSTRAINT fk_mensagem_cuidador FOREIGN KEY (cuidador_id) REFERENCES cuidadores(id) ON DELETE SET NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
 
+  // Familiares de quem é cuidado: contatos para ligar e, se quiserem, para
+  // receber um e-mail quando o botão vermelho for apertado.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS familiares (
+      id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      cuidador_id  INT UNSIGNED  NOT NULL,
+      nome         VARCHAR(120)  NOT NULL,
+      parentesco   VARCHAR(40)   NOT NULL DEFAULT 'Outro',
+      telefone     VARCHAR(20)   NULL,
+      email        VARCHAR(190)  NULL,
+      avisar       TINYINT(1)    NOT NULL DEFAULT 0,
+      criado_em    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX (cuidador_id),
+      CONSTRAINT fk_familiar_cuidador FOREIGN KEY (cuidador_id) REFERENCES cuidadores(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+
+  // Mensagens do cuidador para a pochete ("recados", para não confundir com
+  // as mensagens dos formulários do site). A pochete busca as novas em
+  // GET /api/pochete/estado e confirma quando a pessoa aperta um botão.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS recados (
+      id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      pochete_id     INT UNSIGNED  NOT NULL,
+      texto          VARCHAR(160)  NOT NULL,
+      audio          TINYINT UNSIGNED NULL,
+      status         VARCHAR(12)   NOT NULL DEFAULT 'pendente',
+      criado_em      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      entregue_em    DATETIME      NULL,
+      confirmado_em  DATETIME      NULL,
+      INDEX (pochete_id, status),
+      CONSTRAINT fk_recado_pochete FOREIGN KEY (pochete_id) REFERENCES pochetes(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+
   // Tentativas recentes (login errado, cadastro, chave de pochete errada...).
   // Fica no banco, não na memória, porque na Vercel cada pedido pode cair numa
   // instância diferente e um contador em memória não seguraria ninguém.
@@ -364,9 +403,20 @@ const ipDoPedido = req => (CONFIG.confiarProxy && String(req.headers['x-forwarde
 const publico = c => ({ id: c.id, nome: c.nome, email: c.email, foto: c.foto || null, telefone: c.telefone || null, telegram: Boolean(c.telegram_chat_id) });
 const pochetePublica = p => ({
   id: p.id, nome_idoso: p.nome_idoso, telefone_idoso: p.telefone_idoso,
+  // casa: só quando o endereço foi achado no mapa (tem coordenadas);
+  // endereco: o texto que o cuidador digitou, achado ou não
   casa: p.casa_lat != null ? { lat: Number(p.casa_lat), lng: Number(p.casa_lng), nome: p.casa_nome } : null,
+  endereco: p.casa_nome || null,
   bateria: p.bateria, posicao: p.lat != null ? { lat: Number(p.lat), lng: Number(p.lng) } : null,
   ultimo_contato: p.ultimo_contato, criado_em: p.criado_em,
+});
+const familiarPublico = f => ({
+  id: f.id, nome: f.nome, parentesco: f.parentesco, telefone: f.telefone || null,
+  email: f.email || null, avisar: Boolean(f.avisar), criado_em: f.criado_em,
+});
+const recadoPublico = r => ({
+  id: r.id, pochete_id: r.pochete_id, texto: r.texto, audio: r.audio ?? null, status: r.status,
+  criado_em: r.criado_em, entregue_em: r.entregue_em, confirmado_em: r.confirmado_em,
 });
 const corridaPublica = c => ({
   id: c.id, pochete_id: c.pochete_id, status: c.status,
@@ -413,13 +463,17 @@ async function tratarEvento(pochete, cuidador, tipo, corpo = {}, origem = 'poche
 
   switch (tipo) {
     case 'emergencia':
-      await telegram.enviar(cuidador.telegram_chat_id, `🚨 <b>EMERGÊNCIA</b>\n${tg(pochete.nome_idoso)} apertou o botão vermelho às ${horaBR()}.\nVeja onde está e, se for preciso, ligue 192 (SAMU).${lugar}`);
+      await Promise.allSettled([
+        telegram.enviar(cuidador.telegram_chat_id, `🚨 <b>EMERGÊNCIA</b>\n${tg(pochete.nome_idoso)} apertou o botão vermelho às ${horaBR()}.\nVeja onde está e, se for preciso, ligue 192 (SAMU).${lugar}`),
+        avisarFamiliares(cuidador, pochete, pos, origem),
+      ]);
       break;
 
     case 'transporte': {
       const destino = validarCoordenada(dados.destino?.lat, dados.destino?.lng)
         || (pochete.casa_lat != null ? { lat: Number(pochete.casa_lat), lng: Number(pochete.casa_lng) } : null);
       if (!pos) throw erro(422, 'A pochete precisa mandar a localização (lat, lng) para pedir transporte.');
+      if (!destino && pochete.casa_nome) throw erro(422, `Não encontrei "${pochete.casa_nome}" no mapa. Confira o endereço de casa no painel (rua, número e cidade).`);
       if (!destino) throw erro(422, 'Sem destino: cadastre o endereço de casa da pochete no painel ou mande destino no evento.');
       const destinoNome = dados.destino?.nome || (dados.destino?.lat ? null : pochete.casa_nome || 'Casa');
 
@@ -451,6 +505,74 @@ async function tratarEvento(pochete, cuidador, tipo, corpo = {}, origem = 'poche
 
   sse.publicar(cuidador.id, tipo, { evento, corrida, pochete: { id: pochete.id, nome_idoso: pochete.nome_idoso, bateria, posicao: pos } });
   return { evento, corrida };
+}
+
+/* Emergência: e-mail para os familiares que pediram para ser avisados.
+   Limites contra abuso (é o e-mail da empresa que manda): um aviso por
+   familiar a cada 10 min e no máximo 30 por cuidador por dia. */
+async function avisarFamiliares(cuidador, pochete, pos, origem) {
+  try {
+    const [lista] = await pool.query('SELECT * FROM familiares WHERE cuidador_id = ? AND avisar = 1 AND email IS NOT NULL', [cuidador.id]);
+    if (!lista.length) return 0;
+    const porCuidador = 'aviso-familia:' + cuidador.id;
+    const teste = origem === 'painel';
+    const onde = pos ? mapa(pos.lat, pos.lng) : null;
+    let enviados = 0;
+    for (const f of lista) {
+      const marca = 'aviso-familiar:' + f.id;
+      if (await excedeu(marca, 1, 10) || await excedeu(porCuidador, 30, 1440)) continue;
+      await registrar(marca); await registrar(porCuidador);
+      const assunto = `${teste ? '[TESTE] ' : ''}Emergência: ${pochete.nome_idoso} apertou o botão da ELO`;
+      const texto = [
+        `Olá, ${f.nome.split(' ')[0]}.`,
+        '',
+        `${pochete.nome_idoso} apertou o botão vermelho da pochete ELO às ${horaBR()}.`,
+        `${cuidador.nome}, que cuida dela, também foi avisado(a).`,
+        onde ? `Onde está: ${onde}` : 'A pochete ainda não mandou a localização.',
+        '',
+        'Se for uma emergência de saúde, ligue 192 (SAMU).',
+        teste ? '\nEste é um TESTE feito pelo painel: ninguém apertou o botão de verdade.' : '',
+        '',
+        'Você recebe este aviso porque foi cadastrado(a) como familiar no painel da ELO.',
+      ].join('\n');
+      const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+      const html = `<div style="font-family:system-ui,Segoe UI,sans-serif;font-size:16px;line-height:1.55;color:#1b2340">
+        <p style="font-size:20px;font-weight:700;color:#d92b3a">${teste ? '[TESTE] ' : ''}Emergência</p>
+        <p><b>${esc(pochete.nome_idoso)}</b> apertou o botão vermelho da pochete ELO às ${horaBR()}.<br>${esc(cuidador.nome)}, que cuida dela, também foi avisado(a).</p>
+        ${onde ? `<p><a href="${esc(onde)}" style="color:#1f6fe0;font-weight:700">Ver onde está no mapa</a></p>` : '<p>A pochete ainda não mandou a localização.</p>'}
+        <p>Se for uma emergência de saúde, ligue <b>192</b> (SAMU).</p>
+        ${teste ? '<p style="color:#8a5a00">Este é um teste feito pelo painel: ninguém apertou o botão de verdade.</p>' : ''}
+        <p style="color:#6b7594;font-size:13px">Você recebe este aviso porque foi cadastrado(a) como familiar no painel da ELO.</p></div>`;
+      const r = await correio.enviar({ para: f.email, assunto, texto, html });
+      if (r.ok) enviados++;
+    }
+    return enviados;
+  } catch (e) {
+    console.error('[avisar familiares]', e.message);
+    return 0;
+  }
+}
+
+/* Endereço digitado → coordenadas, pelo Nominatim (OpenStreetMap): gratuito,
+   sem chave, até 1 pedido por segundo (folgado para o painel). Se não achar,
+   o endereço fica guardado mesmo assim e o Uber recebe o texto. */
+async function geocodificar(endereco) {
+  if (process.env.GEOCODER === 'off') return null;
+  try {
+    const url = 'https://nominatim.openstreetmap.org/search?' + new URLSearchParams({
+      q: endereco, format: 'jsonv2', limit: '1', countrycodes: 'br', 'accept-language': 'pt-BR',
+    });
+    const r = await fetch(url, {
+      headers: { 'User-Agent': `ELO-pochete/1.0 (${correio.empresa || 'projeto estudantil ELO'})` },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!r.ok) return null;
+    const [achado] = await r.json();
+    return achado ? validarCoordenada(achado.lat, achado.lon) : null;
+  } catch (e) {
+    console.error('[endereço]', e.message);
+    return null;
+  }
 }
 
 /* Atualiza uma corrida com o que a Uber diz e avisa o painel se mudou */
@@ -599,7 +721,8 @@ const ROTAS = [
   ]],
   ['A pochete fala com o servidor (X-Pochete-Key)', [
     ['POST', '/api/pochete/evento', '{ tipo: emergencia | transporte | bateria | localizacao | teste, lat?, lng?, bateria?, destino? } → 201 { evento, corrida? }'],
-    ['GET', '/api/pochete/estado', '→ { pochete, cuidador, corrida } — para ela anunciar a corrida por voz.'],
+    ['GET', '/api/pochete/estado', '→ { pochete, cuidador, corrida, recados } — corrida ativa e mensagens do cuidador ainda não confirmadas.'],
+    ['POST', '/api/pochete/recados/:id/confirmar', '→ { recado } — a pessoa apertou um botão com a mensagem tocando.'],
   ]],
   ['Eventos e corridas (cuidador)', [
     ['GET', '/api/eventos?limite=20&de=&ate=', 'Bearer → { eventos }. de/ate (ISO) filtram o período; com eles o limite vai até 1000.'],
@@ -615,6 +738,15 @@ const ROTAS = [
     ['POST', '/api/mensagens', '{ tipo: contato | pedido, nome, email, telefone?, assunto?, mensagem?, quantidade?, pagamento?, cidade?, pagina? } → 201 { mensagem, email }. Salva no banco e manda para o e-mail da empresa. Sem login.'],
     ['GET', '/api/mensagens?tipo=&limite=', 'Bearer de uma conta em ADMIN_EMAILS → { mensagens }'],
     ['PATCH', '/api/mensagens/:id', 'Bearer (equipe) { lida } → { mensagem }'],
+  ]],
+  ['Familiares e mensagens para a pochete (cuidador)', [
+    ['GET', '/api/familiares', 'Bearer → { familiares, parentescos, avisos_por_email }'],
+    ['POST', '/api/familiares', 'Bearer { nome, parentesco, telefone?, email?, avisar? } → 201 { familiar }. avisar = e-mail quando o botão vermelho for apertado.'],
+    ['PATCH', '/api/familiares/:id', 'Bearer (mesmos campos) → { familiar }'],
+    ['DELETE', '/api/familiares/:id', 'Bearer → { ok }'],
+    ['GET', '/api/pochetes/:id/recados', 'Bearer → { recados, prontos } (status: pendente, entregue, confirmado)'],
+    ['POST', '/api/pochetes/:id/recados', 'Bearer { texto } (até 160) → 201 { recado }. A pochete recebe no próximo GET /api/pochete/estado.'],
+    ['POST', '/api/pochetes/:id/recados/:rid/confirmar', 'Bearer → { recado }: faz o papel da pessoa apertando o botão (teste sem a pochete).'],
   ]],
   ['Telegram (cuidador)', [
     ['POST', '/api/telegram/codigo', 'Bearer → { codigo, bot, simulado, vinculado }'],
@@ -796,13 +928,20 @@ app.get('/api/pochetes', autenticar, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-function lerCasa(casa) {
+/* Endereço de casa. O painel manda só o texto ({ endereco }); o servidor
+   procura as coordenadas. Coordenadas prontas ({ lat, lng }) ainda valem,
+   para quem já usava a API assim. Endereço vazio apaga. */
+async function lerCasa(casa) {
   if (casa === null) return { lat: null, lng: null, nome: null };
   if (casa === undefined) return undefined;
-  if (typeof casa !== 'object') throw erro(400, 'O endereço de casa precisa de latitude e longitude válidas.');
+  if (typeof casa !== 'object') throw erro(400, 'Escreva o endereço de casa.');
+  const endereco = limparTexto(casa.endereco ?? casa.nome, 200).replace(/\s+/g, ' ');
   const c = validarCoordenada(casa.lat, casa.lng);
-  if (!c) throw erro(400, 'O endereço de casa precisa de latitude e longitude válidas.');
-  return { ...c, nome: limparTexto(casa.nome, 200) || 'Casa' };
+  if (c) return { ...c, nome: endereco || 'Casa' };
+  if (!endereco) return { lat: null, lng: null, nome: null };
+  if (endereco.length < 6) throw erro(400, 'Escreva o endereço completo: rua, número e cidade.');
+  const achado = await geocodificar(endereco);
+  return { lat: achado?.lat ?? null, lng: achado?.lng ?? null, nome: endereco };
 }
 
 app.post('/api/pochetes', autenticar, async (req, res, next) => {
@@ -811,7 +950,7 @@ app.post('/api/pochetes', autenticar, async (req, res, next) => {
     if (nome.length < 2 || nome.length > 120) throw erro(400, 'Digite o nome de quem vai usar a pochete.');
     const [[{ total }]] = await pool.query('SELECT COUNT(*) AS total FROM pochetes WHERE cuidador_id = ?', [req.cuidador.id]);
     if (total >= 20) throw erro(400, 'Limite de 20 pochetes por conta. Desvincule uma que não usa mais.');
-    const casa = lerCasa(req.body?.casa) || { lat: null, lng: null, nome: null };
+    const casa = (await lerCasa(req.body?.casa)) || { lat: null, lng: null, nome: null };
     const { chave, hash } = novaChavePochete();
     const [r] = await pool.query(
       'INSERT INTO pochetes (cuidador_id, nome_idoso, telefone_idoso, chave_hash, casa_lat, casa_lng, casa_nome) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -840,7 +979,7 @@ app.patch('/api/pochetes/:id', autenticar, async (req, res, next) => {
       campos.push('nome_idoso = ?'); valores.push(nome);
     }
     if (req.body?.telefone_idoso !== undefined) { campos.push('telefone_idoso = ?'); valores.push(limparTelefone(req.body.telefone_idoso)); }
-    const casa = lerCasa(req.body?.casa);
+    const casa = await lerCasa(req.body?.casa);
     if (casa) { campos.push('casa_lat = ?', 'casa_lng = ?', 'casa_nome = ?'); valores.push(casa.lat, casa.lng, casa.nome); }
     if (!campos.length) throw erro(400, 'Nada para atualizar.');
     valores.push(p.id);
@@ -868,6 +1007,139 @@ app.post('/api/pochetes/:id/simular', autenticar, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+/* ---- mensagens para a pochete ----
+   As prontas têm um áudio gravado na pochete (cartão do módulo de som:
+   0001.mp3, 0002.mp3...). Texto livre toca o aviso de mensagem nova. */
+const RECADOS_PRONTOS = [
+  { audio: 1, texto: 'Estou a caminho.' },
+  { audio: 2, texto: 'Hora de tomar o remédio.' },
+  { audio: 3, texto: 'Me ligue quando puder.' },
+  { audio: 4, texto: 'Fique onde está, já vou buscar você.' },
+  { audio: 5, texto: 'Está tudo bem? Aperte um botão para me responder.' },
+];
+
+async function recadoDaPochete(pocheteId, recadoId) {
+  const [[r]] = await pool.query('SELECT * FROM recados WHERE id = ? AND pochete_id = ?', [Number(recadoId), pocheteId]);
+  if (!r) throw erro(404, 'Mensagem não encontrada.');
+  return r;
+}
+
+// A pessoa apertou um botão com a mensagem tocando: avisa quem mandou
+async function confirmarRecado(recado, pochete, cuidador) {
+  if (recado.status !== 'confirmado') {
+    await pool.query("UPDATE recados SET status = 'confirmado', confirmado_em = NOW(), entregue_em = COALESCE(entregue_em, NOW()) WHERE id = ?", [recado.id]);
+    await telegram.enviar(cuidador.telegram_chat_id, `💬 ${tg(pochete.nome_idoso)} ouviu sua mensagem: "${tg(recado.texto)}"`);
+  }
+  const [[atual]] = await pool.query('SELECT * FROM recados WHERE id = ?', [recado.id]);
+  sse.publicar(cuidador.id, 'recado', { recado: recadoPublico(atual), nome_idoso: pochete.nome_idoso });
+  return recadoPublico(atual);
+}
+
+app.get('/api/pochetes/:id/recados', autenticar, async (req, res, next) => {
+  try {
+    const p = await pocheteDoCuidador(req);
+    const limite = Math.min(Math.max(Number(req.query.limite) || 10, 1), 50);
+    const [linhas] = await pool.query('SELECT * FROM recados WHERE pochete_id = ? ORDER BY id DESC LIMIT ?', [p.id, limite]);
+    res.json({ recados: linhas.map(recadoPublico), prontos: RECADOS_PRONTOS });
+  } catch (e) { next(e); }
+});
+
+app.post('/api/pochetes/:id/recados', autenticar, async (req, res, next) => {
+  try {
+    const p = await pocheteDoCuidador(req);
+    const texto = limparTexto(req.body?.texto, 400).replace(/\s+/g, ' ');
+    if (texto.length < 2) throw erro(400, 'Escreva a mensagem.');
+    if (texto.length > 160) throw erro(400, 'A mensagem pode ter até 160 caracteres.');
+    const marca = 'recado-pochete:' + p.id;
+    if (await excedeu(marca, 20, 60)) throw erro(429, 'Muitas mensagens para esta pochete na última hora. Espere um pouco.');
+    const [[{ abertos }]] = await pool.query(
+      "SELECT COUNT(*) AS abertos FROM recados WHERE pochete_id = ? AND status <> 'confirmado' AND criado_em > (NOW() - INTERVAL 12 HOUR)", [p.id]);
+    if (abertos >= 5) throw erro(409, 'Já há 5 mensagens esperando a pessoa ouvir. Espere ela confirmar uma.');
+    await registrar(marca);
+    const pronto = RECADOS_PRONTOS.find(x => x.texto === texto);
+    const [r] = await pool.query('INSERT INTO recados (pochete_id, texto, audio) VALUES (?, ?, ?)', [p.id, texto, pronto?.audio ?? null]);
+    const [[novo]] = await pool.query('SELECT * FROM recados WHERE id = ?', [r.insertId]);
+    res.status(201).json({ recado: recadoPublico(novo) });
+  } catch (e) { next(e); }
+});
+
+// Demonstração sem o dispositivo: o painel faz o papel da pessoa apertando o botão
+app.post('/api/pochetes/:id/recados/:rid/confirmar', autenticar, async (req, res, next) => {
+  try {
+    const p = await pocheteDoCuidador(req);
+    const r = await recadoDaPochete(p.id, req.params.rid);
+    res.json({ recado: await confirmarRecado(r, p, req.cuidador) });
+  } catch (e) { next(e); }
+});
+
+/* ---- familiares ---- */
+const PARENTESCOS = ['Filho(a)', 'Neto(a)', 'Cônjuge', 'Irmão(ã)', 'Sobrinho(a)', 'Genro ou nora', 'Vizinho(a)', 'Amigo(a)', 'Cuidador(a)', 'Outro'];
+
+function lerFamiliar(corpo, atual = {}) {
+  const f = { ...atual };
+  if (corpo.nome !== undefined || !atual.nome) {
+    f.nome = limparNome(corpo.nome);
+    if (f.nome.length < 2 || f.nome.length > 120) throw erro(400, 'Digite o nome do familiar.');
+  }
+  if (corpo.parentesco !== undefined || !atual.parentesco) f.parentesco = PARENTESCOS.includes(corpo.parentesco) ? corpo.parentesco : 'Outro';
+  if (corpo.telefone !== undefined) {
+    f.telefone = limparTelefone(corpo.telefone);
+    if (f.telefone && f.telefone.replace(/\D/g, '').length < 8) throw erro(400, 'Confira o telefone: coloque o DDD e o número.');
+  }
+  if (corpo.email !== undefined) {
+    f.email = limparEmail(corpo.email) || null;
+    if (f.email && (!EMAIL.test(f.email) || f.email.length > 190)) throw erro(400, 'Confira o e-mail do familiar.');
+  }
+  if (corpo.avisar !== undefined) f.avisar = corpo.avisar ? 1 : 0;
+  if (!f.telefone && !f.email) throw erro(400, 'Coloque pelo menos o telefone ou o e-mail do familiar.');
+  if (f.avisar && !f.email) throw erro(400, 'Para avisar em emergência, coloque o e-mail do familiar.');
+  return f;
+}
+
+async function familiarDoCuidador(req) {
+  const [[f]] = await pool.query('SELECT * FROM familiares WHERE id = ? AND cuidador_id = ?', [Number(req.params.id), req.cuidador.id]);
+  if (!f) throw erro(404, 'Familiar não encontrado.');
+  return f;
+}
+
+app.get('/api/familiares', autenticar, async (req, res, next) => {
+  try {
+    const [linhas] = await pool.query('SELECT * FROM familiares WHERE cuidador_id = ? ORDER BY nome', [req.cuidador.id]);
+    res.json({ familiares: linhas.map(familiarPublico), parentescos: PARENTESCOS, avisos_por_email: !correio.simulado });
+  } catch (e) { next(e); }
+});
+
+app.post('/api/familiares', autenticar, async (req, res, next) => {
+  try {
+    const f = lerFamiliar(req.body || {});
+    const [[{ total }]] = await pool.query('SELECT COUNT(*) AS total FROM familiares WHERE cuidador_id = ?', [req.cuidador.id]);
+    if (total >= 10) throw erro(400, 'Limite de 10 familiares. Remova alguém para incluir outra pessoa.');
+    const [r] = await pool.query('INSERT INTO familiares (cuidador_id, nome, parentesco, telefone, email, avisar) VALUES (?, ?, ?, ?, ?, ?)',
+      [req.cuidador.id, f.nome, f.parentesco, f.telefone || null, f.email || null, f.avisar ? 1 : 0]);
+    const [[novo]] = await pool.query('SELECT * FROM familiares WHERE id = ?', [r.insertId]);
+    res.status(201).json({ familiar: familiarPublico(novo) });
+  } catch (e) { next(e); }
+});
+
+app.patch('/api/familiares/:id', autenticar, async (req, res, next) => {
+  try {
+    const atual = await familiarDoCuidador(req);
+    const f = lerFamiliar(req.body || {}, atual);
+    await pool.query('UPDATE familiares SET nome = ?, parentesco = ?, telefone = ?, email = ?, avisar = ? WHERE id = ?',
+      [f.nome, f.parentesco, f.telefone || null, f.email || null, f.avisar ? 1 : 0, atual.id]);
+    const [[novo]] = await pool.query('SELECT * FROM familiares WHERE id = ?', [atual.id]);
+    res.json({ familiar: familiarPublico(novo) });
+  } catch (e) { next(e); }
+});
+
+app.delete('/api/familiares/:id', autenticar, async (req, res, next) => {
+  try {
+    const f = await familiarDoCuidador(req);
+    await pool.query('DELETE FROM familiares WHERE id = ?', [f.id]);
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
 /* ---- a pochete fala com o servidor ---- */
 app.post('/api/pochete/evento', autenticarPochete, async (req, res, next) => {
   try {
@@ -882,7 +1154,26 @@ app.get('/api/pochete/estado', autenticarPochete, async (req, res, next) => {
     await pool.query('UPDATE pochetes SET ultimo_contato = NOW() WHERE id = ?', [req.pochete.id]);
     const [linhas] = await pool.query('SELECT * FROM corridas WHERE pochete_id = ? AND status IN (?) ORDER BY id DESC LIMIT 1', [req.pochete.id, STATUS_ATIVOS]);
     const corrida = linhas[0] ? await sincronizarCorrida(linhas[0], req.cuidador.id) : null;
-    res.json({ pochete: pochetePublica(req.pochete), cuidador: req.cuidador.nome, corrida: corrida ? corridaPublica(corrida) : null });
+    // Mensagens do cuidador que a pessoa ainda não confirmou (das últimas 12 h)
+    const [recados] = await pool.query(
+      "SELECT * FROM recados WHERE pochete_id = ? AND status <> 'confirmado' AND criado_em > (NOW() - INTERVAL 12 HOUR) ORDER BY id LIMIT 5", [req.pochete.id]);
+    const novos = recados.filter(r => r.status === 'pendente').map(r => r.id);
+    if (novos.length) {
+      await pool.query("UPDATE recados SET status = 'entregue', entregue_em = NOW() WHERE id IN (?)", [novos]);
+      sse.publicar(req.cuidador.id, 'recado', { entregues: novos, nome_idoso: req.pochete.nome_idoso });
+    }
+    res.json({
+      pochete: pochetePublica(req.pochete), cuidador: req.cuidador.nome,
+      corrida: corrida ? corridaPublica(corrida) : null,
+      recados: recados.map(r => ({ id: r.id, texto: r.texto, audio: r.audio ?? null, criado_em: r.criado_em })),
+    });
+  } catch (e) { next(e); }
+});
+
+app.post('/api/pochete/recados/:id/confirmar', autenticarPochete, async (req, res, next) => {
+  try {
+    const r = await recadoDaPochete(req.pochete.id, req.params.id);
+    res.json({ recado: await confirmarRecado(r, req.pochete, req.cuidador) });
   } catch (e) { next(e); }
 });
 
@@ -983,8 +1274,10 @@ app.post('/api/corridas', autenticar, async (req, res, next) => {
     if (!(await uber.disponivel())) {
       // Modo link: nada é registrado porque ninguém aqui saberá o que
       // aconteceu depois — quem conclui o pedido é a pessoa, no app da Uber.
+      // endereço de casa que não foi achado no mapa vai como texto para o Uber
+      const enderecoDestino = !destino && !informado ? pochete?.casa_nome || null : null;
       const link = uber.linkUniversal({
-        origem, destino,
+        origem, destino, enderecoDestino,
         nomeOrigem: origem ? (pochete?.nome_idoso ? `Onde ${pochete.nome_idoso} está` : 'Partida') : null,
         nomeDestino: destino ? (destinoNome || 'Destino') : null,
       });
@@ -992,8 +1285,8 @@ app.post('/api/corridas', autenticar, async (req, res, next) => {
         modo: 'link',
         link,
         origem,
-        destino: destino ? { ...destino, nome: destinoNome } : null,
-        aviso: !destino
+        destino: destino ? { ...destino, nome: destinoNome } : (enderecoDestino ? { nome: enderecoDestino } : null),
+        aviso: !destino && !enderecoDestino
           ? 'Escolha o destino na tela do Uber. Para ele vir preenchido, cadastre o endereço de casa da pochete aqui no painel.'
           : null,
       });

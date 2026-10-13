@@ -10,6 +10,7 @@ import '../nucleo/sessao.dart';
 import '../nucleo/tema.dart';
 import '../widgets/comum.dart';
 import 'casca.dart';
+import 'painel_extras.dart';
 import 'relatorios.dart';
 
 /// Painel do cuidador: o mesmo do site (pages/painel.html + js/painel*.js).
@@ -46,6 +47,7 @@ class _TelaPainelState extends State<TelaPainel> {
   bool chamandoUber = false;
   Timer? _timer, _esperaTelegram;
   final _chatId = TextEditingController(); // chat_id do Telegram no modo simulado
+  final _chaveFamiliares = GlobalKey(); // "Ver familiares" rola até a seção
 
   @override
   void initState() {
@@ -151,9 +153,30 @@ class _TelaPainelState extends State<TelaPainel> {
     }
   }
 
-  void _acaoDemonstracao(String titulo, String feedback, IconData icone, Color cor) {
-    Avisos.i.mostrar(Aviso(tipo: 'acao', rotulo: titulo, titulo: feedback, icone: icone, cor: cor, duracao: const Duration(seconds: 6),
-        texto: 'Demonstração: esta ação ainda não fala com a pochete de verdade.'));
+  Map<String, dynamic>? _primeiraCom(String campo) => pochetes.where((p) => p[campo] != null).firstOrNull;
+
+  void _ligarIdoso() {
+    final p = _primeiraCom('telefone_idoso');
+    if (p != null) { abrirLink(context, linkLigar(p['telefone_idoso'] as String?)); return; }
+    _recado('teste', pochetes.isEmpty ? 'Vincule a pochete primeiro' : 'Falta o telefone',
+        pochetes.isEmpty ? 'O telefone dela é cadastrado junto com a pochete, em Pochete e avisos.' : 'Toque em "Editar" na pochete, em Pochete e avisos, e coloque o telefone dela.');
+  }
+
+  void _ondeEsta() {
+    final p = _primeiraCom('posicao');
+    final pos = p?['posicao'] as Map?;
+    if (pos != null) { abrirMapa(context, lat: (pos['lat'] as num).toDouble(), lng: (pos['lng'] as num).toDouble(), titulo: 'Onde está ${p!['nome_idoso']}'); return; }
+    _recado('teste', 'Sem posição ainda', 'A pochete manda a localização quando liga e a cada poucos minutos. Para testar agora, use "Localização" em Testar sem a pochete.');
+  }
+
+  void _mensagem() {
+    if (pochetes.isEmpty) { _recado('teste', 'Vincule a pochete primeiro', 'A mensagem vai para a pochete de quem você cuida.'); return; }
+    abrirMensagem(context, pochetes);
+  }
+
+  void _verFamiliares() {
+    final ctx = _chaveFamiliares.currentContext;
+    if (ctx != null) Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 450), curve: Curves.easeOutCubic);
   }
 
   /* ---------------- tela ---------------- */
@@ -176,6 +199,8 @@ class _TelaPainelState extends State<TelaPainel> {
         const TituloSecao('Ações rápidas'),
         const SizedBox(height: 14),
         _acoes(c),
+        const Respiro(32),
+        SecaoFamiliares(key: _chaveFamiliares),
         const Respiro(32),
         const TituloSecao('Pochete e avisos', apoio: 'Vincule a pochete de quem você cuida, escolha onde receber os avisos e teste os botões sem sair daqui.'),
         const SizedBox(height: 14),
@@ -284,11 +309,11 @@ class _TelaPainelState extends State<TelaPainel> {
   Widget _acoes(EloCores c) {
     final acoes = [
       _Acao(Icons.local_taxi_rounded, c.teal, 'Chamar Uber', chamandoUber ? 'Falando com a Uber…' : 'Carro até o destino', chamandoUber ? null : _chamarUber),
-      _Acao(Icons.call_rounded, c.green, 'Ligar para idoso', 'Iniciar chamada', () => _acaoDemonstracao('Ligar para idoso', 'Chamando pela pochete', Icons.call_rounded, c.green)),
-      _Acao(Icons.chat_rounded, c.blue2, 'Enviar mensagem', 'Mandar mensagem', () => _acaoDemonstracao('Enviar mensagem', 'Mensagem enviada. Ela será lida em voz pela pochete', Icons.chat_rounded, c.blue2)),
+      _Acao(Icons.call_rounded, c.green, 'Ligar para idoso', _primeiraCom('telefone_idoso') != null ? 'Para ${chamarPeloNome(_primeiraCom('telefone_idoso')!['nome_idoso'] as String?)}' : 'Telefone dela', _ligarIdoso),
+      _Acao(Icons.chat_rounded, c.blue2, 'Enviar mensagem', 'Toca na pochete', _mensagem),
       _Acao(Icons.notification_important_rounded, c.red, 'Ligar 192', 'SAMU, se for preciso', () => abrirLink(context, 'tel:192')),
-      _Acao(Icons.mic_rounded, c.purple, 'Comando de voz', 'Enviar comando', () => _acaoDemonstracao('Comando de voz', 'Comando de voz enviado à pochete', Icons.mic_rounded, c.purple)),
-      _Acao(Icons.groups_rounded, c.orange, 'Ver familiares', 'Gerenciar acessos', () => _acaoDemonstracao('Ver familiares', '3 familiares com acesso ao painel', Icons.groups_rounded, c.orange)),
+      _Acao(Icons.place_rounded, c.purple, 'Onde está agora', _primeiraCom('posicao') != null ? 'Última posição' : 'Sem posição ainda', _ondeEsta),
+      _Acao(Icons.groups_rounded, c.orange, 'Ver familiares', 'Cadastrar e ligar', _verFamiliares),
     ];
     return LayoutBuilder(builder: (context, lim) {
       final col = lim.maxWidth > 620 ? 3 : 2;
@@ -312,10 +337,13 @@ class _TelaPainelState extends State<TelaPainel> {
           Text([
             if (p['bateria'] != null) 'Bateria ${p['bateria']}%',
             p['ultimo_contato'] != null ? 'Último contato ${_hora(p['ultimo_contato'])}' : 'Ainda não falou com o servidor',
-            p['casa'] != null ? 'Casa: ${(p['casa'] as Map)['nome'] ?? 'cadastrada'}' : 'Sem endereço de casa',
           ].join(' · '), style: TextStyle(color: c.text3, fontSize: 13)),
+          Text(p['endereco'] != null ? 'Casa: ${p['endereco']}' : 'Sem endereço de casa', style: TextStyle(color: c.text3, fontSize: 13)),
+          if (p['endereco'] != null && p['casa'] == null)
+            Text('Não achei no mapa: confira o número e a cidade.', style: TextStyle(color: c.orange, fontSize: 12.5)),
           const SizedBox(height: 8),
-          Wrap(spacing: 8, children: [
+          Wrap(spacing: 8, runSpacing: 8, children: [
+            BotaoContorno(texto: 'Editar', compacto: true, aoTocar: () async { if (await editarPochete(context, p)) await _carregar(); }),
             BotaoContorno(texto: 'Nova chave', compacto: true, aoTocar: () => _novaChave(p)),
             BotaoContorno(texto: 'Desvincular', compacto: true, cor: c.red, aoTocar: () => _desvincular(p)),
           ]),
@@ -587,23 +615,20 @@ class _FormVincular extends StatefulWidget {
 class _FormVincularState extends State<_FormVincular> {
   final _nome = TextEditingController();
   final _telefone = TextEditingController();
-  final _casaNome = TextEditingController(text: 'Casa');
-  final _lat = TextEditingController();
-  final _lng = TextEditingController();
+  final _endereco = TextEditingController();
   bool _enviando = false;
   String? _erro;
 
   Future<void> _enviar() async {
     final nome = _nome.text.trim();
     if (nome.length < 2) { setState(() => _erro = 'Digite o nome de quem vai usar.'); return; }
-    final lat = double.tryParse(_lat.text.trim().replaceAll(',', '.'));
-    final lng = double.tryParse(_lng.text.trim().replaceAll(',', '.'));
+    final endereco = _endereco.text.trim();
     setState(() { _enviando = true; _erro = null; });
     try {
       final r = await Api.chamar('pochetes', metodo: 'POST', corpo: {
         'nome_idoso': nome,
         'telefone_idoso': _telefone.text.trim().isEmpty ? null : _telefone.text.trim(),
-        if (lat != null && lng != null) 'casa': {'lat': lat, 'lng': lng, 'nome': _casaNome.text.trim().isEmpty ? 'Casa' : _casaNome.text.trim()},
+        if (endereco.isNotEmpty) 'casa': {'endereco': endereco},
       });
       if (mounted) Navigator.pop(context, r['chave'] as String?);
     } on ErroApi catch (e) {
@@ -626,17 +651,9 @@ class _FormVincularState extends State<_FormVincular> {
           const SizedBox(height: 12),
           TextField(controller: _telefone, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Telefone dela (para o motorista)')),
           const SizedBox(height: 16),
-          const Text('Endereço de casa', style: TextStyle(fontWeight: FontWeight.w700)),
+          TextField(controller: _endereco, keyboardType: TextInputType.streetAddress, decoration: const InputDecoration(labelText: 'Endereço de casa', hintText: 'Rua das Flores, 123, Jardim Paulista, São Paulo')),
           const SizedBox(height: 8),
-          TextField(controller: _casaNome, decoration: const InputDecoration(labelText: 'Nome do lugar')),
-          const SizedBox(height: 10),
-          Row(children: [
-            Expanded(child: TextField(controller: _lat, keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true), decoration: const InputDecoration(labelText: 'Latitude'))),
-            const SizedBox(width: 10),
-            Expanded(child: TextField(controller: _lng, keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true), decoration: const InputDecoration(labelText: 'Longitude'))),
-          ]),
-          const SizedBox(height: 8),
-          Text('Casa é o destino padrão quando o botão de transporte é apertado. Pegue as coordenadas no Google Maps (toque e segure no lugar).', style: TextStyle(color: c.text3, fontSize: 13)),
+          Text('Rua, número, bairro e cidade, do jeito que você escreveria numa carta. É o destino quando o botão amarelo pede um carro; o mapa é achado sozinho.', style: TextStyle(color: c.text3, fontSize: 13)),
           const SizedBox(height: 16),
           BotaoMarca(texto: 'Vincular pochete', carregando: _enviando, aoTocar: _enviar, expandir: true),
           if (_erro != null) StatusFormulario(texto: _erro!, ok: false),

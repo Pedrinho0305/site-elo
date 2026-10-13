@@ -38,6 +38,8 @@
   --purple: #a78bfa;
   --teal: #2dd4bf;
   --ink-on-brand: #05101f;
+  /* fundo de QR Code: claro nos dois temas, é o que a câmera do celular lê melhor */
+  --papel: #ffffff;
 
   --grad-brand: linear-gradient(100deg, #22c55e 0%, #22d3ee 52%, #2f7ff7 100%);
   --grad-panel: linear-gradient(160deg, #122051 0%, #08122f 100%);
@@ -834,7 +836,20 @@ footer p:last-child { color: var(--text-3); justify-self: end; }
   background: var(--bg);
 }
 
+/* Janela "Ligar" (computador): número grande, QR Code para o celular e saídas */
+.ligar-janela { width: min(520px, calc(100vw - 2rem)); }
+.ligar-numero { margin-top: .2rem; font-family: var(--font-display); font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 600; letter-spacing: -.01em; font-variant-numeric: tabular-nums; color: var(--text); }
+.ligar-corpo { display: grid; grid-template-columns: 168px 1fr; gap: 1.1rem; align-items: center; margin-top: 1rem; }
+/* o QR fica sempre em fundo claro: é o que as câmeras leem melhor, nos dois temas */
+.ligar-qr { width: 168px; aspect-ratio: 1; padding: 6px; border-radius: var(--r-md); background: var(--papel); border: 1px solid var(--line); display: grid; place-items: center; color: var(--ink-on-brand); font-weight: 700; }
+.ligar-qr svg { width: 100%; height: 100%; display: block; }
+.ligar-texto p { color: var(--text-2); font-size: .95rem; line-height: 1.5; }
+.ligar-texto .ligar-nota { margin-top: .6rem; color: var(--text-3); font-size: .86rem; }
+.ligar-janela .aviso-acoes { margin-top: 1.1rem; }
+.ligar-janela [hidden] { display: none; }
+
 @media (max-width: 560px) {
+  .ligar-corpo { grid-template-columns: 1fr; justify-items: center; text-align: center; }
   .avisos { right: .75rem; left: .75rem; bottom: .75rem; width: auto; }
   .aviso-mapa { height: 110px; }
   /* no celular o mapa fica só na emergência; os outros têm "Abrir no mapa" */

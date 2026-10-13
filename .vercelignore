@@ -14,3 +14,4 @@ backend/README.md
 backend/.env.example
 api/.env.example
 api/README.md
+firmware

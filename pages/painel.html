@@ -5,14 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel do cuidador - ELO</title>
     <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/header.css?v=8">
-    <link rel="stylesheet" href="../css/painel.css?v=9">
+    <link rel="stylesheet" href="../css/header.css?v=9">
+    <link rel="stylesheet" href="../css/painel.css?v=10">
     <link rel="stylesheet" href="../css/reveal.css?v=7">
     <script src="../js/header.js" defer></script>
     <script src="../js/avisos.js" defer></script>
     <script src="../js/reveal.js" defer></script>
     <script src="../js/painel.js" defer></script>
     <script src="../js/painel-pochete.js" defer></script>
+    <script src="../js/painel-familia.js" defer></script>
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 </head>
 <body class="app-page">
@@ -107,37 +108,121 @@
                     <span class="action-note" id="acaoUberNota">Carro até o destino</span>
                 </button>
 
-                <button type="button" class="action action--green" data-feedback="Chamando o Sr. Antônio pela pochete">
+                <!-- Ligar para idoso, Enviar mensagem e Onde está: painel-pochete.js.
+                     Ligar (aqui e no 192) abre o discador no celular e, no
+                     computador, a janela com QR Code de avisos.js. -->
+                <button type="button" class="action action--green" id="acaoLigarIdoso">
                     <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h3.5l1.7 4.3-2.2 1.4a11 11 0 0 0 6.3 6.3l1.4-2.2L20 15.5V19a1.5 1.5 0 0 1-1.6 1.5C10.4 20 4 13.6 3.5 5.6A1.5 1.5 0 0 1 5 4Z"/></svg></span>
                     <span class="action-title">Ligar para idoso</span>
-                    <span class="action-note">Iniciar chamada</span>
+                    <span class="action-note" id="acaoLigarIdosoNota">Telefone dela</span>
                 </button>
 
-                <button type="button" class="action action--blue" data-feedback="Mensagem enviada. Ela será lida em voz pela pochete">
+                <button type="button" class="action action--blue" id="acaoMensagem">
                     <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 3.5V16A2.5 2.5 0 0 1 4 13.5v-7Z"/><path d="M8.5 9h7M8.5 12h4"/></svg></span>
                     <span class="action-title">Enviar mensagem</span>
-                    <span class="action-note">Mandar mensagem</span>
+                    <span class="action-note">Toca na pochete</span>
                 </button>
 
-                <a class="action action--red" href="tel:192" aria-label="Ligar 192, SAMU">
+                <a class="action action--red" href="tel:192" data-ligar-nome="SAMU" aria-label="Ligar 192, SAMU">
                     <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.8a7.2 7.2 0 0 1 7.2 7.2v4.6l1.7 2.9a1 1 0 0 1-.9 1.5H4a1 1 0 0 1-.9-1.5l1.7-2.9V11A7.2 7.2 0 0 1 12 3.8Z"/><path d="M12 8v4M12 15h.01"/></svg></span>
                     <span class="action-title">Ligar 192</span>
                     <span class="action-note">SAMU, se for preciso</span>
                 </a>
 
-                <button type="button" class="action action--purple" data-feedback="Comando de voz enviado à pochete">
-                    <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5a4 4 0 0 1 4 4v4a4 4 0 0 1-8 0v-4a4 4 0 0 1 4-4Z"/><path d="M6 11.5a6 6 0 0 0 12 0"/><path d="M12 17.5v3"/></svg></span>
-                    <span class="action-title">Comando de voz</span>
-                    <span class="action-note">Enviar comando</span>
+                <button type="button" class="action action--purple" id="acaoOnde">
+                    <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-10a6 6 0 0 0-12 0c0 4.8 6 10 6 10Z"/><circle cx="12" cy="11" r="2.2"/></svg></span>
+                    <span class="action-title">Onde está agora</span>
+                    <span class="action-note" id="acaoOndeNota">Última posição</span>
                 </button>
 
-                <button type="button" class="action action--orange" data-feedback="3 familiares com acesso ao painel">
+                <a class="action action--orange" href="#familiares">
                     <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15 5.5a3 3 0 0 1 0 5.8M17 14a5.5 5.5 0 0 1 3.5 5"/></svg></span>
                     <span class="action-title">Ver familiares</span>
-                    <span class="action-note">Gerenciar acessos</span>
-                </button>
+                    <span class="action-note" id="acaoFamiliaNota">Cadastrar e ligar</span>
+                </a>
             </div>
             <p class="action-status" id="actionStatus" role="status" aria-live="polite"></p>
+        </section>
+
+        <!-- Mensagem para a pochete: as prontas tocam um áudio gravado nela;
+             a pessoa aperta qualquer botão e o painel mostra "ouviu". -->
+        <dialog class="mapa-janela recado-janela" id="recadoJanela" aria-labelledby="recadoTitulo">
+            <div class="mapa-janela-topo">
+                <div>
+                    <h2 class="mapa-janela-titulo" id="recadoTitulo">Mensagem para a pochete</h2>
+                    <p class="mapa-janela-coord" id="recadoPara"></p>
+                </div>
+                <button type="button" class="aviso-fechar" data-fechar aria-label="Fechar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+            </div>
+            <form class="recado-form" id="recadoForm" novalidate>
+                <div class="form-field" id="recadoPocheteCampo" hidden>
+                    <label for="recadoPochete">Para quem</label>
+                    <select id="recadoPochete" class="campo-select"></select>
+                </div>
+                <fieldset class="recado-prontos">
+                    <legend>Mensagens prontas <span class="muted">(tocam com a voz gravada na pochete)</span></legend>
+                    <div class="recado-chips" id="recadoProntos"></div>
+                </fieldset>
+                <div class="form-field">
+                    <label for="recadoTexto">Ou escreva <span class="muted" id="recadoConta">0/160</span></label>
+                    <textarea id="recadoTexto" rows="2" maxlength="160" placeholder="Ex.: Chego às 18h para o jantar."></textarea>
+                    <p class="muted">Texto escrito faz a pochete tocar o aviso de mensagem nova e piscar o anel azul. A pessoa aperta qualquer botão para dizer que ouviu.</p>
+                </div>
+                <button type="submit" class="btn btn-green">Enviar para a pochete</button>
+                <p class="action-status" id="recadoStatus" role="status" aria-live="polite"></p>
+            </form>
+            <h3 class="recado-historico-titulo">Enviadas</h3>
+            <ul class="recado-lista" id="recadoLista"><li class="muted">Nenhuma mensagem ainda.</li></ul>
+        </dialog>
+
+        <!-- Familiares: quem mais acompanha a pessoa. Dá para ligar daqui e,
+             com e-mail, receber aviso quando o botão vermelho for apertado. -->
+        <section class="familia-section" id="familiares">
+            <h2>Familiares</h2>
+            <p class="section-lead">Cadastre quem mais acompanha a pessoa. Você liga para qualquer um daqui, e quem tiver e-mail pode ser avisado na hora de uma emergência.</p>
+
+            <div class="familia-grid">
+                <div class="panel">
+                    <h3>Cadastrados <span class="muted" id="familiaConta"></span></h3>
+                    <ul class="familia-lista" id="familiaLista"><li class="muted">Carregando</li></ul>
+                </div>
+
+                <form class="panel familia-form" id="familiaForm" novalidate>
+                    <h3 id="familiaFormTitulo">Cadastrar familiar</h3>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="fNome">Nome</label>
+                            <input type="text" id="fNome" autocomplete="off" placeholder="Maria Souza" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="fParentesco">Parentesco</label>
+                            <select id="fParentesco" class="campo-select">
+                                <option>Filho(a)</option><option>Neto(a)</option><option>Cônjuge</option><option>Irmão(ã)</option><option>Sobrinho(a)</option>
+                                <option>Genro ou nora</option><option>Vizinho(a)</option><option>Amigo(a)</option><option>Cuidador(a)</option><option>Outro</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="fTelefone">Telefone com DDD</label>
+                            <input type="tel" id="fTelefone" autocomplete="off" placeholder="(11) 99999-0000">
+                        </div>
+                        <div class="form-field">
+                            <label for="fEmail">E-mail</label>
+                            <input type="email" id="fEmail" autocomplete="off" placeholder="maria@email.com">
+                        </div>
+                    </div>
+                    <label class="check">
+                        <input type="checkbox" id="fAvisar">
+                        <span>Avisar por e-mail quando o botão vermelho for apertado</span>
+                    </label>
+                    <div class="familia-form-acoes">
+                        <button type="submit" class="btn btn-green" id="familiaSalvar">Cadastrar</button>
+                        <button type="button" class="btn btn-outline" id="familiaCancelar" hidden>Cancelar edição</button>
+                    </div>
+                    <p class="action-status" id="familiaStatus" role="status" aria-live="polite"></p>
+                </form>
+            </div>
         </section>
 
         <!-- Pochete e avisos: vínculo do dispositivo, Telegram e simulação -->
@@ -162,21 +247,11 @@
                                 <input type="tel" id="pTelefone" placeholder="+55 11 99999-0000">
                             </div>
                         </div>
-                        <div class="form-row form-row--3">
-                            <div class="form-field">
-                                <label for="pCasaNome">Endereço de casa</label>
-                                <input type="text" id="pCasaNome" placeholder="Rua das Flores, 123" value="Casa">
-                            </div>
-                            <div class="form-field">
-                                <label for="pCasaLat">Latitude</label>
-                                <input type="text" id="pCasaLat" placeholder="-23.5505" inputmode="decimal">
-                            </div>
-                            <div class="form-field">
-                                <label for="pCasaLng">Longitude</label>
-                                <input type="text" id="pCasaLng" placeholder="-46.6333" inputmode="decimal">
-                            </div>
+                        <div class="form-field">
+                            <label for="pEndereco">Endereço de casa</label>
+                            <input type="text" id="pEndereco" autocomplete="street-address" placeholder="Rua das Flores, 123, Jardim Paulista, São Paulo">
                         </div>
-                        <p class="muted">Casa é o destino padrão quando o botão de transporte é apertado. Pegue as coordenadas no Google Maps (clique com o botão direito no lugar) ou <button type="button" class="link-btn" id="pUsarLocal">use a minha localização</button>.</p>
+                        <p class="muted">Rua, número, bairro e cidade, do jeito que você escreveria numa carta. É o destino quando o botão amarelo pede um carro; o mapa é achado sozinho.</p>
                         <button type="submit" class="btn btn-green">Vincular pochete</button>
                         <p class="action-status" id="pocheteStatus" role="status" aria-live="polite"></p>
                     </form>

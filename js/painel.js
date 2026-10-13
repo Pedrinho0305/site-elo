@@ -1,4 +1,4 @@
-// Painel do cuidador: saudação, ações rápidas e "Meu perfil". A parte que
+// Painel do cuidador: saudação e "Meu perfil". A parte que
 // fala com a pochete e o servidor está em painel-pochete.js.
 document.addEventListener('DOMContentLoaded', () => {
   // Sem sessão (login no backend), o painel não faz sentido: volta para o login
@@ -8,38 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const greeting = document.getElementById('greetingName');
   if (greeting) greeting.textContent = session.nome.split(' ')[0];
 
-  const status = document.getElementById('actionStatus');
-  let timer;
-
-  // cada ação rápida também vira card, com a cor e o ícone do próprio botão
-  const COR_DA_ACAO = { green: 'var(--green)', blue: 'var(--blue-2)', red: 'var(--red)', purple: 'var(--purple)', orange: 'var(--orange)', teal: 'var(--teal)' };
-  const cardDaAcao = button => {
-    const cor = [...button.classList].find(c => c.startsWith('action--'))?.slice(8);
-    window.EloAvisos?.mostrar({
-      tipo: 'acao', cor: COR_DA_ACAO[cor] || 'var(--cyan)',
-      icone: button.querySelector('.action-icon svg')?.innerHTML,
-      rotulo: button.querySelector('.action-title')?.textContent,
-      titulo: button.dataset.feedback,
-      texto: 'Demonstração: esta ação ainda não fala com a pochete de verdade.',
-      duracao: 6000,
-    });
-  };
-
-  document.querySelectorAll('.action[data-feedback]').forEach(button => {
-    button.addEventListener('click', () => {
-      cardDaAcao(button);
-      document.querySelectorAll('.action.is-active').forEach(b => b.classList.remove('is-active'));
-      button.classList.add('is-active');
-      if (!status) return;
-      status.textContent = button.dataset.feedback;
-      status.classList.add('is-visible');
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        status.classList.remove('is-visible');
-        button.classList.remove('is-active');
-      }, 4000);
-    });
-  });
+  // As ações rápidas (Uber, ligar, mensagem, onde está) são todas reais e
+  // ficam em painel-pochete.js; familiares em painel-familia.js.
 
   /* ---- Meu perfil ---- */
   const avatar = document.getElementById('perfilAvatar');

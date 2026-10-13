@@ -784,7 +784,92 @@ a.action { text-decoration: none; }
 #simularPanel.is-disabled .simular-grid { opacity: .5; }
 
 
+/* Endereço e telefone editados direto na lista de pochetes */
+.pochete-item > div:first-child { min-width: 0; flex: 1 1 260px; }
+.pochete-endereco { overflow-wrap: anywhere; }
+.aviso-endereco { font-style: normal; color: var(--orange); }
+.endereco-form { flex: 1 1 100%; display: grid; gap: .55rem; padding-top: .8rem; border-top: 1px solid var(--line); }
+.endereco-campos { display: grid; grid-template-columns: 1.6fr 1fr; gap: .7rem; }
+.endereco-form .form-field { display: grid; gap: .3rem; }
+.endereco-form label { font-weight: 600; font-size: .85rem; }
+.endereco-linha { display: flex; flex-wrap: wrap; gap: .5rem; }
+.endereco-linha .btn { min-height: 44px; padding-inline: 1rem; font-size: .88rem; }
+
+/* Campos compartilhados por familiares, mensagem e edição da pochete */
+.familia-form input, .recado-form textarea, .campo-select, .endereco-form input {
+  width: 100%; min-height: 46px; padding: .7rem .95rem; border-radius: var(--r-md);
+  background: var(--bg-2); border: 1px solid var(--line-2); color: var(--text); font: inherit; font-size: .95rem;
+}
+.recado-form textarea { resize: vertical; min-height: 76px; line-height: 1.45; }
+.campo-select { appearance: none; padding-right: 2.4rem; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-3) 50%), linear-gradient(135deg, var(--text-3) 50%, transparent 50%);
+  background-position: calc(100% - 1.15rem) 52%, calc(100% - .8rem) 52%; background-size: 6px 6px; background-repeat: no-repeat; }
+:is(.familia-form input, .recado-form textarea, .campo-select, .endereco-form input):focus { outline: 0; border-color: var(--cyan); box-shadow: 0 0 0 4px color-mix(in srgb, var(--cyan) 22%, transparent); }
+
+/* --------------------------------------------------------------------------
+   8 · Familiares
+   -------------------------------------------------------------------------- */
+.familia-section { margin-top: clamp(2.5rem, 5vw, 3.5rem); scroll-margin-top: 6rem; }
+.familia-section h2 { font-size: clamp(1.4rem, 2.6vw, 1.9rem); }
+.familia-grid { margin-top: 1.3rem; display: grid; grid-template-columns: 1.15fr 1fr; gap: 1rem; align-items: start; }
+.familia-grid h3 .muted { font-weight: 500; font-size: .85rem; margin-left: .3rem; }
+
+.familia-lista { margin-top: .9rem; display: grid; gap: .55rem; list-style: none; padding: 0; }
+.familia-item { display: grid; grid-template-columns: auto 1fr auto; gap: .9rem; align-items: center; padding: .85rem 1rem; border-radius: var(--r-md); background: var(--bg-2); border: 1px solid var(--line); }
+.familia-avatar { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: .9rem;
+  color: var(--orange); background: color-mix(in srgb, var(--orange) 14%, transparent); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--orange) 40%, transparent); }
+.familia-dados { min-width: 0; display: grid; gap: .1rem; }
+.familia-dados .muted { font-size: .86rem; overflow-wrap: anywhere; }
+.familia-selo { justify-self: start; margin-top: .3rem; padding: .18rem .6rem; border-radius: var(--r-pill); font-size: .78rem; font-weight: 600;
+  color: var(--red); background: color-mix(in srgb, var(--red) 10%, transparent); border: 1px solid color-mix(in srgb, var(--red) 35%, transparent); }
+.familia-acoes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .4rem; }
+.familia-acoes .btn { min-height: 40px; padding-inline: .9rem; font-size: .85rem; }
+.familia-vazio { padding: 1.1rem 1rem; border-radius: var(--r-md); border: 1px dashed var(--line-2); }
+.familia-vazio p:first-child { font-weight: 600; }
+.familia-vazio .muted { margin-top: .25rem; }
+
+.familia-form { display: grid; gap: .9rem; }
+.familia-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+.familia-form .form-field { display: grid; gap: .35rem; }
+.familia-form label { font-weight: 600; font-size: .88rem; }
+.familia-form .check { display: flex; align-items: flex-start; gap: .6rem; font-weight: 500; font-size: .92rem; color: var(--text-2); cursor: pointer; }
+.familia-form .check input { width: 20px; min-height: 20px; height: 20px; margin-top: .1rem; padding: 0; accent-color: var(--green); flex: none; }
+.familia-form-acoes { display: flex; flex-wrap: wrap; gap: .6rem; }
+.familia-form [hidden], .recado-form [hidden] { display: none; }
+.familia-form-acoes .btn { min-height: 48px; }
+.familia-form .action-status { margin-top: 0; }
+.action-status.is-ok { color: var(--green-2); }
+
+/* --------------------------------------------------------------------------
+   9 · Mensagem para a pochete (janela)
+   -------------------------------------------------------------------------- */
+.recado-janela { width: min(560px, calc(100vw - 2rem)); overflow-y: auto; }
+.recado-form { margin-top: 1rem; display: grid; gap: .9rem; }
+.recado-form .form-field { display: grid; gap: .35rem; }
+.recado-form label, .recado-prontos legend { font-weight: 600; font-size: .9rem; }
+.recado-prontos { border: 0; padding: 0; margin: 0; }
+.recado-prontos legend .muted, .recado-form label .muted { font-weight: 500; font-size: .82rem; }
+.recado-chips { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .5rem; }
+.recado-chip { padding: .5rem .85rem; border-radius: var(--r-pill); border: 1px solid var(--line-2); background: var(--bg-2); color: var(--text); font: inherit; font-size: .88rem; cursor: pointer; transition: border-color .2s, background-color .2s; }
+.recado-chip:hover, .recado-chip:focus-visible { border-color: var(--blue-2); background: color-mix(in srgb, var(--blue-2) 10%, var(--bg-2)); }
+.recado-form .btn { justify-self: start; min-height: 48px; }
+.recado-form .action-status { margin-top: 0; }
+.recado-historico-titulo { margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--line); font-family: var(--font-text); font-size: 1rem; font-weight: 700; letter-spacing: 0; }
+.recado-lista { list-style: none; padding: 0; margin-top: .6rem; display: grid; gap: .45rem; }
+.recado-item { padding: .65rem .85rem; border-radius: var(--r-sm); background: var(--bg-2); border: 1px solid var(--line); border-left: 3px solid var(--text-3); }
+.recado-item p { font-weight: 600; }
+.recado-item .muted { font-size: .84rem; }
+.recado-item .link-btn { display: block; margin-top: .2rem; font-size: .82rem; }
+.recado-item--entregue { border-left-color: var(--blue-2); }
+.recado-item--confirmado { border-left-color: var(--green); }
+
 @media (max-width: 1080px) { .pochete-grid { grid-template-columns: 1fr 1fr; } #pochetePanel { grid-column: 1 / -1; } }
+@media (max-width: 1180px) { .familia-grid { grid-template-columns: 1fr; } }
+@media (max-width: 560px) {
+  .familia-item { grid-template-columns: auto 1fr; }
+  .familia-acoes { grid-column: 1 / -1; justify-content: flex-start; }
+  .familia-form .form-row, .endereco-campos { grid-template-columns: 1fr; }
+}
 @media (max-width: 700px) {
   .pochete-grid, .pochete-form .form-row, .pochete-form .form-row--3, .simular-grid { grid-template-columns: 1fr; }
   .ride-actions .btn { flex: 1 1 100%; }

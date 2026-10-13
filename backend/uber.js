@@ -217,7 +217,7 @@ export async function cancelar(requestId) {
    Sem coordenada de partida, "pickup=my_location" deixa o próprio app
    resolver onde a pessoa está.
    ------------------------------------------------------------------------ */
-export function linkUniversal({ origem, destino, nomeOrigem, nomeDestino } = {}) {
+export function linkUniversal({ origem, destino, nomeOrigem, nomeDestino, enderecoDestino } = {}) {
   const p = new URLSearchParams({ action: 'setPickup' });
   if (config.clientId) p.set('client_id', config.clientId);
 
@@ -233,6 +233,9 @@ export function linkUniversal({ origem, destino, nomeOrigem, nomeDestino } = {})
     p.set('dropoff[latitude]', String(destino.lat));
     p.set('dropoff[longitude]', String(destino.lng));
     if (nomeDestino) p.set('dropoff[nickname]', nomeDestino);
+  } else if (enderecoDestino) {
+    // sem coordenadas: o Uber procura o endereço escrito
+    p.set('dropoff[formatted_address]', enderecoDestino);
   }
 
   return `https://m.uber.com/ul/?${p}`;

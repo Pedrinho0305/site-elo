@@ -1,13 +1,17 @@
 /* ==========================================================================
    Painel · Pochete ao vivo
    ---------------------------------------------------------------------------
-   Só funciona com sessão do backend (token). Faz quatro coisas:
+   Só funciona com sessão do backend (token). Faz estas coisas:
      1. ouve GET /api/eventos/stream (SSE) e mostra cada aviso na hora:
         toast, tile "Último alerta", bateria e localização; se o servidor
         não tem stream (serverless, como na Vercel), consulta a cada 10 s;
      2. mostra a corrida pendente com Aprovar / Recusar e acompanha o status;
-     3. vincula pochetes (gera a chave) e o Telegram;
-     4. simula os botões da pochete para testar.
+     3. vincula pochetes (gera a chave, endereço de casa por texto) e o Telegram;
+     4. simula os botões da pochete para testar;
+     5. ações rápidas: ligar para a pessoa (discador no celular, janela com
+        QR Code no computador, via EloAvisos.ligar), mensagem para a pochete
+        (POST /api/pochetes/:id/recados) e onde ela está agora.
+   Familiares ficam em painel-familia.js.
    Sem token (sessão antiga, sem login no servidor), a seção explica e para por aqui.
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
@@ -254,6 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const [titulo] = STATUS[corrida.status] || [corrida.status];
       if (['a_caminho', 'em_andamento', 'concluida', 'sem_motorista', 'erro'].includes(corrida.status)) toast('corrida', titulo, corrida.motorista || corrida.erro || '');
     });
+    fonte.addEventListener('recado', e => recadoMudou(JSON.parse(e.data).dados));
     fonte.addEventListener('telegram', () => { telegram.vinculado = true; renderTelegram(); toast('telegram', 'Telegram vinculado', 'Os avisos vão chegar lá também.'); });
     fonte.onerror = () => {
       // Queda de rede: o EventSource reconecta sozinho. Fechado de vez (o
@@ -288,6 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
         avisos?.chegaram(eventos);
         await carregarPochetes();
         await carregarCorridas();
+        await conferirRecados();
       } catch (e) { console.warn('consulta', e.message); }
     };
     tique();
@@ -304,9 +310,11 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pochete-item" data-id="${num(p.id)}">
         <div>
           <strong>${esc(p.nome_idoso)}</strong>
-          <span class="muted">${p.bateria != null ? `Bateria ${num(p.bateria)}% · ` : ''}${p.ultimo_contato ? 'Último contato ' + hora(p.ultimo_contato) : 'Ainda não falou com o servidor'}${p.casa ? ' · Casa: ' + esc(p.casa.nome || 'cadastrada') : ' · Sem endereço de casa'}</span>
+          <span class="muted">${p.bateria != null ? `Bateria ${num(p.bateria)}% · ` : ''}${p.ultimo_contato ? 'Último contato ' + hora(p.ultimo_contato) : 'Ainda não falou com o servidor'}</span>
+          <span class="muted pochete-endereco">${p.endereco ? 'Casa: ' + esc(p.endereco) + (p.casa ? '' : ' <em class="aviso-endereco">(não achei no mapa: confira o número e a cidade)</em>') : 'Sem endereço de casa'}</span>
         </div>
         <div class="pochete-item-actions">
+          <button type="button" class="btn btn-outline" data-acao="editar">Editar</button>
           <button type="button" class="btn btn-outline" data-acao="chave">Nova chave</button>
           <button type="button" class="btn btn-outline btn-danger" data-acao="apagar">Desvincular</button>
         </div>
@@ -315,6 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lista.querySelectorAll('[data-acao]').forEach(b => b.addEventListener('click', async () => {
       const id = Number(b.closest('.pochete-item').dataset.id);
       try {
+        if (b.dataset.acao === 'editar') { editarPochete(b.closest('.pochete-item'), pochetes.find(x => x.id === id)); return; }
         if (b.dataset.acao === 'chave') {
           if (!confirm('Gerar uma chave nova? A antiga para de funcionar na hora.')) return;
           const { chave } = await api(`pochetes/${id}/chave`, { method: 'POST' });
@@ -328,6 +337,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
   }
 
+  // Endereço de casa e telefone direto na lista: dois campos, salvar, pronto
+  function editarPochete(item, p) {
+    if (!p || item.querySelector('.endereco-form')) return;
+    const form = document.createElement('form');
+    form.className = 'endereco-form';
+    form.innerHTML = `
+      <div class="endereco-campos">
+        <div class="form-field">
+          <label for="endereco-${num(p.id)}">Endereço de casa</label>
+          <input type="text" id="endereco-${num(p.id)}" autocomplete="street-address" placeholder="Rua das Flores, 123, Jardim Paulista, São Paulo">
+        </div>
+        <div class="form-field">
+          <label for="telefone-${num(p.id)}">Telefone dela</label>
+          <input type="tel" id="telefone-${num(p.id)}" placeholder="(11) 99999-0000">
+        </div>
+      </div>
+      <div class="endereco-linha">
+        <button type="submit" class="btn btn-green">Salvar</button>
+        <button type="button" class="btn btn-outline" data-cancelar>Cancelar</button>
+      </div>
+      <p class="muted" role="status"></p>`;
+    const campo = form.querySelector(`#endereco-${num(p.id)}`);
+    const telefone = form.querySelector(`#telefone-${num(p.id)}`);
+    campo.value = p.endereco || '';
+    telefone.value = p.telefone_idoso || '';
+    form.querySelector('[data-cancelar]').addEventListener('click', () => form.remove());
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const aviso = form.querySelector('[role="status"]');
+      const botao = form.querySelector('[type="submit"]');
+      const endereco = campo.value.trim();
+      const mudouEndereco = endereco !== (p.endereco || '');
+      botao.disabled = true; aviso.textContent = mudouEndereco && endereco ? 'Procurando o endereço no mapa…' : 'Salvando…';
+      try {
+        const { pochete } = await api(`pochetes/${p.id}`, { method: 'PATCH', body: {
+          telefone_idoso: telefone.value.trim() || null,
+          ...(mudouEndereco ? { casa: endereco ? { endereco } : null } : {}),
+        } });
+        const semMapa = pochete.endereco && !pochete.casa;
+        toast('teste', semMapa ? 'Salvo, mas não achei o endereço no mapa' : 'Pochete atualizada',
+          semMapa ? 'O Uber vai receber o endereço escrito. Se puder, confira o número e a cidade.' : 'O endereço é o destino quando o botão amarelo pede um carro.');
+        await carregarPochetes();
+      } catch (err) { aviso.textContent = err.message; botao.disabled = false; }
+    });
+    item.append(form);
+    campo.focus();
+  }
+
   function mostrarChave(chave) {
     $('keyValue').textContent = chave;
     $('keyBox').hidden = false;
@@ -338,6 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       ({ pochetes } = await api('pochetes'));
       renderPochetes();
+      atualizarAcoes();
       if (pochetes[0]) atualizarTiles({ ...pochetes[0], nome_idoso: pochetes[0].nome_idoso });
       $('simularPanel').classList.toggle('is-disabled', !pochetes.length);
     } catch (e) { $('pocheteLista').innerHTML = `<p class="muted">${esc(e.message)}</p>`; }
@@ -347,28 +405,25 @@ document.addEventListener('DOMContentLoaded', () => {
     try { await navigator.clipboard.writeText($('keyValue').textContent); $('keyCopy').textContent = 'Copiada'; setTimeout(() => { $('keyCopy').textContent = 'Copiar'; }, 2000); } catch {}
   });
 
-  $('pUsarLocal').addEventListener('click', () => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(pos => {
-      $('pCasaLat').value = pos.coords.latitude.toFixed(6);
-      $('pCasaLng').value = pos.coords.longitude.toFixed(6);
-    }, () => { $('pocheteStatus').textContent = 'Não consegui pegar a localização. Digite as coordenadas.'; $('pocheteStatus').classList.add('is-visible'); });
-  });
-
   $('pocheteForm').addEventListener('submit', async e => {
     e.preventDefault();
     const status = $('pocheteStatus');
     const nome = $('pIdoso').value.trim();
     if (nome.length < 2) { status.textContent = 'Digite o nome de quem vai usar.'; status.classList.add('is-visible'); return; }
-    const lat = parseFloat($('pCasaLat').value.replace(',', '.')), lng = parseFloat($('pCasaLng').value.replace(',', '.'));
-    const casa = Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng, nome: $('pCasaNome').value.trim() || 'Casa' } : undefined;
+    const endereco = $('pEndereco').value.trim();
+    const casa = endereco ? { endereco } : undefined;
+    const botao = e.target.querySelector('[type="submit"]');
+    botao.disabled = true;
+    if (endereco) { status.textContent = 'Procurando o endereço no mapa…'; status.classList.add('is-visible'); }
     try {
-      const { chave } = await api('pochetes', { method: 'POST', body: { nome_idoso: nome, telefone_idoso: $('pTelefone').value || null, casa } });
-      e.target.reset(); $('pCasaNome').value = 'Casa';
-      status.textContent = ''; status.classList.remove('is-visible');
+      const { chave, pochete } = await api('pochetes', { method: 'POST', body: { nome_idoso: nome, telefone_idoso: $('pTelefone').value || null, casa } });
+      e.target.reset();
+      status.textContent = endereco && !pochete.casa ? 'Pochete vinculada. Não achei o endereço no mapa: confira o número e a cidade em "Mudar endereço".' : '';
+      status.classList.toggle('is-visible', Boolean(status.textContent));
       await carregarPochetes();
       mostrarChave(chave);
     } catch (err) { status.textContent = err.message; status.classList.add('is-visible'); }
+    finally { botao.disabled = false; }
   });
 
   /* ---------------------------------------------------------------------
@@ -412,6 +467,154 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!esperar && esperandoTelegram) { clearInterval(esperandoTelegram); esperandoTelegram = null; }
     }
     catch (e) { $('telegramEstado').innerHTML = `<p class="muted">${esc(e.message)}</p>`; }
+  }
+
+  /* ---------------------------------------------------------------------
+     Ações rápidas: ligar para a pessoa e onde ela está
+     --------------------------------------------------------------------- */
+  const primeiraCom = campo => pochetes.find(p => p[campo]) || null;
+  // "Dona Lia Souza" → "Dona Lia"; "Maria Souza" → "Maria" (título sozinho não diz quem é)
+  const chamar = nome => { const [a, b] = String(nome || '').split(' ').filter(Boolean); return /^(dona|seu|sr\.?|sra\.?|dr\.?|dra\.?|vó|vô|tia|tio)$/i.test(a || '') && b ? `${a} ${b}` : (a || ''); };
+
+  function atualizarAcoes() {
+    const comTelefone = primeiraCom('telefone_idoso');
+    $('acaoLigarIdosoNota').textContent = comTelefone ? `Para ${chamar(comTelefone.nome_idoso)}` : (pochetes.length ? 'Cadastre o telefone dela' : 'Vincule a pochete');
+    const comPosicao = primeiraCom('posicao');
+    $('acaoOndeNota').textContent = comPosicao?.ultimo_contato ? `Às ${hora(comPosicao.ultimo_contato)}` : 'Sem posição ainda';
+  }
+
+  $('acaoLigarIdoso').addEventListener('click', () => {
+    const p = primeiraCom('telefone_idoso');
+    if (p) { avisos?.ligar({ numero: p.telefone_idoso, nome: p.nome_idoso }); return; }
+    toast('teste', pochetes.length ? 'Falta o telefone' : 'Vincule a pochete primeiro',
+      pochetes.length ? 'Toque em "Editar" na pochete, logo abaixo, e coloque o telefone dela.' : 'O telefone dela é cadastrado junto com a pochete, logo abaixo.');
+    $('pochete').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  $('acaoOnde').addEventListener('click', () => {
+    const p = primeiraCom('posicao');
+    if (p) { avisos?.abrirMapa({ ...p.posicao, titulo: `Onde está ${p.nome_idoso}` }); return; }
+    toast('teste', 'Sem posição ainda', 'A pochete manda a localização quando liga e a cada poucos minutos. Para testar agora, use "Localização" em Testar sem a pochete.');
+  });
+
+  /* ---------------------------------------------------------------------
+     Mensagem para a pochete
+     ---------------------------------------------------------------------
+     A pochete busca as mensagens novas em GET /api/pochete/estado, toca o
+     áudio (as prontas têm voz gravada; as escritas, o aviso de mensagem) e
+     a pessoa aperta qualquer botão para confirmar. O painel acompanha:
+     enviada → chegou na pochete → ouviu. */
+  const janelaRecado = $('recadoJanela');
+  const STATUS_RECADO = { pendente: 'Esperando a pochete buscar', entregue: 'Chegou na pochete, tocando', confirmado: 'Ouviu' };
+  let prontos = [];
+  let esperandoConfirmacao = new Map(); // id → { pochete_id, texto }
+  let atualizarJanela = null;
+
+  const pocheteDoRecado = () => pochetes.find(p => p.id === Number($('recadoPochete').value)) || pochetes[0];
+
+  async function carregarRecados() {
+    const p = pocheteDoRecado();
+    if (!p) return;
+    try {
+      const r = await api(`pochetes/${p.id}/recados?limite=8`);
+      if (!prontos.length && r.prontos?.length) {
+        prontos = r.prontos;
+        $('recadoProntos').innerHTML = prontos.map((x, i) => `<button type="button" class="recado-chip" data-i="${i}">${esc(x.texto)}</button>`).join('');
+      }
+      $('recadoLista').innerHTML = r.recados.length ? r.recados.map(x => `
+        <li class="recado-item recado-item--${esc(x.status)}">
+          <p>${esc(x.texto)}</p>
+          <span class="muted">${hora(x.criado_em)} · ${esc(STATUS_RECADO[x.status] || x.status)}${x.status === 'confirmado' && x.confirmado_em ? ' às ' + hora(x.confirmado_em) : ''}</span>
+          ${x.status !== 'confirmado' ? `<button type="button" class="link-btn" data-simular-ouvir="${num(x.id)}">Testar: fazer de conta que ela ouviu</button>` : ''}
+        </li>`).join('') : '<li class="muted">Nenhuma mensagem ainda.</li>';
+      r.recados.filter(x => x.status !== 'confirmado' && Date.now() - new Date(x.criado_em).getTime() < 12 * 3600e3)
+        .forEach(x => { if (!esperandoConfirmacao.has(x.id)) esperandoConfirmacao.set(x.id, { pochete_id: p.id, texto: x.texto, status: x.status }); });
+    } catch (e) { $('recadoLista').innerHTML = `<li class="muted">${esc(e.message)}</li>`; }
+  }
+
+  $('acaoMensagem').addEventListener('click', () => {
+    if (!pochetes.length) {
+      toast('teste', 'Vincule a pochete primeiro', 'A mensagem vai para a pochete de quem você cuida.');
+      $('pochete').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    const escolha = $('recadoPochete');
+    escolha.innerHTML = pochetes.map(p => `<option value="${num(p.id)}">${esc(p.nome_idoso)}</option>`).join('');
+    $('recadoPocheteCampo').hidden = pochetes.length < 2;
+    $('recadoPara').textContent = pochetes.length < 2 ? `Para ${pochetes[0].nome_idoso}` : 'Escolha para quem';
+    $('recadoStatus').textContent = '';
+    janelaRecado.showModal();
+    carregarRecados();
+    atualizarJanela ??= setInterval(() => { if (janelaRecado.open && !document.hidden) carregarRecados(); }, 5000);
+  });
+  $('recadoPochete').addEventListener('change', () => { carregarRecados(); });
+  janelaRecado.querySelector('[data-fechar]').addEventListener('click', () => janelaRecado.close());
+  janelaRecado.addEventListener('click', e => { if (e.target === janelaRecado) janelaRecado.close(); });
+  janelaRecado.addEventListener('close', () => { clearInterval(atualizarJanela); atualizarJanela = null; });
+
+  $('recadoProntos').addEventListener('click', e => {
+    const chip = e.target.closest('[data-i]');
+    if (!chip) return;
+    $('recadoTexto').value = prontos[Number(chip.dataset.i)]?.texto || '';
+    $('recadoTexto').dispatchEvent(new Event('input'));
+    $('recadoTexto').focus();
+  });
+  $('recadoTexto').addEventListener('input', () => { $('recadoConta').textContent = `${$('recadoTexto').value.length}/160`; });
+
+  $('recadoForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const status = $('recadoStatus');
+    const texto = $('recadoTexto').value.trim();
+    const p = pocheteDoRecado();
+    if (texto.length < 2) { status.textContent = 'Escolha uma mensagem pronta ou escreva a sua.'; status.classList.add('is-visible'); return; }
+    const botao = e.target.querySelector('[type="submit"]');
+    botao.disabled = true;
+    try {
+      const { recado } = await api(`pochetes/${p.id}/recados`, { method: 'POST', body: { texto } });
+      esperandoConfirmacao.set(recado.id, { pochete_id: p.id, texto: recado.texto, status: recado.status });
+      $('recadoTexto').value = ''; $('recadoConta').textContent = '0/160';
+      status.textContent = `Enviada. A pochete de ${chamar(p.nome_idoso)} toca a mensagem na próxima vez que falar com o servidor (em até 15 segundos).`;
+      status.classList.add('is-visible');
+      await carregarRecados();
+    } catch (err) { status.textContent = err.message; status.classList.add('is-visible'); }
+    finally { botao.disabled = false; }
+  });
+
+  // Teste sem o dispositivo: o painel faz o papel da pessoa apertando o botão
+  $('recadoLista').addEventListener('click', async e => {
+    const b = e.target.closest('[data-simular-ouvir]');
+    if (!b) return;
+    b.disabled = true;
+    try {
+      const { recado } = await api(`pochetes/${pocheteDoRecado().id}/recados/${b.dataset.simularOuvir}/confirmar`, { method: 'POST' });
+      recadoMudou({ recado, nome_idoso: pocheteDoRecado().nome_idoso });
+      await carregarRecados();
+    } catch (err) { toast('teste', 'Não deu certo', err.message); b.disabled = false; }
+  });
+
+  // Uma mensagem foi entregue ou confirmada (stream ou consulta)
+  function recadoMudou({ recado, nome_idoso }) {
+    if (!recado) { if (janelaRecado.open) carregarRecados(); return; }
+    const antes = esperandoConfirmacao.get(recado.id);
+    if (recado.status === 'confirmado' && antes) {
+      esperandoConfirmacao.delete(recado.id);
+      avisos?.mostrar({ tipo: 'teste', rotulo: 'Mensagem', cor: 'var(--blue-2)', duracao: 10000,
+        titulo: `${chamar(nome_idoso) || 'A pessoa'} ouviu sua mensagem`,
+        texto: `"${recado.texto}"${recado.confirmado_em ? ` · ${hora(recado.confirmado_em)}` : ''}` });
+    }
+    if (janelaRecado.open) carregarRecados();
+  }
+
+  // Sem stream: confere de tempos em tempos as mensagens ainda não ouvidas
+  async function conferirRecados() {
+    const porPochete = new Set([...esperandoConfirmacao.values()].map(x => x.pochete_id));
+    for (const id of porPochete) {
+      try {
+        const { recados } = await api(`pochetes/${id}/recados?limite=8`);
+        const p = pochetes.find(x => x.id === id);
+        recados.forEach(r => { if (esperandoConfirmacao.has(r.id) && r.status === 'confirmado') recadoMudou({ recado: r, nome_idoso: p?.nome_idoso }); });
+      } catch { /* tenta na próxima */ }
+    }
   }
 
   /* ---------------------------------------------------------------------
