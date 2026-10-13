@@ -405,24 +405,40 @@ document.addEventListener('DOMContentLoaded', () => {
     try { await navigator.clipboard.writeText($('keyValue').textContent); $('keyCopy').textContent = 'Copiada'; setTimeout(() => { $('keyCopy').textContent = 'Copiar'; }, 2000); } catch {}
   });
 
+  /* Endereço da casa: o cuidador escreve como escreveria para um taxista e o
+     servidor acha no mapa. "Usar o lugar onde estou" guarda a posição do
+     navegador; se o texto for mexido depois, vale o texto. */
+  let casaAqui = null;
+  const LUGAR_ATUAL = 'Casa (lugar marcado agora)';
+  const avisoForm = texto => { const s = $('pocheteStatus'); s.textContent = texto; s.classList.toggle('is-visible', !!texto); };
+
+  $('pCasaEndereco').addEventListener('input', () => { casaAqui = null; });
+
+  $('pUsarLocal').addEventListener('click', async () => {
+    avisoForm('Procurando onde você está…');
+    casaAqui = await posicaoDoNavegador();
+    if (!casaAqui) return avisoForm('Não consegui achar sua localização. Escreva o endereço no campo acima.');
+    $('pCasaEndereco').value = LUGAR_ATUAL;
+    avisoForm('Pronto: a casa dela fica marcada onde você está agora.');
+  });
+
   $('pocheteForm').addEventListener('submit', async e => {
     e.preventDefault();
-    const status = $('pocheteStatus');
     const nome = $('pIdoso').value.trim();
-    if (nome.length < 2) { status.textContent = 'Digite o nome de quem vai usar.'; status.classList.add('is-visible'); return; }
-    const endereco = $('pEndereco').value.trim();
-    const casa = endereco ? { endereco } : undefined;
+    if (nome.length < 2) return avisoForm('Digite o nome de quem vai usar.');
+    const endereco = $('pCasaEndereco').value.trim();
+    const casa = casaAqui ? { ...casaAqui, nome: 'Casa' } : endereco ? { endereco } : undefined;
     const botao = e.target.querySelector('[type="submit"]');
     botao.disabled = true;
-    if (endereco) { status.textContent = 'Procurando o endereço no mapa…'; status.classList.add('is-visible'); }
+    if (casa?.endereco) avisoForm('Procurando o endereço no mapa…');
     try {
       const { chave, pochete } = await api('pochetes', { method: 'POST', body: { nome_idoso: nome, telefone_idoso: $('pTelefone').value || null, casa } });
-      e.target.reset();
-      status.textContent = endereco && !pochete.casa ? 'Pochete vinculada. Não achei o endereço no mapa: confira o número e a cidade em "Mudar endereço".' : '';
-      status.classList.toggle('is-visible', Boolean(status.textContent));
+      e.target.reset(); casaAqui = null;
+      // endereço que o mapa não achou fica guardado como texto (o Uber recebe escrito)
+      avisoForm(casa?.endereco && !pochete.casa ? 'Pochete vinculada. Não achei o endereço no mapa: confira o número e a cidade em "Editar".' : '');
       await carregarPochetes();
       mostrarChave(chave);
-    } catch (err) { status.textContent = err.message; status.classList.add('is-visible'); }
+    } catch (err) { avisoForm(err.message); }
     finally { botao.disabled = false; }
   });
 

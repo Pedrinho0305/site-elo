@@ -628,6 +628,7 @@ class _FormVincularState extends State<_FormVincular> {
       final r = await Api.chamar('pochetes', metodo: 'POST', corpo: {
         'nome_idoso': nome,
         'telefone_idoso': _telefone.text.trim().isEmpty ? null : _telefone.text.trim(),
+        // o servidor acha o endereço escrito no mapa
         if (endereco.isNotEmpty) 'casa': {'endereco': endereco},
       });
       if (mounted) Navigator.pop(context, r['chave'] as String?);
@@ -647,13 +648,13 @@ class _FormVincularState extends State<_FormVincular> {
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           const Text('Vincular uma pochete', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 19)),
           const SizedBox(height: 14),
-          TextField(controller: _nome, decoration: const InputDecoration(labelText: 'Quem vai usar')),
+          TextField(controller: _nome, decoration: const InputDecoration(labelText: 'Nome de quem vai usar', hintText: 'Ex.: Dona Maria')),
           const SizedBox(height: 12),
-          TextField(controller: _telefone, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Telefone dela (para o motorista)')),
-          const SizedBox(height: 16),
-          TextField(controller: _endereco, keyboardType: TextInputType.streetAddress, decoration: const InputDecoration(labelText: 'Endereço de casa', hintText: 'Rua das Flores, 123, Jardim Paulista, São Paulo')),
+          TextField(controller: _telefone, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Celular dela (opcional)', hintText: '(11) 99999-0000')),
+          const SizedBox(height: 12),
+          TextField(controller: _endereco, keyboardType: TextInputType.streetAddress, decoration: const InputDecoration(labelText: 'Endereço da casa dela (opcional)', hintText: 'Rua das Flores, 123, São Paulo')),
           const SizedBox(height: 8),
-          Text('Rua, número, bairro e cidade, do jeito que você escreveria numa carta. É o destino quando o botão amarelo pede um carro; o mapa é achado sozinho.', style: TextStyle(color: c.text3, fontSize: 13)),
+          Text('É para lá que o carro leva quando ela aperta o botão amarelo. Escreva rua, número e cidade.', style: TextStyle(color: c.text3, fontSize: 13)),
           const SizedBox(height: 16),
           BotaoMarca(texto: 'Vincular pochete', carregando: _enviando, aoTocar: _enviar, expandir: true),
           if (_erro != null) StatusFormulario(texto: _erro!, ok: false),
