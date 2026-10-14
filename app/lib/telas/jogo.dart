@@ -48,7 +48,7 @@ class TelaJogo extends StatelessWidget {
           for (final (icone, cor, texto) in [
             (Icons.notification_important_rounded, c.red, 'Como funcionam os alertas de emergência'),
             (Icons.directions_car_rounded, c.orange, 'Aprovação inteligente de transportes'),
-            (Icons.mic_rounded, c.purple, 'Uso de comandos de voz para auxiliar idosos'),
+            (Icons.radio_button_checked_rounded, c.purple, 'Botões simples, sem tela, para quem tem dificuldade com tecnologia'),
             (Icons.place_rounded, c.cyan, 'Localização em tempo real e zonas de segurança'),
             (Icons.forum_rounded, c.green, 'Comunicação efetiva entre cuidador e idoso'),
           ])

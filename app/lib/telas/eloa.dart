@@ -38,7 +38,7 @@ class _TelaEloaState extends State<TelaEloa> {
     'Como funciona o botão de emergência?',
     'Quanto tempo dura a bateria?',
     'Como o cuidador aprova uma corrida?',
-    'Quais comandos de voz ela entende?',
+    'E se apertar o botão sem querer?',
   ];
 
   Future<void> _perguntar(String texto) async {

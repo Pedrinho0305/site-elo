@@ -36,8 +36,15 @@
     qnt: 'quanto', qto: 'quanto', qd: 'quando', qdo: 'quando', qm: 'quem', msm: 'mesmo',
     pra: 'para', pro: 'para o', ta: 'esta', tao: 'estao', n: 'nao', nn: 'nao', ne: 'nao e',
     cmg: 'comigo', ctg: 'contigo', mt: 'muito', mto: 'muito', blz: 'beleza', vlw: 'valeu',
-    obg: 'obrigado', sla: 'sei la', hj: 'hoje', dps: 'depois', bjs: 'beijos', kd: 'cade'
+    obg: 'obrigado', sla: 'sei la', hj: 'hoje', dps: 'depois', bjs: 'beijos', kd: 'cade',
+    oque: 'o que', oqe: 'o que', eh: 'e', naum: 'nao', tah: 'esta', ki: 'que', qe: 'que',
+    cmo: 'como', td: 'tudo', tds: 'todos', agr: 'agora', fzr: 'fazer', qnto: 'quanto',
+    quantu: 'quanto', kanto: 'quanto', pfv: 'por favor', pfvr: 'por favor', vdd: 'verdade',
+    dnv: 'de novo', cel: 'celular', zap: 'whatsapp', zapzap: 'whatsapp'
   };
+  // Jeitos de chamar a pochete sem dizer "pochete" ("esse trem faz o quê?")
+  ['trem', 'treco', 'bagulho', 'negocio', 'aparelho', 'aparelhinho', 'dispositivo', 'geringonca', 'trambolho', 'coisinha']
+    .forEach(apelido => { ABREVIACOES[apelido] = 'pochete'; });
 
   function normalizar(texto) {
     const base = String(texto || '')
@@ -160,10 +167,10 @@
     },
     {
       id: 'sobre_eloa', nome: 'o que eu faço',
-      fortes: ['quem e voce', 'quem voce e', 'o que voce faz', 'o que voce sabe', 'voce pode me ajudar', 'me ajuda', 'o que voce pode', 'no que voce ajuda', 'preciso de ajuda', 'me ajude', 'pode ajudar', 'sobre o que posso perguntar', 'o que posso perguntar', 'me apresenta', 'se apresenta', 'quem fala'],
+      fortes: ['quem e voce', 'quem voce e', 'o que voce e', 'voce e o que', 'o que voce faz', 'o que voce sabe', 'voce pode me ajudar', 'me ajuda', 'o que voce pode', 'no que voce ajuda', 'preciso de ajuda', 'me ajude', 'pode ajudar', 'sobre o que posso perguntar', 'o que posso perguntar', 'me apresenta', 'se apresenta', 'quem fala'],
       fracas: ['eloa', 'assistente', 'ajudar', 'ajuda', 'duvida'],
       respostas: [
-        'Sou a Eloá, a assistente do projeto ELO. Respondo dúvidas sobre a pochete, o app do cuidador e o uso no dia a dia.\n\nPode me perguntar sobre o botão de emergência, o transporte, os comandos de voz, a bateria, a localização, o preço, a garantia — ou sobre o projeto e a equipe.',
+        'Sou a Eloá, a assistente do projeto ELO. Respondo dúvidas sobre a pochete, o app do cuidador e o uso no dia a dia.\n\nPode me perguntar sobre o botão de emergência, o transporte, a bateria, a localização, o preço, a garantia — ou sobre o projeto e a equipe.',
         'Eu sou a Eloá. Meu trabalho é explicar a ELO de um jeito simples: como a pochete funciona, como configurar, quanto custa, o que vem na caixa, quem fez. Pergunta o que quiser.'
       ]
     },
@@ -174,8 +181,8 @@
       fortes: ['o que e a elo', 'o que e elo', 'o que e a pochete', 'como funciona a elo', 'como funciona a pochete', 'me fala da elo', 'me fale sobre a elo', 'explica a elo', 'o que a elo faz', 'resumo', 'pochete inteligente', 'me explica', 'me fala tudo', 'fala tudo', 'tudo sobre', 'sobre o projeto', 'o que e o projeto', 'do que se trata', 'me conta sobre', 'visao geral', 'em resumo', 'o que e isso'],
       fracas: ['pochete', 'projeto', 'produto', 'elo', 'sobre'],
       respostas: [
-        'A ELO é uma pochete inteligente feita para pessoas idosas, com um app para quem cuida.\n\nEla tem botão de emergência que avisa o cuidador na hora com a localização, botão de transporte com aprovação do cuidador, comandos de voz, GPS em tempo real e bateria de até 48 horas. A ideia é dar autonomia para quem usa e tranquilidade para quem cuida.',
-        'Pensa numa pochete comum — só que com um botão que avisa você numa emergência, outro que pede um carro com a aprovação de quem cuida, comando de voz e GPS. Isso é a ELO. Ela deixa {pessoa} sair sozinha com segurança, e você acompanha tudo pelo app.'
+        'A ELO é uma pochete inteligente feita para pessoas idosas, com um app para quem cuida.\n\nEla tem botão de emergência que avisa o cuidador na hora com a localização, botão de transporte com aprovação do cuidador, GPS em tempo real e bateria de até 48 horas. Não tem tela nem comando de voz: é tudo pelos dois botões. A ideia é dar autonomia para quem usa e tranquilidade para quem cuida.',
+        'Pensa numa pochete comum — só que com um botão que avisa você numa emergência, outro que pede um carro com a aprovação de quem cuida, e GPS. Isso é a ELO. Ela deixa {pessoa} sair sozinha com segurança, e você acompanha tudo pelo app.'
       ],
       seguimento: { texto: 'Quer que eu liste todas as funcionalidades?', alvo: 'funcionalidades' }
     },
@@ -184,8 +191,8 @@
       fortes: ['funcionalidade', 'funcoes', 'funcao', 'recurso', 'feature', 'serve para que', 'para que serve', 'serve para', 'quero saber tudo', 'saber tudo', 'o que mais', 'mais alguma coisa', 'mais funcoes', 'outras funcoes', 'o que ela faz', 'o que a pochete faz', 'o que ela tem', 'o que tem', 'oferece', 'beneficio', 'vantagem', 'capaz de', 'consegue fazer', 'ela faz o que', 'faz o que', 'o que faz', 'o que da para fazer', 'o que posso fazer', 'principais', 'lista'],
       fracas: ['tudo', 'quais', 'todas', 'pode', 'serve'],
       respostas: [
-        'As principais funcionalidades da ELO são:\n\n• Botão de emergência — segurar por 3 segundos avisa o cuidador na hora, com a localização (se for preciso, ele liga 192)\n• Botão de transporte — pede um carro, e o cuidador aprova antes\n• Comandos de voz — "Oi ELO" para ligar, pedir carro, saber onde está ou chamar ajuda\n• Localização em tempo real — GPS no mapa do app, com histórico do dia\n• App do cuidador — alertas, aprovações, cadastro e notificações\n• Bateria de até 48 horas, com carga USB-C\n• Resistente a chuva e respingos (IP63)',
-        'Ela faz cinco coisas principais: avisa o cuidador pelo botão vermelho, pede transporte pelo botão preto (com aprovação do cuidador), obedece a comandos de voz, mostra a localização em tempo real no app e avisa o cuidador de tudo isso. Fora isso, a bateria dura até 48 horas e ela aguenta chuva.'
+        'As principais funcionalidades da ELO são:\n\n• Botão de emergência — segurar por 3 segundos avisa o cuidador na hora, com a localização (se for preciso, ele liga 192)\n• Botão de transporte — pede um carro, e o cuidador aprova antes\n• Mensagens do cuidador — a pochete avisa com bipes, e um toque em qualquer botão confirma que a pessoa ouviu\n• Localização em tempo real — GPS no mapa do app, com histórico do dia\n• App do cuidador — alertas, aprovações, cadastro e notificações\n• Bateria de até 48 horas, com carga USB-C\n• Resistente a chuva e respingos (IP63)',
+        'Ela faz quatro coisas principais: avisa o cuidador pelo botão vermelho, pede transporte pelo botão preto (com aprovação do cuidador), mostra a localização em tempo real no app e avisa o cuidador de tudo isso. Fora isso, a bateria dura até 48 horas e ela aguenta chuva.'
       ],
       seguimento: { texto: 'Quer que eu detalhe alguma delas?', alvo: null }
     },
@@ -194,8 +201,8 @@
       fortes: ['diferencial', 'diferente', 'diferenca', 'e boa', 'e bom', 'vale a pena', 'compensa', 'recomenda', 'funciona bem', 'confiavel', 'e confiavel', 'qualidade', 'por que escolher', 'porque escolher', 'por que a elo', 'porque a elo', 'e melhor', 'melhor que', 'unica', 'unico', 'inovacao', 'inovador', 'o que tem de especial', 'especial', 'concorrente', 'outras marcas', 'existe algo parecido', 'no mercado', 'primeira'],
       fracas: ['melhor', 'vale a pena', 'compensa', 'destaque'],
       respostas: [
-        'O diferencial é a combinação: a ELO é a única solução que junta pochete inteligente com app integrado, oferecendo comandos de voz, aprovação de transporte pelo cuidador e alerta de emergência direto para quem cuida — tudo num objeto simples, sem tela.\n\nNão é só tecnologia: é cuidado humanizado. 100% do foco no idoso, monitoramento 24/7, e a primeira do mercado nesse formato.',
-        'O que ela tem de diferente é não exigir que a pessoa idosa lide com tela nenhuma. São botões físicos e voz. E do outro lado, quem cuida tem o app com tudo: alertas, aprovação de corrida, localização. Essa dupla — objeto simples para quem usa, app completo para quem cuida — é o que não existe pronto no mercado.'
+        'O diferencial é a combinação: a ELO é a única solução que junta pochete inteligente com app integrado, oferecendo aprovação de transporte pelo cuidador e alerta de emergência direto para quem cuida — tudo num objeto simples, sem tela.\n\nNão é só tecnologia: é cuidado humanizado. 100% do foco no idoso, monitoramento 24/7, e a primeira do mercado nesse formato.',
+        'O que ela tem de diferente é não exigir que a pessoa idosa lide com tela nenhuma. São dois botões físicos, e só. E do outro lado, quem cuida tem o app com tudo: alertas, aprovação de corrida, localização. Essa dupla — objeto simples para quem usa, app completo para quem cuida — é o que não existe pronto no mercado.'
       ],
       seguimento: { texto: 'Quer saber por que isso é melhor que um celular ou um relógio?', alvo: 'comparacao' }
     },
@@ -204,8 +211,8 @@
       fortes: ['celular', 'smartwatch', 'relogio', 'pulseira', 'smartphone', 'por que nao usar', 'porque nao usar', 'melhor que', 'em vez de', 'ao inves de', 'alternativa', 'apple watch', 'galaxy watch', 'telefone comum', 'so um telefone'],
       fracas: ['comparar', 'diferenca', 'vantagem', 'usar'],
       respostas: [
-        'A diferença está em quem vai usar. Celular e relógio inteligente pedem tela, toque, menus, senha — e é justamente isso que trava muita gente idosa. A ELO tem botões físicos grandes e comando de voz: para chamar ajuda é segurar um botão por 3 segundos, para pedir carro é segurar o outro.\n\nE tem a parte de quem cuida: o cuidador aprova a corrida antes de sair e recebe a localização no alerta. Isso um celular comum não faz.',
-        'Um celular exige que a pessoa saiba usar celular. A ELO não exige nada: um botão vermelho para emergência, um preto para transporte, e a voz para o resto. Foi feita para quem tem dificuldade com tecnologia — e para a família acompanhar sem precisar ficar ligando.'
+        'A diferença está em quem vai usar. Celular e relógio inteligente pedem tela, toque, menus, senha — e é justamente isso que trava muita gente idosa. A ELO tem só dois botões físicos grandes: para chamar ajuda é segurar um botão por 3 segundos, para pedir carro é segurar o outro.\n\nE tem a parte de quem cuida: o cuidador aprova a corrida antes de sair e recebe a localização no alerta. Isso um celular comum não faz.',
+        'Um celular exige que a pessoa saiba usar celular. A ELO não exige nada: um botão vermelho para emergência, um preto para transporte, e pronto. Foi feita para quem tem dificuldade com tecnologia — e para a família acompanhar sem precisar ficar ligando.'
       ]
     },
     {
@@ -271,25 +278,16 @@
       ]
     },
 
-    /* ---- voz ----------------------------------------------------------- */
+    /* ---- voz (não tem) ------------------------------------------------ */
     {
-      id: 'voz', nome: 'os comandos de voz',
-      fortes: ['comando de voz', 'comandos de voz', 'por voz', 'oi elo', 'microfone', 'alto falante', 'reconhece', 'falar com ela', 'falar com a pochete', 'falando', 'ela fala', 'que comandos', 'quais comandos', 'comandos tem', 'ativa por voz', 'ativar por voz'],
-      fracas: ['voz', 'fala', 'audio', 'som', 'escuta', 'ouvir', 'comando', 'responde', 'dizer'],
+      id: 'voz', nome: 'o comando de voz',
+      fortes: ['comando de voz', 'comandos de voz', 'por voz', 'oi elo', 'microfone', 'alto falante', 'reconhece', 'falar com ela', 'falar com a pochete', 'falando', 'ela fala', 'ela ouve', 'ela escuta', 'que comandos', 'quais comandos', 'comandos tem', 'ativa por voz', 'ativar por voz', 'sotaque', 'voz baixa', 'alexa', 'siri', 'assistente de voz'],
+      fracas: ['voz', 'fala', 'audio', 'escuta', 'ouvir', 'comando', 'dizer'],
       respostas: [
-        'É só dizer "Oi ELO" para ativar. Depois, {pessoa} pode falar:\n• "Ligar para [nome]"\n• "Onde estou?"\n• "Chamar transporte"\n• "Emergência"\n\nA pochete responde em áudio, confirmando cada comando.',
-        'A pochete escuta. Diga "Oi ELO" e depois o comando: "Ligar para Maria", "Onde estou?", "Chamar transporte" ou "Emergência". Ela responde falando, para {pessoa} não precisar olhar para tela nenhuma.'
+        'A pochete não tem comando de voz nem microfone — isso foi retirado do projeto. Se alguma página ainda falar em "Oi ELO", é texto antigo.\n\nTudo se faz pelos dois botões: segurar o vermelho por 3 segundos avisa o cuidador, segurar o preto por 3 segundos pede um carro (com a aprovação dele). E ela não fala: responde com bipes, um por segundo enquanto se segura o botão e um som diferente para cada coisa que acontece.',
+        'Não, ela não escuta nem fala. São só dois botões: vermelho para emergência, preto para transporte, cada um segurado por 3 segundos. A resposta vem em bipes. Ligar para {pessoa} é com o cuidador, pelo painel.'
       ],
-      seguimento: { texto: 'Quer que eu explique o que acontece quando ela fala "Emergência"?', alvo: 'emergencia' }
-    },
-    {
-      id: 'voz_detalhes', nome: 'os limites do comando de voz',
-      fortes: ['fala baixo', 'voz baixa', 'sotaque', 'nao ouvir', 'nao escuta', 'nao entende', 'nao entender', 'barulho', 'lugar barulhento', 'rouco', 'gaguej', 'idioma', 'ingles', 'espanhol', 'outra lingua', 'so em portugues'],
-      fracas: ['entende', 'ouve', 'escutar', 'reconhecer'],
-      respostas: [
-        'O reconhecimento é por voz, com a palavra de ativação "Oi ELO", em português. Sobre sotaque forte, voz baixa ou lugares barulhentos, o site não traz testes — então não vou te garantir.\n\nO que eu posso garantir: os botões físicos funcionam sempre, independente da voz. Emergência e transporte nunca dependem de a pochete entender a fala.',
-        'A voz é uma comodidade; os botões são a garantia. Se {pessoa} fala baixo ou o lugar está barulhento, o botão vermelho e o preto continuam funcionando: é só segurar por 3 segundos. Sobre a precisão do reconhecimento em cada situação, quem pode detalhar é a equipe.'
-      ]
+      seguimento: { texto: 'Quer que eu explique o que cada botão faz?', alvo: 'funcionalidades' }
     },
 
     /* ---- bateria ------------------------------------------------------- */
@@ -329,8 +327,8 @@
       fortes: ['chip', 'internet', 'wifi', 'wi fi', '4g', '3g', '5g', 'sinal', 'dados moveis', 'plano', 'operadora', 'alcance', 'longe do celular', 'sem celular por perto', 'precisa do celular', 'qualquer lugar', 'todo o brasil', 'sem sinal', 'area rural', 'interior', 'conexao'],
       fracas: ['bluetooth', 'conecta', 'funciona sem', 'precisa de', 'cobertura', 'rede'],
       respostas: [
-        'A pochete tem conexão própria: um módulo GPS/GPRS (o SIM800L) cuida da localização e de mandar os alertas pela rede celular, e um ESP32 faz Wi-Fi e Bluetooth — o Bluetooth é usado para parear com o app na configuração.\n\nOu seja: ela não depende de o celular estar do lado para funcionar na rua. Onde tem sinal de celular, ela funciona. Sobre chip e plano de dados (se vem incluso ou como é contratado), o site não detalha — confirme com a equipe.',
-        'Ela funciona com rede celular própria, por um módulo GPRS — é assim que o GPS e os alertas chegam ao app mesmo com {pessoa} longe de casa. O Bluetooth serve para a configuração inicial com o celular. O que eu não sei te dizer é como fica o chip e o plano: isso a equipe precisa confirmar.'
+        'Um módulo GPS (Ublox) descobre a localização de {pessoa}, e um ESP32 faz Wi-Fi e Bluetooth — é por ele que os alertas chegam ao app, e o Bluetooth serve para parear na configuração.\n\nSe ela precisa ficar perto do celular na rua, e como ficam chip e plano de dados, o site não detalha — confirme com a equipe.',
+        'A localização vem de um GPS, que pega melhor ao ar livre; a conexão com o app vem do Wi-Fi e do Bluetooth de um ESP32. O que eu não sei te dizer é se precisa de chip ou do celular por perto: isso a equipe precisa confirmar.'
       ]
     },
     {
@@ -346,10 +344,10 @@
     /* ---- app ----------------------------------------------------------- */
     {
       id: 'app', nome: 'o app do cuidador',
-      fortes: ['aplicativo', 'app', 'play store', 'app store', 'google play', 'notific', 'baixar', 'instalar o app', 'cadastr', 'loja de aplicativo', 'familiar', 'mandar mensagem', 'mensagem para a pochete', 'enviar mensagem'],
+      fortes: ['aplicativo', 'app', 'play store', 'app store', 'google play', 'notific', 'baixar', 'instalar o app', 'cadastr', 'loja de aplicativo', 'familiar', 'ligar para', 'ligacao', 'telefonar', 'mandar mensagem', 'mensagem para a pochete', 'enviar mensagem'],
       fracas: ['celular', 'conta', 'instalar', 'cuidador', 'login', 'senha', 'perfil', 'tela'],
       respostas: [
-        'O app ELO está na App Store e no Google Play. Você cria a conta como cuidador e cadastra os dados de {pessoa}: nome, idade, contatos de emergência e informações médicas importantes.\n\nPelo app você recebe os alertas, aprova corridas, acompanha a localização e configura as notificações. No painel também dá para cadastrar familiares (quem tiver e-mail pode ser avisado numa emergência), ligar para {pessoa} ou para o 192 e mandar mensagens para a pochete: as prontas tocam com voz gravada e você vê quando {pessoa} ouviu.',
+        'O app ELO está na App Store e no Google Play. Você cria a conta como cuidador e cadastra os dados de {pessoa}: nome, idade, contatos de emergência e informações médicas importantes.\n\nPelo app você recebe os alertas, aprova corridas, acompanha a localização e configura as notificações. No painel também dá para cadastrar familiares (quem tiver e-mail pode ser avisado numa emergência), ligar para {pessoa} ou para o 192 e mandar mensagens para a pochete: a pochete avisa com bipes e você vê quando {pessoa} ouviu.',
         'Baixa na App Store ou no Google Play, cria sua conta de cuidador e cadastra {pessoa} — nome, idade, contatos de emergência e o que for importante de saúde.\n\nDepois é por lá que tudo acontece: alertas, aprovação de corrida, localização. E dá para cadastrar mais de um contato de emergência.'
       ],
       seguimento: { texto: 'Quer que eu passe o passo a passo para conectar a pochete ao app?', alvo: 'configurar' }
@@ -410,8 +408,8 @@
       fortes: ['preco', 'custa', 'custo', 'valor', 'reais', 'r$', 'parcel', 'quanto e', 'quanto custa', 'quanto sai', 'quanto fica', 'quanto vale', 'pagar', 'pagamento', 'caro', 'barato', 'dividir', 'divide', 'parcelamento'],
       fracas: ['investimento', 'desconto', 'promocao', 'vezes', 'juros', 'cartao', 'pix', 'boleto', 'quanto'],
       respostas: [
-        'A ELO completa custa R$ 997 à vista, ou 12× de R$ 89,90 sem juros. Isso já inclui garantia de 12 meses, suporte 24/7 e atualizações gratuitas.\n\nSe quiser ver de onde vem esse valor, a página de Produto mostra o custo de cada componente — R$ 446 por unidade.',
-        'R$ 997 à vista, ou 12 parcelas de R$ 89,90. Vem com garantia de um ano, suporte 24 horas e atualizações sem custo.\n\nA gente é transparente sobre isso: a tabela de componentes na página de Produto mostra que cada unidade custa R$ 446 para produzir.'
+        'A ELO completa custa R$ 997 à vista, ou 12× de R$ 89,90 sem juros. Isso já inclui garantia de 12 meses, suporte 24/7 e atualizações gratuitas.\n\nSe quiser ver de onde vem esse valor, a página de Produto mostra o custo de cada componente — R$ 406 por unidade.',
+        'R$ 997 à vista, ou 12 parcelas de R$ 89,90. Vem com garantia de um ano, suporte 24 horas e atualizações sem custo.\n\nA gente é transparente sobre isso: a tabela de componentes na página de Produto mostra que cada unidade custa R$ 406 para produzir.'
       ],
       seguimento: { texto: 'Quer saber o que vem na caixa?', alvo: 'caixa' }
     },
@@ -483,11 +481,11 @@
     },
     {
       id: 'componentes', nome: 'os componentes',
-      fortes: ['componente', 'esp32', 'sim800', 'pcb', 'placa', 'hardware', 'sensor', 'chip', 'arduino', 'microcontrolador', 'como e feita', 'feita de', 'por dentro', 'tecnologia usada', 'especificac', 'ficha tecnica', 'peca'],
+      fortes: ['componente', 'esp32', 'ublox', 'power bank', 'powerbank', 'pcb', 'placa', 'hardware', 'sensor', 'chip', 'arduino', 'microcontrolador', 'como e feita', 'feita de', 'por dentro', 'tecnologia usada', 'especificac', 'ficha tecnica', 'peca'],
       fracas: ['tecnologia', 'eletron', 'circuito', 'modulo', 'material', 'processador'],
       respostas: [
-        'Por dentro, a ELO usa um módulo GPS/GPRS SIM800L, um ESP32 (Wi-Fi e Bluetooth), bateria Li-Po de 2000 mAh, módulo de áudio com microfone, alto-falante, três botões táticos e uma placa PCB própria, tudo dentro de uma pochete tática ajustável.\n\nA tabela com todos os componentes e valores está na página de Produto.',
-        'O cérebro é um ESP32, que cuida do Wi-Fi e do Bluetooth. O GPS e a conexão celular vêm de um módulo SIM800L. Tem bateria de 2000 mAh, microfone, alto-falante e três botões, tudo numa placa feita pela equipe. A lista completa, com preço de cada peça, está na página de Produto.'
+        'Por dentro, a ELO usa um módulo GPS Ublox, um ESP32 (Wi-Fi e Bluetooth), um power bank de 10000 mAh, dois botões táticos e uma placa PCB própria, com carregador USB-C, tudo dentro de uma pochete tática ajustável.\n\nA tabela com todos os componentes e valores está na página de Produto: R$ 406 de custo por unidade.',
+        'O cérebro é um ESP32, que cuida do Wi-Fi e do Bluetooth. A localização vem de um GPS Ublox, a energia de um power bank de 10000 mAh, e são dois botões, tudo numa placa feita pela equipe. A lista completa, com preço de cada peça, está na página de Produto.'
       ]
     },
     {
@@ -497,6 +495,57 @@
       respostas: [
         'O site tem estas páginas:\n• Início — a visão geral da ELO\n• Instruções — o manual, com a pochete em 3D anotada e o vídeo demonstrativo\n• Produto — componentes, custos, o modelo 3D, o que vem na caixa e o preço\n• Quem Somos — a equipe, a missão e o formulário de contato\n• Referências — os artigos científicos\n• Jogo — ainda em desenvolvimento\n• Eloá — eu!',
         'Depende do que você procura: o vídeo e a pochete em 3D com cada parte explicada estão em Instruções; preço e componentes, em Produto; a equipe e o formulário, em Quem Somos; os artigos, em Referências. A página Jogo ainda está sendo feita.'
+      ]
+    },
+
+    /* ---- perguntas fora do roteiro -------------------------------------- */
+    {
+      id: 'o_que_nao_faz', nome: 'o que a pochete não faz',
+      fortes: ['tela', 'touch', 'musica', 'radio', 'foto', 'camera', 'filma', 'video chamada', 'videochamada', 'whatsapp', 'joguinho', 'mostra a hora', 'que horas', 'despertador', 'lanterna', 'pressao', 'batimento', 'coracao', 'glicose', 'diabete', 'mede a', 'sensor de queda', 'detecta queda', 'faz ligacao', 'atende ligacao', 'ela toca', 'toca musica'],
+      fracas: ['remedio', 'lembrete'],
+      respostas: [
+        'Ela não tem tela, câmera nem alto-falante de música — então não toca música, não tira foto, não faz chamada de vídeo nem mostra a hora. Também não mede pressão, batimento ou glicose e não detecta queda sozinha: não há sensor de saúde entre os componentes.\n\nO que ela tem são dois botões grandes (emergência e transporte), GPS e bipes que confirmam cada ação. Para lembrar do remédio, você manda pelo painel a mensagem pronta "Hora de tomar o remédio".',
+        'A ELO é de propósito simples: dois botões, GPS e sons de aviso. Nada de tela, música, câmera ou medição de saúde. Ligar para {pessoa} é com você, pelo painel; e lembrete de remédio também sai de lá, como mensagem pronta para a pochete.'
+      ]
+    },
+    {
+      id: 'quem_pode_usar', nome: 'quem mais pode usar',
+      fortes: ['cachorro', 'gato', 'pet', 'animal', 'crianca', 'jovem', 'adolescente', 'eu mesmo', 'eu mesma', 'eu posso usar', 'posso usar eu', 'gravida', 'cego', 'surdo', 'nao enxerga', 'nao sabe ler', 'analfabet', 'nao sabe usar celular'],
+      respostas: [
+        'Ela foi pensada para pessoas idosas, mas os botões e o GPS funcionam igual para qualquer pessoa que consiga segurar um botão por 3 segundos. Como é só botão e som, serve até para quem não lê ou não enxerga bem.\n\nPara criança ou bicho o site não fala — e o cinto é de cintura de gente, então para pet não é indicado. Caso específico, a equipe responde pelo formulário em Quem Somos.',
+        'Quem consegue segurar um botão consegue usar. O público é a pessoa idosa, mas nada nos botões depende de idade, leitura ou visão. Cachorro e gato ficam de fora: é uma pochete de cintura.'
+      ]
+    },
+    {
+      id: 'perdeu_pochete', nome: 'o que fazer se a pochete sumir',
+      fortes: ['roubar', 'roubad', 'roubo', 'se roubarem', 'furto', 'furtar', 'furtad', 'perdi a pochete', 'perdeu a pochete', 'sumiu', 'esqueceu a pochete', 'esqueci a pochete', 'deixou em casa', 'achar a pochete', 'encontrar a pochete', 'outra pessoa usar', 'alguem pegar'],
+      respostas: [
+        'O painel e a página Relatórios mostram a última localização que a pochete mandou, com link para o Google Maps. Se ela foi perdida ou roubada, gere uma nova chave da pochete no painel: a antiga para de funcionar na hora, e ninguém usa no lugar.',
+        'Primeiro, veja no painel onde ela mandou a última posição — tem atalho para o Google Maps. Se não voltar, gere uma chave nova no painel e a pochete antiga deixa de valer. E se {pessoa} só saiu sem ela, aí não tem como avisar: por isso o combinado é levar sempre.'
+      ]
+    },
+    {
+      id: 'aperto_sem_querer', nome: 'o aperto sem querer',
+      fortes: ['sem querer', 'apertar errado', 'por engano', 'sentar em cima', 'sentou em cima', 'sentei em cima', 'deitar em cima', 'esbarr', 'os dois botoes', 'dois botoes juntos', 'cancelar', 'desfazer', 'alarme falso'],
+      respostas: [
+        'Os botões só disparam se forem segurados por 3 segundos — a pochete dá um bipe por segundo enquanto você segura. Esbarrar, sentar em cima ou um toque rápido não envia nada. E no transporte, mesmo que dispare, nada acontece sem o cuidador aprovar.\n\nComo cancelar um alerta de emergência já enviado o site não descreve; a equipe confirma.',
+        'Pode ficar tranquilo: toque rápido não conta. Precisa segurar 3 segundos, com bipes avisando. O carro, então, nem sai sem o ok do cuidador.'
+      ]
+    },
+    {
+      id: 'situacoes', nome: 'onde dá para levar a pochete',
+      fortes: ['praia', 'areia', 'no mar', 'viagem', 'viajar', 'aviao', 'aeroporto', 'exterior', 'outro pais', 'fora do brasil', 'hospital', 'igreja', 'academia', 'caminhada', 'correr', 'sol forte', 'dormir com', 'dentro de casa', 'em casa', 'na rua', 'onibus', 'metro', 'levar para'],
+      respostas: [
+        'Dá para levar em qualquer lugar onde se usaria uma pochete comum: rua, casa, caminhada, ônibus, igreja, hospital. Aguenta chuva, suor e respingo, mas não mergulho — mar, piscina e banho estão fora. O GPS pega melhor ao ar livre.\n\nViagem de avião e uso fora do Brasil o site não detalha; vale confirmar com a equipe.',
+        'Onde {pessoa} for, a pochete vai junto — só não entra na água. Para dormir não precisa: à noite ela fica carregando. Avião e exterior eu não sei te garantir; a equipe confirma.'
+      ]
+    },
+    {
+      id: 'seguranca_fisica', nome: 'a segurança do aparelho',
+      fortes: ['explode', 'explodir', 'pega fogo', 'pegar fogo', 'esquenta', 'esquentar', 'quente', 'choque', 'radiacao', 'faz mal', 'perigos', 'cancer', 'marcapasso', 'seguro usar'],
+      respostas: [
+        'A pochete funciona com um power bank de 10000 mAh e carrega por USB-C, como um carregador portátil de celular. O cuidado é o mesmo: usar o carregador da caixa, não mergulhar e não deixar no sol forte ou perto de fogo.\n\nTestes de aquecimento, radiação ou uso com marcapasso o site não publica — nesses casos, confirme com a equipe e com o médico.',
+        'É o mesmo tipo de bateria de um carregador portátil de celular, com os mesmos cuidados: carregador da caixa, longe de fogo, sol forte e mergulho. Para marcapasso ou outro caso de saúde, a palavra final é do médico.'
       ]
     },
 
@@ -522,14 +571,14 @@
   ];
 
   const NAO_SEI = [
-    'Essa eu ainda não sei responder. Mas posso ajudar com o botão de emergência, o transporte, os comandos de voz, a bateria, a localização, o app, o preço, a garantia — e com o projeto e a equipe. Quer ir por algum desses?',
+    'Não peguei bem o que você quis dizer, mas quero ajudar. Escreve de outro jeito, do seu jeito mesmo? Eu entendo do botão de emergência, do transporte, da bateria, da localização, do app, do preço, da garantia — e do projeto e da equipe.',
     'Hmm, isso está fora do que eu conheço. O que eu sei bem é a ELO: como funciona, como configurar, quanto custa, o que vem na caixa, quem fez. Se for sobre outra coisa, a equipe responde pelo formulário em Quem Somos.'
   ];
 
   /* ------------------------------------------------------------------------
      3 · Jeito de falar
      ------------------------------------------------------------------------ */
-  const ABERTURAS = ['Boa pergunta.', 'Deixa eu te explicar.', 'Claro.', 'Essa é importante.', 'Ah, sim.'];
+  const ABERTURAS = ['Boa pergunta.', 'Deixa eu te explicar.', 'Essa é importante.', 'Ah, sim.'];
 
   const ACOLHIMENTO = [
     'Entendo a preocupação — é exatamente para isso que a ELO existe.',
@@ -548,6 +597,8 @@
   ];
 
   const AFIRMATIVOS = ['sim', 'quero', 'pode', 'claro', 'por favor', 'vai', 'manda', 'bora', 'ok', 'uhum', 'aham', 'quero sim', 'pode ser', 'isso', 'pode sim', 'pode falar', 'conta', 'explica', 'mostra', 'sim por favor', 'vamos', 'beleza', 'ta', 'ta bom', 'yes', 'com certeza', 'quero saber', 'sim quero', 'pode explicar', 'exato', 'exatamente', 'isso mesmo', 'e isso', 'e isso mesmo', 'positivo', 'certo', 'sim e isso'];
+  const PERGUNTA_BOBA = ['pergunta idiota', 'pergunta boba', 'pergunta burra', 'pergunta besta', 'pergunta tonta', 'duvida boba', 'duvida idiota', 'duvida besta', 'parece bobo', 'parece idiota', 'desculpa a pergunta', 'desculpe a pergunta', 'vai parecer burrice'];
+  const SEM_PERGUNTA_BOBA = ['Não tem pergunta boba.', 'Pergunta boba não existe, pode mandar.', 'Que nada, é uma boa pergunta.'];
   const NEGATIVOS = ['nao', 'nao precisa', 'nao quero', 'deixa', 'agora nao', 'nao obrigado', 'nao obrigada', 'depois', 'nope', 'nem', 'nao por enquanto', 'nao valeu', 'nao e isso', 'nao era isso', 'errado', 'nada a ver'];
 
   function detectarPessoa(textoNorm) {
@@ -588,13 +639,51 @@
     return tokens.some(t => t.startsWith(radical));
   }
 
+  // Edições (inclusive troca de duas letras vizinhas) para ir de a até b
+  function distancia(a, b) {
+    let anterior = null;
+    let linha = Array.from({ length: b.length + 1 }, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) {
+      const atual = [i];
+      for (let j = 1; j <= b.length; j++) {
+        atual[j] = Math.min(linha[j] + 1, atual[j - 1] + 1, linha[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        if (anterior && i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+          atual[j] = Math.min(atual[j], anterior[j - 2] + 1);
+        }
+      }
+      anterior = linha;
+      linha = atual;
+    }
+    return linha[b.length];
+  }
+
+  // Erro de digitação: "bateira" ~ "bateria", "emergensia" ~ "emergencia".
+  // Só corrige palavra desconhecida ("aviao" já é pista, não vira "aviso")
+  // e com a mesma primeira letra ("franca" não vira "branca").
+  let radicaisConhecidos = null;
+  function conhecida(token) {
+    if (!radicaisConhecidos) {
+      radicaisConhecidos = BASE.flatMap(i => (i.fortes || []).concat(i.fracas || [])).filter(p => !p.includes(' ') && p.length > 3);
+    }
+    return radicaisConhecidos.some(r => token.startsWith(r));
+  }
+
+  function parecida(tokens, radical) {
+    if (radical.length < 5) return false;
+    const tolera = radical.length >= 8 ? 2 : 1;
+    const n = radical.length;
+    return tokens.some(t => t.length >= 4 && t[0] === radical[0] && !conhecida(t) &&
+      [n - 1, n, n + 1].some(k => distancia(t.slice(0, k), radical) <= tolera));
+  }
+
   function pontuar(intencao, textoNorm, tokens) {
     let pontos = 0;
     const listas = [[intencao.fortes || [], PESO_FORTE], [intencao.fracas || [], PESO_FRACA]];
     for (const [lista, peso] of listas) {
       for (const pista of lista) {
-        const casou = pista.includes(' ') ? textoNorm.includes(pista) : casaRadical(tokens, pista);
-        if (casou) pontos += peso;
+        if (pista.includes(' ') ? textoNorm.includes(pista) : casaRadical(tokens, pista)) pontos += peso;
+        // palavra quase certa vale menos: com ela sozinha, a Eloá confirma antes de responder
+        else if (peso === PESO_FORTE && !pista.includes(' ') && parecida(tokens, pista)) pontos += PESO_FORTE - 1;
       }
     }
     return pontos;
@@ -702,7 +791,17 @@
       return preencherPessoa(texto, memoria.pessoa);
     }
 
+    // Quem se desculpa pela pergunta ouve que não tem pergunta boba, e a resposta
     function responder(pergunta) {
+      const r = responderPergunta(pergunta);
+      const textoNorm = normalizar(pergunta);
+      if (PERGUNTA_BOBA.some(p => textoNorm.includes(p))) {
+        r.resposta = sortear(SEM_PERGUNTA_BOBA) + ' ' + (r.intencao === 'desconhecido' ? 'Me conta o que você quer saber da ELO.' : r.resposta);
+      }
+      return r;
+    }
+
+    function responderPergunta(pergunta) {
       memoria.turnos++;
       const textoNorm = normalizar(pergunta);
       const tokens = tokenizar(pergunta);
@@ -782,6 +881,12 @@
           confianca: Math.min(0.5, palpite.pontos / 6),
           fonte: 'local'
         };
+      }
+
+      // Falou da pochete de um jeito que nenhuma pista pegou: o resumo responde o essencial
+      if (!principal && (tokens.includes('pochete') || tokens.includes('elo'))) {
+        const resumo = porId('o_que_e_elo');
+        return { resposta: prefixoNome + montar(resumo, { semAbertura: true }), intencao: resumo.id, confianca: 0.3, fonte: 'local' };
       }
 
       if (!principal) {

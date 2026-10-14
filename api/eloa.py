@@ -81,9 +81,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 # _conhecimento.py: o "_" impede a Vercel de tratar o arquivo como uma função própria
-from _conhecimento import ASSUNTOS, CONVERSA_CURTA, NAO_SEI, PERSONA, texto_dos_fatos
+from _conhecimento import (APELIDOS, ASSUNTOS, CONVERSA_CURTA, NAO_SEI, PERSONA, PISTAS_PERGUNTA_BOBA,
+                           SEM_PERGUNTA_BOBA, texto_dos_fatos)
 
-VERSAO = "2.2.0"
+VERSAO = "2.3.0"
 
 # Provedores: chave que os ativa, protocolo, endereço e modelo padrão.
 # Ordem = prioridade quando há mais de uma chave (ELOA_PROVEDOR força uma).
@@ -260,7 +261,13 @@ ABREVIACOES = {
     "qnt": "quanto", "qto": "quanto", "qd": "quando", "qdo": "quando", "qm": "quem", "msm": "mesmo",
     "pra": "para", "pro": "para o", "ta": "esta", "n": "nao", "nn": "nao", "mt": "muito", "mto": "muito",
     "blz": "beleza", "vlw": "valeu", "obg": "obrigado", "hj": "hoje", "dps": "depois", "kd": "cade",
+    "oque": "o que", "oqe": "o que", "eh": "e", "naum": "nao", "tah": "esta", "ki": "que", "qe": "que",
+    "cmo": "como", "td": "tudo", "tds": "todos", "agr": "agora", "fzr": "fazer", "qnto": "quanto",
+    "quantu": "quanto", "kanto": "quanto", "pfv": "por favor", "pfvr": "por favor", "vdd": "verdade",
+    "dnv": "de novo", "sla": "sei la", "cel": "celular", "zap": "whatsapp", "zapzap": "whatsapp",
+    "vo": "avo", "vovo": "avo",
 }
+ABREVIACOES.update({apelido: "pochete" for apelido in APELIDOS})
 
 
 def normalizar(texto: str) -> str:
@@ -271,7 +278,37 @@ def normalizar(texto: str) -> str:
     return " ".join(ABREVIACOES.get(t, t) for t in base.split(" "))
 
 
+def distancia(a: str, b: str) -> int:
+    """Edições (inclusive troca de duas letras vizinhas) para ir de a até b."""
+    anterior, linha = None, list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        atual = [i] + [0] * len(b)
+        for j, cb in enumerate(b, 1):
+            atual[j] = min(linha[j] + 1, atual[j - 1] + 1, linha[j - 1] + (ca != cb))
+            if anterior and i > 1 and j > 1 and ca == b[j - 2] and a[i - 2] == cb:
+                atual[j] = min(atual[j], anterior[j - 2] + 1)
+        anterior, linha = linha, atual
+    return linha[-1]
+
+
+RADICAIS_CONHECIDOS = [p for a in ASSUNTOS for p in a["pistas"] if " " not in p and len(p) > 3]
+
+
+def parecida(palavra: str, pista: str) -> bool:
+    """'bateira' ~ 'bateria', 'emergensia' ~ 'emergencia': erro de digitação.
+    Só corrige palavra desconhecida ('aviao' já é pista, não vira 'aviso') e
+    com a mesma primeira letra ('franca' não vira 'branca')."""
+    if len(pista) < 5 or len(palavra) < 4 or palavra[0] != pista[0]:
+        return False
+    if any(palavra.startswith(r) for r in RADICAIS_CONHECIDOS):
+        return False
+    tolera = 2 if len(pista) >= 8 else 1
+    n = len(pista)
+    return any(distancia(palavra[:k], pista) <= tolera for k in (n - 1, n, n + 1))
+
+
 def pontuar(texto: str, pistas: list[str]) -> int:
+    """Trecho com espaço vale 3, começo de palavra 2, palavra parecida (erro de digitação) 1."""
     pontos = 0
     palavras = texto.split(" ")
     for pista in pistas:
@@ -280,6 +317,8 @@ def pontuar(texto: str, pistas: list[str]) -> int:
                 pontos += 3
         elif any(p.startswith(pista) for p in palavras):
             pontos += 2
+        elif any(parecida(p, pista) for p in palavras):
+            pontos += 1
     return pontos
 
 
@@ -303,6 +342,9 @@ def responder_local(sessao: Sessao, pergunta: str) -> tuple[str, str, float]:
 
         pontuados = sorted(((pontuar(texto, a["pistas"]), a) for a in ASSUNTOS), key=lambda x: -x[0])
         melhor_pontos, melhor = pontuados[0]
+        if melhor_pontos == 0 and re.search(r"\b(pochete|elo)\b", texto):
+            # falou da pochete de um jeito que nenhuma pista pegou: o resumo responde o essencial
+            melhor_pontos, melhor = 1, next(a for a in ASSUNTOS if a["id"] == "o_que_e_elo")
         if melhor_pontos == 0:
             resposta, intencao, confianca = NAO_SEI, "desconhecido", 0.0
         else:
@@ -311,6 +353,8 @@ def responder_local(sessao: Sessao, pergunta: str) -> tuple[str, str, float]:
             if segundo:
                 resposta += "\n\n" + segundo["fato"]
             intencao, confianca = melhor["id"], min(1.0, melhor_pontos / 6)
+        if any(p in texto for p in PISTAS_PERGUNTA_BOBA):
+            resposta = random.choice(SEM_PERGUNTA_BOBA) + " " + (resposta if melhor_pontos else "Me conta o que você quer saber da ELO.")
         sessao.mensagens += [{"role": "user", "content": pergunta}, {"role": "assistant", "content": resposta}]
         del sessao.mensagens[:-MAX_TURNOS]
         return resposta, intencao, confianca

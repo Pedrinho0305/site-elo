@@ -51,7 +51,7 @@ class TelaInicio extends StatelessWidget {
         _Recurso(Icons.notification_important_rounded, c.red, 'Botão de Alerta',
             'Em caso de emergência, basta segurar o botão vermelho por 3 segundos para avisar o cuidador na hora, com a localização. Se for preciso, ele liga para o SAMU (192).', destaque: true),
         _Recurso(Icons.directions_car_rounded, c.orange, 'Uber com Aprovação', 'Solicite transporte com um botão. O cuidador recebe notificação e pode aprovar ou negar a corrida.'),
-        _Recurso(Icons.mic_rounded, c.purple, 'Comandos de Voz', 'Interface por voz e áudio para facilitar o uso, mesmo para quem tem dificuldades com tecnologia.'),
+        _Recurso(Icons.chat_bubble_outline_rounded, c.purple, 'Recados do Cuidador', 'Mande avisos como "Hora de tomar o remédio": a pochete apita e um toque em qualquer botão confirma que a mensagem foi ouvida.'),
         _Recurso(Icons.phone_iphone_rounded, c.green, 'App do Cuidador', 'Aplicativo completo para cadastrar idosos, receber alertas e monitorar atividades em tempo real.'),
         _Recurso(Icons.shield_rounded, c.blue2, 'Segurança Total', 'Rastreamento em tempo real e notificações instantâneas garantem tranquilidade para toda a família.'),
         _Recurso(Icons.all_inclusive_rounded, c.teal, 'Conexão Constante', 'Mantenha contato direto e saiba sempre onde seu ente querido está, promovendo independência com segurança.'),
@@ -60,7 +60,7 @@ class TelaInicio extends StatelessWidget {
         // Diferencial
         const TituloSecao('Nosso Diferencial'),
         const SizedBox(height: 12),
-        Text('A ELO é a única solução que combina pochete inteligente com app integrado, oferecendo comandos de voz, aprovação de transportes pelo cuidador e alerta de emergência direto para quem cuida. Não é apenas tecnologia - é cuidado humanizado em cada detalhe.',
+        Text('A ELO é a única solução que combina pochete inteligente com app integrado, oferecendo aprovação de transportes pelo cuidador e alerta de emergência direto para quem cuida. Não é apenas tecnologia - é cuidado humanizado em cada detalhe.',
             style: TextStyle(fontSize: 16.5, height: 1.55, color: c.text2)),
         const SizedBox(height: 18),
         ClipRRect(borderRadius: BorderRadius.circular(Raio.lg), child: Image.asset('assets/img/pochete-embalagem.png', semanticLabel: 'A pochete e a caixa que chega na sua casa')),

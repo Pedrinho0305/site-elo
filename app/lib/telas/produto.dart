@@ -22,17 +22,15 @@ class _TelaProdutoState extends State<TelaProduto> {
   final _chavePedido = GlobalKey();
 
   static const _componentes = [
-    ('Módulo GPS/GPRS SIM800L', 'Rastreamento em tempo real e conectividade', 1, 'R\$ 45,00'),
+    ('Módulo GPS/GPRS Ublox GY-GPSS6MV2', 'Rastreamento em tempo real e conectividade', 1, 'R\$ 45,00'),
     ('ESP32 DevKit V1', 'Microcontrolador com Wi-Fi e Bluetooth 4.2', 1, 'R\$ 32,00'),
-    ('Bateria Li-Po 3,7V 2000mAh', 'Alimentação recarregável e de longa duração', 1, 'R\$ 28,00'),
-    ('Módulo de Áudio/Microfone', 'Comunicação de voz e alerta sonoro', 1, 'R\$ 18,00'),
-    ('Botões Táticos (3 unidades)', 'Emergência (SOS), Ligar e Configurações', 3, 'R\$ 12,00'),
+    ('PowerBank de 10000 mah', 'Alimentação recarregável e de longa duração', 1, 'R\$ 100,00'),
+    ('Botões Táticos (2 unidades)', 'Emergência (SOS) e Transporte', 2, 'R\$ 12,00'),
     ('Pochete Tática Ajustável', 'Base de tecido resistente e ajuste de cintura', 1, 'R\$ 38,00'),
     ('Carregador USB-C 5V/2A', 'Carregador rápido seguro', 1, 'R\$ 19,00'),
     ('Placa PCB Customizada', 'Integração perfeita dos componentes', 1, 'R\$ 25,00'),
-    ('Alto-falante Mini 8Ω 2W', 'Exibição de áudio e áudio guia de retorno', 1, 'R\$ 9,00'),
-    ('Resistores, LEDs e Conectores', 'Componentes eletrônicos diversos', 1, 'R\$ 15,00'),
-    ('Testes e Certificação', 'Controle de qualidade e segurança', 1, 'R\$ 85,00'),
+    ('Resistores e Conectores', 'Componentes eletrônicos diversos', 1, 'R\$ 15,00'),
+    ('Testes e Certificação', 'Controle de qualidade e segurança', 1, 'R\$ 0,00'),
   ];
 
   void _irParaPedido() {
@@ -91,7 +89,7 @@ class _TelaProdutoState extends State<TelaProduto> {
                   ]),
                 ]),
               ),
-            _LinhaTotal('Subtotal componentes', 'R\$ 326,00'),
+            _LinhaTotal('Subtotal componentes', 'R\$ 286,00'),
             _LinhaTotal('Montagem, embalagem e logística', 'R\$ 120,00'),
           ]),
         ),
@@ -117,7 +115,7 @@ class _TelaProdutoState extends State<TelaProduto> {
             TintaMarca(precoAVista, estilo: GoogleFonts.unbounded(fontSize: 44, fontWeight: FontWeight.w700)),
             const Text('à vista, ou $precoParcelado sem juros', style: TextStyle(color: Color(0xFFC7CFEC), fontSize: 15)),
             const SizedBox(height: 6),
-            const Text('Custo de produção por unidade: R\$ 446,00, detalhado na tabela acima.', style: TextStyle(color: Color(0xFF8C97C2), fontSize: 13)),
+            const Text('Custo de produção por unidade: R\$ 406,00, detalhado na tabela acima.', style: TextStyle(color: Color(0xFF8C97C2), fontSize: 13)),
             const SizedBox(height: 14),
             for (final t in ['Garantia de 12 meses', 'Suporte técnico 24/7 em português', 'Atualizações de software gratuitas', 'Baseada em 5 estudos revisados por pares'])
               Padding(padding: const EdgeInsets.symmetric(vertical: 3), child: Row(children: [
