@@ -8,7 +8,7 @@ const String siteBase = String.fromEnvironment('ELO_SITE', defaultValue: 'https:
 const String apiBase = String.fromEnvironment('ELO_API', defaultValue: '$siteBase/api');
 const String eloaUrl = String.fromEnvironment('ELOA_API', defaultValue: '$siteBase/api/eloa/perguntar');
 
-/// Modelo 3D da pochete (60 MB): baixado só quando a pessoa pede.
+/// Modelo 3D da pochete (2 MB): baixado só quando a pessoa pede.
 const String modelo3dUrl = '$siteBase/assets/3d/pochete.glb';
 
 /// O jogo publicado no gd.games (o mesmo da página Jogo do site).

@@ -6,7 +6,7 @@ import '../widgets/comum.dart';
 import '../widgets/quadro_web.dart';
 import 'casca.dart';
 
-/// Instruções: a pochete em 3D (sob demanda: o modelo tem 60 MB), as seis
+/// Instruções: a pochete em 3D (sob demanda: o modelo tem 2 MB), as seis
 /// partes, os seis passos, o vídeo (em produção) e as dicas.
 class TelaInstrucoes extends StatefulWidget {
   const TelaInstrucoes({super.key});
@@ -62,7 +62,7 @@ class _TelaInstrucoesState extends State<TelaInstrucoes> {
                       const SizedBox(height: 12),
                       BotaoMarca(texto: 'Ver a pochete em 3D', icone: Icons.threed_rotation_rounded, aoTocar: () => setState(() => _ver3d = true)),
                       const SizedBox(height: 8),
-                      Text('O modelo tem 60 MB: prefira o Wi-Fi.', style: TextStyle(color: c.text3, fontSize: 13)),
+                      Text('O modelo tem 2 MB.', style: TextStyle(color: c.text3, fontSize: 13)),
                     ]),
                   ),
           ),

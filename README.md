@@ -139,7 +139,7 @@ js/
 assets/
   favicon.svg
   img/                                   as imagens usadas, com nome do que mostram: pochete-clara, pochete-escura, pochete-embalagem, pochete-miniatura, eloa-avatar, jogo-cuidador, mockup-visualizador-3d
-  3d/pochete.glb                         modelo 3D (60 MB; Instruções e Produto)
+  3d/pochete.glb                         modelo 3D (2 MB; Instruções e Produto)
   icons/                                 PNGs pequenos exportados do Figma — nenhum é usado hoje
   video/                                 vídeo do site antigo (77 MB, sem uso; pode ser apagado)
   team/                                  fotos da equipe (LEIA-ME.txt diz os nomes)
@@ -363,7 +363,7 @@ Segredos (`DB_PASSWORD`, chaves de modelo, Telegram, Gmail, `EQUIPE_CHAVE`) vive
 | Credenciais Uber e Telegram | `backend/.env` e Vercel | Sem elas, os dois rodam simulados. Uber exige app aprovado (Guest Rides); Telegram é só criar o bot no @BotFather e colar o token em `TELEGRAM_BOT_TOKEN`. |
 | MySQL configurado | `backend/.env` (local) e `DB_*` na Vercel | Sem ele, o backend sobe mas responde 503 "banco indisponível" (na máquina e na Vercel), a página `/api` mostra o motivo e ninguém consegue entrar. Na máquina, `backend/.env` aponta para o banco da escola (bloco B): falta preencher `DB_PASSWORD` do usuário `alunos`. |
 | Tempo real na Vercel | `backend/server.js` | Serverless não mantém o stream SSE nem o bot do Telegram ouvindo; o painel consulta a cada 10 s. Para o tempo real de verdade, rodar `npm start` num servidor contínuo e apontar `window.ELO_API_URL`. |
-| Modelo 3D pesado | `assets/*.glb` (60 MB) | Por isso não está na home. Comprimir (Draco) se quiser usar em mais lugares. |
+| Modelo 3D | `assets/3d/pochete.glb` (2 MB) | Só em Instruções e Produto. Se mudar o formato da pochete, os 6 hotspots de `pages/instrucoes.html` (`data-position`) precisam acompanhar. |
 | Vídeo antigo | `assets/*.mp4` (77 MB) | Não é mais referenciado; pode ser apagado do repositório. |
 
 ---
