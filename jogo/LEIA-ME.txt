@@ -20,6 +20,21 @@ Nao copie essa pasta para ca. O jogo HTML5 esta dentro do app.asar, na
 pasta "app": extraia (npx @electron/asar extract app.asar saida) e copie
 o conteudo de saida/app para ca.
 
+Recebeu so o instalador (ex.: TCC-JOGO-PC_MOBILE - V3 -1_0_0-windows.exe)?
+Ele e um pacote NSIS: abra com o 7-Zip (ou: npx 7zip-bin ... x arquivo.exe),
+pegue resources/app.asar e siga o passo acima. Foi assim que a versao
+atual (V3, PC e celular) entrou aqui. O .exe fica fora do git (264 MB).
+
+DEPOIS DE COPIAR (obrigatorio): abra jogo/index.html e, logo abaixo da
+linha  <script src="data.js" crossorigin="anonymous"></script>, coloque
+
+	<script src="modo-elo.js"></script>
+
+Sem ela o jogo volta a abrir na tela "PC ou Celular". Com ela, o site
+escolhe sozinho: computador = modo PC, celular/tablet = modo celular
+(variavel global VarModo do jogo; comeca direto na cena Inicio-Jogo).
+Nao apague o modo-elo.js ao substituir os arquivos.
+
 Republicou o jogo? Repita os passos e substitua os arquivos.
 
 Link atual do gd.games (usado so como reserva):

@@ -1,14 +1,25 @@
 // Login e cadastro. Fala com o backend (backend/server.js): só entra quem
 // está cadastrado lá. Se o servidor estiver fora do ar, avisa e não entra.
-// Com sucesso, abre a sessão ('elo-sessao', com o token) e vai para o painel.
+// Com sucesso, abre a sessão ('elo-sessao', com o token) e vai para o painel,
+// ou para a página que pediu o login (?volta=jogo.html; só páginas do site).
 // A foto é recortada e reduzida antes de enviar.
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('authForm');
   const status = document.getElementById('formStatus');
   if (!form) return;
 
+  // Só um nome de página de pages/ (com âncora opcional): nada de outro domínio
+  const volta = new URLSearchParams(location.search).get('volta') || '';
+  const destino = /^[a-z0-9-]+\.html(#[a-z0-9-]+)?$/.test(volta) ? volta : (form.dataset.next || 'painel.html');
+  if (destino !== (form.dataset.next || 'painel.html')) {
+    // Trocar entre login e cadastro mantém o caminho de volta
+    document.querySelectorAll('.auth-switch a').forEach(a => {
+      a.href = `${a.getAttribute('href')}?volta=${encodeURIComponent(destino)}`;
+    });
+  }
+
   // Quem já está logado não precisa entrar de novo
-  if (window.EloSessao?.ler()) { window.location.replace(form.dataset.next || 'painel.html'); return; }
+  if (window.EloSessao?.ler()) { window.location.replace(destino); return; }
 
   /* ---- Mostrar / esconder senha ---- */
   document.querySelectorAll('.password-toggle').forEach(button => {
@@ -115,6 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.EloSessao.entrar(perfil);
     localStorage.setItem('elo-cuidador', perfil.nome.split(' ')[0]);
-    setTimeout(() => { window.location.href = form.dataset.next || 'painel.html'; }, 400);
+    setTimeout(() => { window.location.href = destino; }, 400);
   });
 });

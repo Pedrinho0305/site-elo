@@ -13,3 +13,9 @@ __pycache__/
 
 # Firmware: a configuração tem senha do Wi-Fi e a chave da pochete
 firmware/*/config.h
+
+# Originais pesados (passam do limite de 100 MB do GitHub). O site usa as versões
+# convertidas: jogo/ (HTML5 tirado do .exe) e assets/video/*.mp4 (H.264)
+jogo/*.exe
+assets/video/*.MOV
+assets/video/*.mov

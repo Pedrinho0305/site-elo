@@ -6,7 +6,7 @@
 	<title>ELO: O Jogo</title>
 	<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="../css/header.css?v=9">
-	<link rel="stylesheet" href="../css/jogo.css?v=7">
+	<link rel="stylesheet" href="../css/jogo.css?v=9">
 	<link rel="stylesheet" href="../css/reveal.css?v=7">
 	<script src="../js/jogo.js" defer></script>
 	<script src="../js/header.js" defer></script>
@@ -64,9 +64,10 @@
 			</div>
 		</section>
 
-		<!-- O jogo roda aqui dentro. Primeiro tenta a versão hospedada no site (jogo/index.html,
-		     exportação HTML5 do GDevelop: só o jogo, sem a interface do gd.games). Se ela não
-		     existir, usa a página do gd.games (data-fallback), que vem com a moldura deles. -->
+		<!-- O jogo roda aqui dentro, só para quem entrou na conta (jogo.js confere a sessão no
+		     backend). Primeiro tenta a versão hospedada no site (jogo/index.html, exportação HTML5
+		     do GDevelop, com ?modo=pc ou ?modo=mobile conforme o aparelho). Se ela não existir,
+		     usa a página do gd.games (data-fallback), que vem com a moldura deles. -->
 		<section class="game-stage-section" id="jogar">
 			<div class="stage-head">
 				<h2>Jogar</h2>
@@ -78,6 +79,15 @@
 
 			<div class="game-stage" id="gameStage">
 				<iframe id="gameFrame" data-src="../jogo/index.html" data-fallback="https://gd.games/games/15184de8-d773-4b90-b41d-5c0a2c104402" title="ELO: O Jogo" allow="fullscreen; autoplay; gamepad" allowfullscreen loading="lazy"></iframe>
+				<div class="game-stage-empty" id="gameLock" hidden>
+					<span class="demo-play" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/><circle cx="12" cy="15.2" r="1.2"/></svg></span>
+					<h3 id="gameLockTitle">Entre na sua conta para jogar</h3>
+					<p id="gameLockText">O jogo é para cuidadores cadastrados na ELO. Depois de entrar, você volta direto para cá.</p>
+					<div class="game-lock-actions">
+						<a class="btn btn-green" id="gameLockLogin" href="login.html?volta=jogo.html%23jogar">Entrar para jogar</a>
+						<a class="btn btn-outline" id="gameLockSignup" href="cadastro.html?volta=jogo.html%23jogar">Criar conta</a>
+					</div>
+				</div>
 				<div class="game-stage-empty" id="gameEmpty" hidden>
 					<span class="demo-play" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2.5" y="7" width="19" height="11" rx="4"/><path d="M7 11v3M5.5 12.5h3"/><circle cx="16" cy="11.5" r=".9"/><circle cx="18" cy="13.5" r=".9"/></svg></span>
 					<h3>O jogo ainda está em desenvolvimento</h3>
@@ -125,21 +135,17 @@
 			</div>
 		</section>
 
-		<!-- Demonstração: vídeo ainda em produção -->
+		<!-- Demonstração: uma partida de verdade (tela inicial, Fase 1 inteira e o começo da Fase 2),
+		     gravada no navegador com a trilha do próprio jogo. Aberta a todos, mesmo sem login. -->
 		<section class="game-demo night" id="demo">
 			<div class="demo-wrap">
 				<div class="demo-header">
 					<h2>Demonstração do jogo</h2>
-					<p>Veja o jogo em ação: gameplay e mecânicas principais.</p>
+					<p>Uma partida da Fase 1: Elias junta munição, derruba o Porteiro com dois tiros e desce pelo bueiro até a Fase 2.</p>
 				</div>
 
-				<div class="demo-screen" role="img" aria-label="Espaço reservado para o vídeo de demonstração, ainda em produção">
-					<div class="demo-placeholder">
-						<span class="demo-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg></span>
-						<h3>Vídeo em produção</h3>
-						<p>A demonstração completa será inserida aqui.</p>
-						<p class="demo-specs">1920×1080, entre 5 e 7 minutos</p>
-					</div>
+				<div class="demo-screen demo-screen--video">
+					<video src="../assets/video/jogo-gameplay.mp4" poster="../assets/img/jogo-gameplay-capa.jpg" controls preload="metadata" playsinline aria-label="Partida gravada de ELO: O Jogo, Fase 1"></video>
 				</div>
 			</div>
 		</section>
