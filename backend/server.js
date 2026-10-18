@@ -44,9 +44,6 @@
      POST   /api/telegram/teste
      GET    /api/familiares · POST /api/familiares   { nome, parentesco, telefone?, email?, avisar? }
      PATCH  /api/familiares/:id · DELETE /api/familiares/:id
-     GET    /api/pochetes/:id/recados                                       → { recados, prontos }
-     POST   /api/pochetes/:id/recados    { texto }  mensagem para a pochete tocar
-     POST   /api/pochetes/:id/recados/:rid/confirmar   (simula a pochete confirmando)
 
    ROTAS DOS FORMULÁRIOS DO SITE (sem login)
      POST   /api/mensagens              { tipo: contato|pedido, nome, email, telefone?,
@@ -58,8 +55,7 @@
    ROTAS DA POCHETE (X-Pochete-Key: <chave>)
      POST   /api/pochete/evento          { tipo: emergencia|transporte|bateria|localizacao|teste,
                                            lat?, lng?, bateria?, destino?: { lat, lng, nome } }
-     GET    /api/pochete/estado          → { pochete, corrida, recados }   (corrida ativa e mensagens novas)
-     POST   /api/pochete/recados/:id/confirmar   a pessoa apertou um botão: mensagem recebida
+     GET    /api/pochete/estado          → { pochete, corrida }   (corrida ativa)
 
    Erros: { erro: "mensagem em português" } com o status HTTP certo.
 
@@ -269,23 +265,6 @@ async function conectarBanco() {
       CONSTRAINT fk_familiar_cuidador FOREIGN KEY (cuidador_id) REFERENCES cuidadores(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
 
-  // Mensagens do cuidador para a pochete ("recados", para não confundir com
-  // as mensagens dos formulários do site). A pochete busca as novas em
-  // GET /api/pochete/estado e confirma quando a pessoa aperta um botão.
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS recados (
-      id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-      pochete_id     INT UNSIGNED  NOT NULL,
-      texto          VARCHAR(160)  NOT NULL,
-      audio          TINYINT UNSIGNED NULL,
-      status         VARCHAR(12)   NOT NULL DEFAULT 'pendente',
-      criado_em      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      entregue_em    DATETIME      NULL,
-      confirmado_em  DATETIME      NULL,
-      INDEX (pochete_id, status),
-      CONSTRAINT fk_recado_pochete FOREIGN KEY (pochete_id) REFERENCES pochetes(id) ON DELETE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
-
   // Tentativas recentes (login errado, cadastro, chave de pochete errada...).
   // Fica no banco, não na memória, porque na Vercel cada pedido pode cair numa
   // instância diferente e um contador em memória não seguraria ninguém.
@@ -413,10 +392,6 @@ const pochetePublica = p => ({
 const familiarPublico = f => ({
   id: f.id, nome: f.nome, parentesco: f.parentesco, telefone: f.telefone || null,
   email: f.email || null, avisar: Boolean(f.avisar), criado_em: f.criado_em,
-});
-const recadoPublico = r => ({
-  id: r.id, pochete_id: r.pochete_id, texto: r.texto, audio: r.audio ?? null, status: r.status,
-  criado_em: r.criado_em, entregue_em: r.entregue_em, confirmado_em: r.confirmado_em,
 });
 const corridaPublica = c => ({
   id: c.id, pochete_id: c.pochete_id, status: c.status,
@@ -721,8 +696,7 @@ const ROTAS = [
   ]],
   ['A pochete fala com o servidor (X-Pochete-Key)', [
     ['POST', '/api/pochete/evento', '{ tipo: emergencia | transporte | bateria | localizacao | teste, lat?, lng?, bateria?, destino? } → 201 { evento, corrida? }'],
-    ['GET', '/api/pochete/estado', '→ { pochete, cuidador, corrida, recados } — corrida ativa e mensagens do cuidador ainda não confirmadas.'],
-    ['POST', '/api/pochete/recados/:id/confirmar', '→ { recado } — a pessoa apertou um botão com a mensagem tocando.'],
+    ['GET', '/api/pochete/estado', '→ { pochete, cuidador, corrida } — corrida ativa.'],
   ]],
   ['Eventos e corridas (cuidador)', [
     ['GET', '/api/eventos?limite=20&de=&ate=', 'Bearer → { eventos }. de/ate (ISO) filtram o período; com eles o limite vai até 1000.'],
@@ -739,14 +713,11 @@ const ROTAS = [
     ['GET', '/api/mensagens?tipo=&limite=', 'Bearer de uma conta em ADMIN_EMAILS → { mensagens }'],
     ['PATCH', '/api/mensagens/:id', 'Bearer (equipe) { lida } → { mensagem }'],
   ]],
-  ['Familiares e mensagens para a pochete (cuidador)', [
+  ['Familiares (cuidador)', [
     ['GET', '/api/familiares', 'Bearer → { familiares, parentescos, avisos_por_email }'],
     ['POST', '/api/familiares', 'Bearer { nome, parentesco, telefone?, email?, avisar? } → 201 { familiar }. avisar = e-mail quando o botão vermelho for apertado.'],
     ['PATCH', '/api/familiares/:id', 'Bearer (mesmos campos) → { familiar }'],
     ['DELETE', '/api/familiares/:id', 'Bearer → { ok }'],
-    ['GET', '/api/pochetes/:id/recados', 'Bearer → { recados, prontos } (status: pendente, entregue, confirmado)'],
-    ['POST', '/api/pochetes/:id/recados', 'Bearer { texto } (até 160) → 201 { recado }. A pochete recebe no próximo GET /api/pochete/estado.'],
-    ['POST', '/api/pochetes/:id/recados/:rid/confirmar', 'Bearer → { recado }: faz o papel da pessoa apertando o botão (teste sem a pochete).'],
   ]],
   ['Telegram (cuidador)', [
     ['POST', '/api/telegram/codigo', 'Bearer → { codigo, bot, simulado, vinculado }'],
@@ -1007,71 +978,6 @@ app.post('/api/pochetes/:id/simular', autenticar, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-/* ---- mensagens para a pochete ----
-   As prontas têm um áudio gravado na pochete (cartão do módulo de som:
-   0001.mp3, 0002.mp3...). Texto livre toca o aviso de mensagem nova. */
-const RECADOS_PRONTOS = [
-  { audio: 1, texto: 'Estou a caminho.' },
-  { audio: 2, texto: 'Hora de tomar o remédio.' },
-  { audio: 3, texto: 'Me ligue quando puder.' },
-  { audio: 4, texto: 'Fique onde está, já vou buscar você.' },
-  { audio: 5, texto: 'Está tudo bem? Aperte um botão para me responder.' },
-];
-
-async function recadoDaPochete(pocheteId, recadoId) {
-  const [[r]] = await pool.query('SELECT * FROM recados WHERE id = ? AND pochete_id = ?', [Number(recadoId), pocheteId]);
-  if (!r) throw erro(404, 'Mensagem não encontrada.');
-  return r;
-}
-
-// A pessoa apertou um botão com a mensagem tocando: avisa quem mandou
-async function confirmarRecado(recado, pochete, cuidador) {
-  if (recado.status !== 'confirmado') {
-    await pool.query("UPDATE recados SET status = 'confirmado', confirmado_em = NOW(), entregue_em = COALESCE(entregue_em, NOW()) WHERE id = ?", [recado.id]);
-    await telegram.enviar(cuidador.telegram_chat_id, `💬 ${tg(pochete.nome_idoso)} ouviu sua mensagem: "${tg(recado.texto)}"`);
-  }
-  const [[atual]] = await pool.query('SELECT * FROM recados WHERE id = ?', [recado.id]);
-  sse.publicar(cuidador.id, 'recado', { recado: recadoPublico(atual), nome_idoso: pochete.nome_idoso });
-  return recadoPublico(atual);
-}
-
-app.get('/api/pochetes/:id/recados', autenticar, async (req, res, next) => {
-  try {
-    const p = await pocheteDoCuidador(req);
-    const limite = Math.min(Math.max(Number(req.query.limite) || 10, 1), 50);
-    const [linhas] = await pool.query('SELECT * FROM recados WHERE pochete_id = ? ORDER BY id DESC LIMIT ?', [p.id, limite]);
-    res.json({ recados: linhas.map(recadoPublico), prontos: RECADOS_PRONTOS });
-  } catch (e) { next(e); }
-});
-
-app.post('/api/pochetes/:id/recados', autenticar, async (req, res, next) => {
-  try {
-    const p = await pocheteDoCuidador(req);
-    const texto = limparTexto(req.body?.texto, 400).replace(/\s+/g, ' ');
-    if (texto.length < 2) throw erro(400, 'Escreva a mensagem.');
-    if (texto.length > 160) throw erro(400, 'A mensagem pode ter até 160 caracteres.');
-    const marca = 'recado-pochete:' + p.id;
-    if (await excedeu(marca, 20, 60)) throw erro(429, 'Muitas mensagens para esta pochete na última hora. Espere um pouco.');
-    const [[{ abertos }]] = await pool.query(
-      "SELECT COUNT(*) AS abertos FROM recados WHERE pochete_id = ? AND status <> 'confirmado' AND criado_em > (NOW() - INTERVAL 12 HOUR)", [p.id]);
-    if (abertos >= 5) throw erro(409, 'Já há 5 mensagens esperando a pessoa ouvir. Espere ela confirmar uma.');
-    await registrar(marca);
-    const pronto = RECADOS_PRONTOS.find(x => x.texto === texto);
-    const [r] = await pool.query('INSERT INTO recados (pochete_id, texto, audio) VALUES (?, ?, ?)', [p.id, texto, pronto?.audio ?? null]);
-    const [[novo]] = await pool.query('SELECT * FROM recados WHERE id = ?', [r.insertId]);
-    res.status(201).json({ recado: recadoPublico(novo) });
-  } catch (e) { next(e); }
-});
-
-// Demonstração sem o dispositivo: o painel faz o papel da pessoa apertando o botão
-app.post('/api/pochetes/:id/recados/:rid/confirmar', autenticar, async (req, res, next) => {
-  try {
-    const p = await pocheteDoCuidador(req);
-    const r = await recadoDaPochete(p.id, req.params.rid);
-    res.json({ recado: await confirmarRecado(r, p, req.cuidador) });
-  } catch (e) { next(e); }
-});
-
 /* ---- familiares ---- */
 const PARENTESCOS = ['Filho(a)', 'Neto(a)', 'Cônjuge', 'Irmão(ã)', 'Sobrinho(a)', 'Genro ou nora', 'Vizinho(a)', 'Amigo(a)', 'Cuidador(a)', 'Outro'];
 
@@ -1154,26 +1060,10 @@ app.get('/api/pochete/estado', autenticarPochete, async (req, res, next) => {
     await pool.query('UPDATE pochetes SET ultimo_contato = NOW() WHERE id = ?', [req.pochete.id]);
     const [linhas] = await pool.query('SELECT * FROM corridas WHERE pochete_id = ? AND status IN (?) ORDER BY id DESC LIMIT 1', [req.pochete.id, STATUS_ATIVOS]);
     const corrida = linhas[0] ? await sincronizarCorrida(linhas[0], req.cuidador.id) : null;
-    // Mensagens do cuidador que a pessoa ainda não confirmou (das últimas 12 h)
-    const [recados] = await pool.query(
-      "SELECT * FROM recados WHERE pochete_id = ? AND status <> 'confirmado' AND criado_em > (NOW() - INTERVAL 12 HOUR) ORDER BY id LIMIT 5", [req.pochete.id]);
-    const novos = recados.filter(r => r.status === 'pendente').map(r => r.id);
-    if (novos.length) {
-      await pool.query("UPDATE recados SET status = 'entregue', entregue_em = NOW() WHERE id IN (?)", [novos]);
-      sse.publicar(req.cuidador.id, 'recado', { entregues: novos, nome_idoso: req.pochete.nome_idoso });
-    }
     res.json({
       pochete: pochetePublica(req.pochete), cuidador: req.cuidador.nome,
       corrida: corrida ? corridaPublica(corrida) : null,
-      recados: recados.map(r => ({ id: r.id, texto: r.texto, audio: r.audio ?? null, criado_em: r.criado_em })),
     });
-  } catch (e) { next(e); }
-});
-
-app.post('/api/pochete/recados/:id/confirmar', autenticarPochete, async (req, res, next) => {
-  try {
-    const r = await recadoDaPochete(req.pochete.id, req.params.id);
-    res.json({ recado: await confirmarRecado(r, req.pochete, req.cuidador) });
   } catch (e) { next(e); }
 });
 

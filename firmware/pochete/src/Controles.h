@@ -18,9 +18,6 @@ public:
   void iniciar();
   bool proximaAcao(Acao &acao);
 
-  // Com mensagem tocando, o preto segurado só confirma (não pede carro sem querer)
-  void mensagemTocando(bool sim) { mensagemTocando_ = sim; }
-
 private:
   static void tarefa(void *controles);
   void tratar(Botao::Evento evento, Acao acaoAo3s, Som tique);
@@ -28,5 +25,4 @@ private:
   Buzzer &buzzer_;
   Botao &vermelho_, &preto_;
   QueueHandle_t acoes_ = nullptr;
-  volatile bool mensagemTocando_ = false;
 };

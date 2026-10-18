@@ -100,7 +100,7 @@ class _TelaPainelState extends State<TelaPainel> {
     } on ErroApi catch (_) {}
   }
 
-  void _recado(String tipo, String titulo, String texto) => Avisos.i.mostrar(Aviso(tipo: tipo, titulo: titulo, texto: texto));
+  void _avisar(String tipo, String titulo, String texto) => Avisos.i.mostrar(Aviso(tipo: tipo, titulo: titulo, texto: texto));
 
   /* ---------------- ações ---------------- */
 
@@ -116,13 +116,13 @@ class _TelaPainelState extends State<TelaPainel> {
         // sem credencial da Uber: o link universal abre o app do Uber com tudo preenchido
         if (mounted) await abrirLink(context, r['link'] as String);
         final destino = (r['destino'] as Map?)?['nome'];
-        _recado('corrida', 'Uber pronto para pedir', 'Abri o Uber${destino != null ? ' com destino $destino já preenchido' : ''}. Confirme o carro por lá.${r['aviso'] != null ? ' ${r['aviso']}' : ''}');
+        _avisar('corrida', 'Uber pronto para pedir', 'Abri o Uber${destino != null ? ' com destino $destino já preenchido' : ''}. Confirme o carro por lá.${r['aviso'] != null ? ' ${r['aviso']}' : ''}');
       } else {
         setState(() => corrida = Map<String, dynamic>.from(r['corrida'] as Map));
-        _recado('corrida', 'Carro chamado', 'Acompanhe o status no painel da corrida.');
+        _avisar('corrida', 'Carro chamado', 'Acompanhe o status no painel da corrida.');
       }
     } on ErroApi catch (e) {
-      _recado('corrida', 'Não deu certo', e.mensagem);
+      _avisar('corrida', 'Não deu certo', e.mensagem);
     } finally {
       if (mounted) setState(() => chamandoUber = false);
     }
@@ -133,13 +133,13 @@ class _TelaPainelState extends State<TelaPainel> {
       final r = await Api.chamar('corridas/${corrida!['id']}/$acao', metodo: 'POST');
       setState(() => corrida = Map<String, dynamic>.from(r['corrida'] as Map));
     } on ErroApi catch (e) {
-      _recado('corrida', 'Não deu certo', e.mensagem);
+      _avisar('corrida', 'Não deu certo', e.mensagem);
     }
   }
 
   Future<void> _simular(String tipo, {int? bateria}) async {
     final p = pochetes.firstOrNull;
-    if (p == null) { _recado('teste', 'Vincule uma pochete primeiro', 'Os testes mandam os eventos como se fossem da pochete.'); return; }
+    if (p == null) { _avisar('teste', 'Vincule uma pochete primeiro', 'Os testes mandam os eventos como se fossem da pochete.'); return; }
     try {
       final r = await Api.chamar('pochetes/${p['id']}/simular', metodo: 'POST', corpo: {
         'tipo': tipo, 'lat': -23.5612, 'lng': -46.6560, // Av. Paulista, para a demonstração
@@ -149,7 +149,7 @@ class _TelaPainelState extends State<TelaPainel> {
       if (r['corrida'] != null) setState(() => corrida = Map<String, dynamic>.from(r['corrida'] as Map));
       _carregar();
     } on ErroApi catch (e) {
-      _recado('teste', 'Não deu certo', e.mensagem);
+      _avisar('teste', 'Não deu certo', e.mensagem);
     }
   }
 
@@ -158,7 +158,7 @@ class _TelaPainelState extends State<TelaPainel> {
   void _ligarIdoso() {
     final p = _primeiraCom('telefone_idoso');
     if (p != null) { abrirLink(context, linkLigar(p['telefone_idoso'] as String?)); return; }
-    _recado('teste', pochetes.isEmpty ? 'Vincule a pochete primeiro' : 'Falta o telefone',
+    _avisar('teste', pochetes.isEmpty ? 'Vincule a pochete primeiro' : 'Falta o telefone',
         pochetes.isEmpty ? 'O telefone dela é cadastrado junto com a pochete, em Pochete e avisos.' : 'Toque em "Editar" na pochete, em Pochete e avisos, e coloque o telefone dela.');
   }
 
@@ -166,12 +166,7 @@ class _TelaPainelState extends State<TelaPainel> {
     final p = _primeiraCom('posicao');
     final pos = p?['posicao'] as Map?;
     if (pos != null) { abrirMapa(context, lat: (pos['lat'] as num).toDouble(), lng: (pos['lng'] as num).toDouble(), titulo: 'Onde está ${p!['nome_idoso']}'); return; }
-    _recado('teste', 'Sem posição ainda', 'A pochete manda a localização quando liga e a cada poucos minutos. Para testar agora, use "Localização" em Testar sem a pochete.');
-  }
-
-  void _mensagem() {
-    if (pochetes.isEmpty) { _recado('teste', 'Vincule a pochete primeiro', 'A mensagem vai para a pochete de quem você cuida.'); return; }
-    abrirMensagem(context, pochetes);
+    _avisar('teste', 'Sem posição ainda', 'A pochete manda a localização quando liga e a cada poucos minutos. Para testar agora, use "Localização" em Testar sem a pochete.');
   }
 
   void _verFamiliares() {
@@ -310,7 +305,7 @@ class _TelaPainelState extends State<TelaPainel> {
     final acoes = [
       _Acao(Icons.local_taxi_rounded, c.teal, 'Chamar Uber', chamandoUber ? 'Falando com a Uber…' : 'Carro até o destino', chamandoUber ? null : _chamarUber),
       _Acao(Icons.call_rounded, c.green, 'Ligar para idoso', _primeiraCom('telefone_idoso') != null ? 'Para ${chamarPeloNome(_primeiraCom('telefone_idoso')!['nome_idoso'] as String?)}' : 'Telefone dela', _ligarIdoso),
-      _Acao(Icons.chat_rounded, c.blue2, 'Enviar mensagem', 'Toca na pochete', _mensagem),
+      _Acao(Icons.insights_rounded, c.blue2, 'Ver relatórios', 'Alertas, corridas e mapa', () => abrirTela(context, const TelaRelatorios())),
       _Acao(Icons.notification_important_rounded, c.red, 'Ligar 192', 'SAMU, se for preciso', () => abrirLink(context, 'tel:192')),
       _Acao(Icons.place_rounded, c.purple, 'Onde está agora', _primeiraCom('posicao') != null ? 'Última posição' : 'Sem posição ainda', _ondeEsta),
       _Acao(Icons.groups_rounded, c.orange, 'Ver familiares', 'Cadastrar e ligar', _verFamiliares),
@@ -380,7 +375,7 @@ class _TelaPainelState extends State<TelaPainel> {
       final r = await Api.chamar('pochetes/${p['id']}/chave', metodo: 'POST');
       setState(() => chaveNova = r['chave'] as String?);
     } on ErroApi catch (e) {
-      _recado('corrida', 'Não deu certo', e.mensagem);
+      _avisar('corrida', 'Não deu certo', e.mensagem);
     }
   }
 
@@ -391,7 +386,7 @@ class _TelaPainelState extends State<TelaPainel> {
       await Api.chamar('pochetes/${p['id']}', metodo: 'DELETE');
       await _carregar();
     } on ErroApi catch (e) {
-      _recado('corrida', 'Não deu certo', e.mensagem);
+      _avisar('corrida', 'Não deu certo', e.mensagem);
     }
   }
 
@@ -420,12 +415,12 @@ class _TelaPainelState extends State<TelaPainel> {
         const SizedBox(height: 10),
         Wrap(spacing: 8, runSpacing: 8, children: [
           BotaoContorno(texto: 'Enviar mensagem de teste', compacto: true, aoTocar: () async {
-            try { await Api.chamar('telegram/teste', metodo: 'POST'); _recado('telegram', 'Mensagem enviada', t['simulado'] == true ? 'Veja no terminal do servidor.' : 'Confira o seu Telegram.'); }
-            on ErroApi catch (e) { _recado('telegram', 'Não deu certo', e.mensagem); }
+            try { await Api.chamar('telegram/teste', metodo: 'POST'); _avisar('telegram', 'Mensagem enviada', t['simulado'] == true ? 'Veja no terminal do servidor.' : 'Confira o seu Telegram.'); }
+            on ErroApi catch (e) { _avisar('telegram', 'Não deu certo', e.mensagem); }
           }),
           BotaoContorno(texto: 'Desvincular', compacto: true, cor: c.red, aoTocar: () async {
             try { await Api.chamar('telegram', metodo: 'DELETE'); await Sessao.i.atualizarCuidador({'telegram': false}); await _carregarTelegram(); }
-            on ErroApi catch (e) { _recado('telegram', 'Não deu certo', e.mensagem); }
+            on ErroApi catch (e) { _avisar('telegram', 'Não deu certo', e.mensagem); }
           }),
         ]),
       ]);
@@ -438,7 +433,7 @@ class _TelaPainelState extends State<TelaPainel> {
         const SizedBox(height: 10),
         BotaoMarca(texto: 'Vincular', aoTocar: () async {
           try { await Api.chamar('telegram/vincular', metodo: 'POST', corpo: {'chat_id': _chatId.text.trim()}); await Sessao.i.atualizarCuidador({'telegram': true}); await _carregarTelegram(); }
-          on ErroApi catch (e) { _recado('telegram', 'Não deu certo', e.mensagem); }
+          on ErroApi catch (e) { _avisar('telegram', 'Não deu certo', e.mensagem); }
         }),
       ]);
     } else {

@@ -3,8 +3,7 @@
 // fala com o servidor")
 // ----------------------------------------------------------------------------
 //   POST /api/pochete/evento               { tipo, lat?, lng?, bateria? }
-//   GET  /api/pochete/estado               → { corrida, recados[] }
-//   POST /api/pochete/recados/:id/confirmar
+//   GET  /api/pochete/estado               → { corrida }
 // Todos com o cabeçalho X-Pochete-Key, por https com o certificado conferido.
 // É o mesmo caminho do "Testar sem a pochete" do painel: as duas rotas
 // chamam a mesma função do servidor (tratarEvento em backend/server.js).
@@ -25,19 +24,10 @@ struct Resposta {
   bool recusado() const { return status >= 400 && status < 500 && status != 429; }
 };
 
-// Uma mensagem do cuidador ainda não confirmada
-struct RecadoServidor {
-  uint32_t id = 0;
-  String texto;
-};
-
 // O que GET /pochete/estado devolve
 struct EstadoServidor {
   bool ok = false;
   String corrida;                 // status da corrida ativa; "" = nenhuma
-  static constexpr uint8_t MAX_RECADOS = 5;
-  RecadoServidor recados[MAX_RECADOS];
-  uint8_t totalRecados = 0;
 };
 
 class Servidor {
@@ -56,7 +46,6 @@ public:
   // bateria < 0: não manda.
   Resposta enviarEvento(const char *tipo, const Posicao *posicao, int bateria);
   EstadoServidor consultarEstado();
-  Resposta confirmarRecado(uint32_t id);
 
 private:
   Resposta pedir(const char *metodo, const String &rota, const String &corpo, String *resposta);

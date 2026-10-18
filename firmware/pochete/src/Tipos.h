@@ -15,13 +15,12 @@ struct Posicao {
 enum class Acao : uint8_t {
   Emergencia,   // vermelho segurado 3 s
   Uber,         // preto segurado 3 s
-  ToqueCurto,   // qualquer botão solto antes de 3 s: só confirma mensagem
 };
 
 // Os sons do buzzer (a ordem é a da tabela MELODIAS em Buzzer.cpp)
 enum class Som : uint8_t {
   Ligou, TiqueVermelho, TiquePreto, Emergencia, Pedido, Ok, Erro, SemInternet,
-  CarroAprovado, CarroChegando, Mensagem, BateriaBaixa, Conectou,
+  CarroAprovado, CarroChegando, BateriaBaixa, Conectou,
   Total   // não é som: conta quantos existem
 };
 

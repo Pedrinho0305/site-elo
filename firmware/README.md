@@ -1,6 +1,6 @@
 # ELO · Firmware da pochete
 
-Código do dispositivo (ESP32), guardado aqui para a montagem e a finalização do projeto. Ele implementa o contrato com o servidor descrito em [backend/README.md](../backend/README.md#como-a-pochete-fala-com-o-servidor-contrato-do-dispositivo): o que a pochete manda, o que ela consulta e como confirma as mensagens do cuidador.
+Código do dispositivo (ESP32), guardado aqui para a montagem e a finalização do projeto. Ele implementa o contrato com o servidor descrito em [backend/README.md](../backend/README.md#como-a-pochete-fala-com-o-servidor-contrato-do-dispositivo): o que a pochete manda e o que ela consulta. A pochete não recebe mensagens do cuidador (decisão do projeto, como a falta de comando de voz): ela só avisa.
 
 Partiu dos códigos de teste da montagem: o do GPS (TinyGPSPlus no `Serial2`, pinos 16 e 17) e o dos botões com buzzer (preto no D18, vermelho no D22, buzzer no D23, pull-up interno).
 
@@ -13,7 +13,7 @@ firmware/
     config.example.h      copie para config.h e preencha (Wi-Fi, chave da pochete, bateria)
     src/
       main.cpp            setup() e loop(): monta as peças e liga o cão de guarda
-      Pochete.h/.cpp      as regras: emergência, Uber, mensagens, posição, bateria
+      Pochete.h/.cpp      as regras: emergência, Uber, posição, bateria
       Servidor.h/.cpp     Wi-Fi e https com o site (o contrato do backend)
       Controles.h/.cpp    os dois botões e o buzzer, numa tarefa própria do ESP32
       Botao.h/.cpp        um botão: debounce e ativação por 3 s segurando
@@ -47,7 +47,6 @@ Os botões só valem se forem **segurados por 3 segundos**: um aperto rápido se
 |---|---|
 | **Botão vermelho, segurar 3 s** | Emergência. O servidor avisa o cuidador na hora (painel, Telegram) e os familiares marcados para receber e-mail, com a localização. Depois a pochete manda a posição a cada 30 s por 10 min. **Não liga para o SAMU**: quem decide é o cuidador. |
 | **Botão preto, segurar 3 s** | Pede um Uber. A corrida fica esperando o cuidador aprovar no painel; a pochete apita quando o carro é chamado e quando o motorista está a caminho. Precisa do endereço de casa cadastrado na pochete (Painel → Pochete e avisos) e de uma posição do GPS (a atual ou a última que chegou ao servidor). |
-| **Mensagem do cuidador** | Toca no buzzer e repete a cada 30 s, até 10 vezes. Um **toque curto em qualquer botão** confirma e o painel mostra "ouviu". Segurar o vermelho continua sendo emergência (e também confirma). Com mensagem tocando, segurar o preto só confirma: não pede carro sem querer. |
 | **GPS** | Manda a posição a cada 2 min se andou mais de 50 m, ou a cada 10 min parada. |
 | **Bateria** (opcional) | Com `PINO_BATERIA` no `config.h`, mede a cada minuto, manda a carga junto com cada evento e avisa com 20% e com 10% (som e evento `bateria`, uma vez cada, até carregar). |
 | **Sem internet** | A emergência tenta de novo a cada 10 s até sair. O pedido de Uber não fica guardado (chegaria atrasado): a pochete toca o som de "sem internet" e a pessoa aperta de novo. |
@@ -66,12 +65,11 @@ Não há comando de voz: foi retirado do projeto.
 | Bipe grave (1000 Hz) / agudo (2500 Hz) | Cada segundo segurando o vermelho / o preto |
 | Três bipes graves, o último longo | Emergência disparada |
 | Dois bipes agudos | Pedido de Uber disparado |
-| Duas notas subindo | Deu certo (o servidor recebeu, mensagem confirmada, pochete ligou) |
+| Duas notas subindo | Deu certo (o servidor recebeu, pochete ligou) |
 | Quatro notas subindo, rápidas | Conectou no Wi-Fi (ao ligar ou quando a rede volta) |
 | Duas notas descendo | O servidor recusou (veja o motivo no Monitor Serial) ou o cuidador recusou o carro |
 | Três notas descendo | Sem internet (ao ligar sem achar rede, quando a rede cai ou quando um envio falha) |
 | Duas notas médias / três subindo | Carro chamado / motorista a caminho |
-| Três notas subindo, rápidas | Mensagem do cuidador |
 
 ## Peças e ligações (ESP32 DevKit V1)
 
@@ -103,7 +101,6 @@ O programa usa cerca de 84% da memória de programa no esquema padrão. Se um di
 2. Aperte rápido um botão: aparece "solto antes de 3 s" e nada é enviado.
 3. Segure o vermelho 3 s: no painel aparece a emergência, e o Telegram do cuidador recebe o aviso.
 4. Segure o preto 3 s: no painel aparece o pedido de transporte com Aprovar / Recusar. Aprove e a pochete toca "carro chamado".
-5. Mande uma mensagem pelo painel: em até 15 s a pochete toca. Dê um toque curto num botão e o painel mostra "ouviu".
 
 Se o servidor recusar algo, o motivo aparece no Monitor Serial (por exemplo: chave inválida, sem endereço de casa, já existe uma corrida).
 
@@ -128,5 +125,4 @@ O mesmo celular abre o painel do site e recebe o Telegram. O GPS pega melhor ao 
 
 - **Rede celular:** hoje a pochete usa Wi-Fi. Para funcionar na rua sem celular por perto, troque a parte de rede (função `pedir()`) por um módulo 4G com TLS 1.2, como o SIM7600 ou o A7670, usando a biblioteca TinyGSM. O SIM800L da lista de componentes não serve para o servidor da Vercel: ele não fala TLS 1.2.
 - **Bateria:** a montagem atual não mede a bateria, então o painel não mostra a porcentagem. O código já está pronto (`src/Bateria.cpp`): ligue um divisor de tensão 100 kΩ + 100 kΩ entre a bateria e o GND, o meio dele num pino analógico (ex.: GPIO 35), e coloque o pino em `PINO_BATERIA` no `config.h`. Ajuste `BATERIA_CALIBRACAO` medindo a tensão real com um multímetro.
-- **Voz:** o servidor já manda o número do áudio de cada mensagem pronta (`audio`, de 1 a 5, na ordem de `RECADOS_PRONTOS` em `backend/server.js`). Com um módulo de som (DFPlayer Mini e cartão SD), a pochete pode falar a mensagem em vez de só apitar.
 - **Economia de bateria:** com 2000 mAh, o consumo do Wi-Fi ligado direto não chega às 48 h prometidas. O caminho é o *light sleep* do ESP32 entre as consultas, acordando pelos botões.

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../nucleo/api.dart';
@@ -7,9 +5,9 @@ import '../nucleo/avisos.dart';
 import '../nucleo/tema.dart';
 import '../widgets/comum.dart';
 
-/// Partes do Painel que o site tem em js/painel-familia.js e na janela de
-/// mensagem de js/painel-pochete.js: familiares, mensagem para a pochete e
-/// edição de endereço/telefone da pochete. Mesmas rotas do site.
+/// Partes do Painel que o site tem em js/painel-familia.js e em
+/// js/painel-pochete.js: familiares e edição de endereço/telefone da pochete.
+/// Mesmas rotas do site.
 
 /* --------------------------------------------------------------------------
    Telefone: "(11) 99999-0000" para mostrar, "tel:+5511999990000" para ligar
@@ -38,12 +36,6 @@ String chamarPeloNome(String? nome) {
   if (p.isEmpty) return '';
   final titulo = RegExp(r'^(dona|seu|sr\.?|sra\.?|dr\.?|dra\.?|vó|vô|tia|tio)$', caseSensitive: false);
   return titulo.hasMatch(p[0]) && p.length > 1 ? '${p[0]} ${p[1]}' : p[0];
-}
-
-String _hora(dynamic iso) {
-  final d = DateTime.tryParse('$iso')?.toLocal();
-  if (d == null) return '';
-  return '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
 }
 
 /* --------------------------------------------------------------------------
@@ -245,142 +237,6 @@ class _FormFamiliarState extends State<_FormFamiliar> {
           const SizedBox(height: 8),
           BotaoMarca(texto: widget.atual == null ? 'Cadastrar' : 'Salvar alterações', carregando: _enviando, aoTocar: _salvar, expandir: true),
           if (_erro != null) StatusFormulario(texto: _erro!, ok: false),
-        ]),
-      ),
-    );
-  }
-}
-
-/* --------------------------------------------------------------------------
-   Mensagem para a pochete
-   -------------------------------------------------------------------------- */
-Future<void> abrirMensagem(BuildContext context, List<Map<String, dynamic>> pochetes) =>
-    showModalBottomSheet<void>(context: context, isScrollControlled: true, builder: (_) => _FormRecado(pochetes: pochetes));
-
-const _statusRecado = {'pendente': 'Esperando a pochete buscar', 'entregue': 'Chegou na pochete, tocando', 'confirmado': 'Ouviu'};
-
-class _FormRecado extends StatefulWidget {
-  const _FormRecado({required this.pochetes});
-  final List<Map<String, dynamic>> pochetes;
-  @override
-  State<_FormRecado> createState() => _FormRecadoState();
-}
-
-class _FormRecadoState extends State<_FormRecado> {
-  final _texto = TextEditingController();
-  late Map<String, dynamic> _pochete = widget.pochetes.first;
-  List<Map<String, dynamic>> _recados = [];
-  List<String> _prontos = [];
-  bool _enviando = false;
-  String? _status;
-  bool _ok = false;
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _carregar();
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) => _carregar());
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  Future<void> _carregar() async {
-    try {
-      final r = await Api.chamar('pochetes/${_pochete['id']}/recados?limite=8');
-      if (!mounted) return;
-      final novos = List<Map<String, dynamic>>.from(r['recados'] as List? ?? []);
-      // alguma que estava esperando acabou de ser ouvida? avisa
-      for (final n in novos) {
-        final antes = _recados.where((x) => x['id'] == n['id']).firstOrNull;
-        if (antes != null && antes['status'] != 'confirmado' && n['status'] == 'confirmado') {
-          Avisos.i.mostrar(Aviso(tipo: 'teste', titulo: '${chamarPeloNome(_pochete['nome_idoso'] as String?)} ouviu sua mensagem', texto: '"${n['texto']}"'));
-        }
-      }
-      setState(() {
-        _recados = novos;
-        _prontos = [for (final p in (r['prontos'] as List? ?? [])) '${(p as Map)['texto']}'];
-      });
-    } on ErroApi catch (_) {}
-  }
-
-  Future<void> _enviar() async {
-    final texto = _texto.text.trim();
-    if (texto.length < 2) { setState(() { _status = 'Escolha uma mensagem pronta ou escreva a sua.'; _ok = false; }); return; }
-    setState(() { _enviando = true; _status = null; });
-    try {
-      await Api.chamar('pochetes/${_pochete['id']}/recados', metodo: 'POST', corpo: {'texto': texto});
-      _texto.clear();
-      setState(() { _status = 'Enviada. A pochete toca a mensagem na próxima vez que falar com o servidor (em até 15 segundos).'; _ok = true; });
-      await _carregar();
-    } on ErroApi catch (e) {
-      setState(() { _status = e.mensagem; _ok = false; });
-    } finally {
-      if (mounted) setState(() => _enviando = false);
-    }
-  }
-
-  Future<void> _simularOuviu(Map<String, dynamic> r) async {
-    try {
-      await Api.chamar('pochetes/${_pochete['id']}/recados/${r['id']}/confirmar', metodo: 'POST');
-      await _carregar();
-    } on ErroApi catch (e) {
-      if (mounted) avisar(context, e.mensagem);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.cores;
-    return Padding(
-      padding: EdgeInsets.only(left: 20, right: 20, top: 20, bottom: MediaQuery.viewInsetsOf(context).bottom + 20),
-      child: SingleChildScrollView(
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          const Text('Mensagem para a pochete', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 19)),
-          const SizedBox(height: 12),
-          if (widget.pochetes.length > 1) ...[
-            DropdownButtonFormField<int>(
-              initialValue: _pochete['id'] as int,
-              decoration: const InputDecoration(labelText: 'Para quem'),
-              items: [for (final p in widget.pochetes) DropdownMenuItem(value: p['id'] as int, child: Text('${p['nome_idoso']}'))],
-              onChanged: (v) { setState(() { _pochete = widget.pochetes.firstWhere((p) => p['id'] == v); _recados = []; }); _carregar(); },
-            ),
-            const SizedBox(height: 12),
-          ] else Text('Para ${_pochete['nome_idoso']}', style: TextStyle(color: c.text3)),
-          const SizedBox(height: 8),
-          Text('Mensagens prontas (tocam com a voz gravada na pochete)', style: TextStyle(fontWeight: FontWeight.w600, color: c.text2, fontSize: 13.5)),
-          const SizedBox(height: 8),
-          Wrap(spacing: 8, runSpacing: 8, children: [
-            for (final p in _prontos) ActionChip(label: Text(p), onPressed: () => setState(() => _texto.text = p)),
-          ]),
-          const SizedBox(height: 14),
-          TextField(controller: _texto, maxLength: 160, minLines: 2, maxLines: 4, decoration: const InputDecoration(labelText: 'Ou escreva')),
-          Text('Texto escrito faz a pochete tocar o aviso de mensagem nova e piscar o anel azul. A pessoa aperta qualquer botão para dizer que ouviu.', style: TextStyle(color: c.text3, fontSize: 12.5, height: 1.4)),
-          const SizedBox(height: 14),
-          BotaoMarca(texto: 'Enviar para a pochete', icone: Icons.send_rounded, carregando: _enviando, aoTocar: _enviar, expandir: true),
-          if (_status != null) StatusFormulario(texto: _status!, ok: _ok),
-          const SizedBox(height: 18),
-          const Text('Enviadas', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-          const SizedBox(height: 8),
-          if (_recados.isEmpty) Text('Nenhuma mensagem ainda.', style: TextStyle(color: c.text3))
-          else for (final r in _recados) Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: c.bg2, borderRadius: BorderRadius.circular(Raio.sm),
-              border: Border(left: BorderSide(width: 3, color: r['status'] == 'confirmado' ? c.green : (r['status'] == 'entregue' ? c.blue2 : c.text3))),
-            ),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('${r['texto']}', style: const TextStyle(fontWeight: FontWeight.w600)),
-              Text('${_hora(r['criado_em'])} · ${_statusRecado[r['status']] ?? r['status']}${r['status'] == 'confirmado' && r['confirmado_em'] != null ? ' às ${_hora(r['confirmado_em'])}' : ''}',
-                  style: TextStyle(color: c.text3, fontSize: 12.5)),
-              if (r['status'] != 'confirmado') TextButton(onPressed: () => _simularOuviu(r), child: const Text('Testar: fazer de conta que ela ouviu')),
-            ]),
-          ),
         ]),
       ),
     );

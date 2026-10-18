@@ -8,7 +8,7 @@
 //   Gps        a posição (TinyGPSPlus na Serial2)
 //   Bateria    a carga (opcional, PINO_BATERIA no config.h)
 //   Servidor   Wi-Fi e https com o site (contrato em backend/README.md)
-//   Pochete    as regras: emergência, Uber, mensagens, posição, bateria
+//   Pochete    as regras: emergência, Uber, posição, bateria
 // ============================================================================
 #include <Arduino.h>
 #include <esp_task_wdt.h>

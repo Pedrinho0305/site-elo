@@ -13,7 +13,6 @@ const Nota ERRO[]           = {{392, 250}, {0, 80}, {330, 350}};
 const Nota SEM_INTERNET[]   = {{392, 150}, {0, 80}, {392, 150}, {0, 80}, {330, 350}};
 const Nota CARRO_APROVADO[] = {{880, 160}, {0, 60}, {1175, 260}};
 const Nota CARRO_CHEGANDO[] = {{880, 160}, {0, 60}, {1175, 160}, {0, 60}, {1568, 300}};
-const Nota MENSAGEM[]       = {{988, 120}, {0, 50}, {1319, 120}, {0, 50}, {1568, 220}};
 const Nota BATERIA_BAIXA[]  = {{659, 200}, {0, 100}, {523, 300}};
 const Nota CONECTOU[]       = {{784, 70}, {0, 30}, {1047, 70}, {0, 30}, {1319, 70}, {0, 30}, {1568, 160}};
 
@@ -26,7 +25,7 @@ constexpr Melodia melodia(const Nota (&notas)[N]) { return { notas, static_cast<
 const Melodia MELODIAS[] = {
   melodia(LIGOU), melodia(TIQUE_VERMELHO), melodia(TIQUE_PRETO), melodia(EMERGENCIA),
   melodia(PEDIDO), melodia(OK), melodia(ERRO), melodia(SEM_INTERNET),
-  melodia(CARRO_APROVADO), melodia(CARRO_CHEGANDO), melodia(MENSAGEM), melodia(BATERIA_BAIXA),
+  melodia(CARRO_APROVADO), melodia(CARRO_CHEGANDO), melodia(BATERIA_BAIXA),
   melodia(CONECTOU),
 };
 static_assert(sizeof(MELODIAS) / sizeof(MELODIAS[0]) == static_cast<size_t>(Som::Total),

@@ -35,13 +35,8 @@ void Controles::tratar(Botao::Evento evento, Acao acaoAo3s, Som tique) {
 
     case Botao::Evento::Ativado:
       acao = acaoAo3s;
-      if (acao == Acao::Uber && mensagemTocando_) acao = Acao::ToqueCurto;
       // O som sai na hora, antes de a pochete falar com o servidor
-      buzzer_.tocar(acao == Acao::Emergencia ? Som::Emergencia : acao == Acao::Uber ? Som::Pedido : Som::Ok);
-      break;
-
-    case Botao::Evento::ToqueCurto:
-      acao = Acao::ToqueCurto;
+      buzzer_.tocar(acao == Acao::Emergencia ? Som::Emergencia : Som::Pedido);
       break;
 
     default:

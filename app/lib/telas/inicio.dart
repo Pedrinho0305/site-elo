@@ -51,7 +51,7 @@ class TelaInicio extends StatelessWidget {
         _Recurso(Icons.notification_important_rounded, c.red, 'Botão de Alerta',
             'Em caso de emergência, basta segurar o botão vermelho por 3 segundos para avisar o cuidador na hora, com a localização. Se for preciso, ele liga para o SAMU (192).', destaque: true),
         _Recurso(Icons.directions_car_rounded, c.orange, 'Uber com Aprovação', 'Solicite transporte com um botão. O cuidador recebe notificação e pode aprovar ou negar a corrida.'),
-        _Recurso(Icons.chat_bubble_outline_rounded, c.purple, 'Recados do Cuidador', 'Mande avisos como "Hora de tomar o remédio": a pochete apita e um toque em qualquer botão confirma que a mensagem foi ouvida.'),
+        _Recurso(Icons.groups_rounded, c.purple, 'Família Avisada', 'Quando o botão vermelho é apertado, você recebe o aviso no Telegram e os familiares cadastrados, por e-mail.'),
         _Recurso(Icons.phone_iphone_rounded, c.green, 'App do Cuidador', 'Aplicativo completo para cadastrar idosos, receber alertas e monitorar atividades em tempo real.'),
         _Recurso(Icons.shield_rounded, c.blue2, 'Segurança Total', 'Rastreamento em tempo real e notificações instantâneas garantem tranquilidade para toda a família.'),
         _Recurso(Icons.all_inclusive_rounded, c.teal, 'Conexão Constante', 'Mantenha contato direto e saiba sempre onde seu ente querido está, promovendo independência com segurança.'),

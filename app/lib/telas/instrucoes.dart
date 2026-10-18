@@ -20,7 +20,7 @@ class _TelaInstrucoesState extends State<TelaInstrucoes> {
   static const _partes = [
     ('Botão de emergência', 'Segure por 3 segundos e o cuidador é avisado na hora, com a localização. Se for preciso, ele liga para o SAMU (192).'),
     ('Botão de transporte', 'Segure por 3 segundos para pedir um carro. O cuidador aprova ou recusa pelo app antes de a corrida ser chamada.'),
-    ('Sinal sonoro', 'Os bipes contam os 3 segundos enquanto você segura um botão e avisam o que aconteceu: alerta enviado, carro chamado, sem internet ou recado do cuidador.'),
+    ('Sinal sonoro', 'Os bipes contam os 3 segundos enquanto você segura um botão e avisam o que aconteceu: alerta enviado, carro chamado ou sem internet.'),
     ('GPS e conexão com o app', 'Por dentro, o módulo GPS envia a localização em tempo real e mantém a pochete ligada ao app do cuidador.'),
     ('Entrada USB-C e bateria', 'Uma carga de cerca de 2 horas dura até 48 horas de uso. Recarregue todo dia à noite.'),
     ('Cinto ajustável', 'Tecido resistente, com ajuste de cintura. Aguenta chuva e respingos (IP63), mas não mergulho.'),
@@ -31,7 +31,7 @@ class _TelaInstrucoesState extends State<TelaInstrucoes> {
     ('Configure a Pochete', 'Ligue a pochete ELO pressionando o botão lateral por 3 segundos. Conecte via Bluetooth ao aplicativo seguindo as instruções na tela. A pochete deve ser carregada completamente antes do primeiro uso (cerca de 2 horas).'),
     ('Teste o Botão de Emergência', 'O botão vermelho envia um alerta ao cuidador, com a localização; é ele quem decide se liga para o SAMU (192). Faça um teste (modo demonstração no app) para garantir que tudo funciona. IMPORTANTE: Não pressione em modo real sem necessidade.'),
     ('Configure Uber', 'No app, vincule uma conta Uber e defina as permissões. Quando o idoso pressionar o botão preto na pochete, você receberá uma notificação para aprovar ou negar a corrida antes dela ser solicitada.'),
-    ('Mande um Recado', 'No painel, escolha uma mensagem pronta (como "Estou a caminho" ou "Hora de tomar o remédio"). A pochete apita até o idoso dar um toque rápido em qualquer botão, e o painel mostra que ele ouviu.'),
+    ('Cadastre a Família', 'No painel, em Familiares, adicione quem mais acompanha o idoso e marque "Avisar por e-mail". Numa emergência, eles recebem o aviso junto com você, e dá para ligar para qualquer um direto do painel.'),
     ('Uso Diário', 'O idoso deve usar a pochete sempre que sair. A bateria dura até 48 horas. Recarregue diariamente. O app mostra localização em tempo real e histórico de atividades. Configure notificações de acordo com suas preferências.'),
   ];
 

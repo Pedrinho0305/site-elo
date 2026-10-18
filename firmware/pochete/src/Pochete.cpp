@@ -3,14 +3,12 @@
 #include "Log.h"
 
 namespace {
-constexpr uint32_t CONSULTA_ESTADO_MS      = 15000;        // pergunta por corrida e mensagens
+constexpr uint32_t CONSULTA_ESTADO_MS      = 15000;        // pergunta pela corrida
 constexpr uint32_t POSICAO_ANDANDO_MS      = 2UL * 60000;  // manda a posição se andou mais de 50 m
 constexpr uint32_t POSICAO_PARADA_MS       = 10UL * 60000;
 constexpr uint32_t POSICAO_EMERGENCIA_MS   = 30000;
 constexpr uint32_t DURACAO_EMERGENCIA_MS   = 10UL * 60000;
 constexpr uint32_t REENVIO_MS              = 10000;        // emergência que não saiu
-constexpr uint32_t REPETE_MENSAGEM_MS      = 30000;        // mensagem não confirmada toca de novo
-constexpr uint8_t  MAX_REPETICOES_MENSAGEM = 10;
 constexpr uint32_t LEITURA_BATERIA_MS      = 60000;
 constexpr uint32_t GPS_VELHO_MS            = 10UL * 60000; // posição mais velha que isso não vale
 constexpr double   ANDOU_METROS            = 50;
@@ -78,7 +76,6 @@ void Pochete::atualizar() {
     switch (acao) {
       case Acao::Emergencia: emergencia(); break;
       case Acao::Uber:       pedirUber(); break;
-      case Acao::ToqueCurto: if (recado_.id) confirmarRecado(); break;
     }
   }
 
@@ -86,10 +83,6 @@ void Pochete::atualizar() {
   if (emergenciaAtiva_ && desde(emergenciaDesde_) > DURACAO_EMERGENCIA_MS) {
     emergenciaAtiva_ = false;
     LOG("[emergência] fim dos 10 min: posição volta ao normal\n");
-  }
-
-  if (recado_.id && !emergenciaAtiva_ && desde(recado_.tocouEm) > REPETE_MENSAGEM_MS) {
-    if (recado_.vezes < MAX_REPETICOES_MENSAGEM) tocarRecado(); else esquecerRecado();
   }
 
   verificarWifi();
@@ -105,7 +98,6 @@ void Pochete::atualizar() {
 
   if (desde(ultimaConsulta_) > CONSULTA_ESTADO_MS) {
     ultimaConsulta_ = millis();
-    mandarConfirmacao();   // confirmação que ficou sem internet
     consultarEstado();
   }
 
@@ -125,7 +117,6 @@ Resposta Pochete::enviar(const char *tipo) {
 }
 
 void Pochete::emergencia() {
-  if (recado_.id) confirmarRecado();   // ouviu a mensagem, mas a emergência vem primeiro
   emergenciaAtiva_ = true;
   emergenciaDesde_ = millis();
   ultimaPosicao_ = millis();
@@ -170,42 +161,6 @@ void Pochete::pedirUber() {
 }
 
 // ---------------------------------------------------------------------------
-// Mensagens do cuidador
-// ---------------------------------------------------------------------------
-void Pochete::tocarRecado() {
-  recado_.vezes++;
-  recado_.tocouEm = millis();
-  controles_.mensagemTocando(true);
-  buzzer_.tocar(Som::Mensagem);
-  LOG("[mensagem] \"%s\" (vez %u) — toque um botão para confirmar\n", recado_.texto.c_str(), recado_.vezes);
-}
-
-void Pochete::confirmarRecado() {
-  LOG("[mensagem] confirmada: \"%s\"\n", recado_.texto.c_str());
-  recadosConfirmados_[posConfirmados_++ % 8] = recado_.id;
-  confirmarPendente_ = recado_.id;
-  esquecerRecado();
-  buzzer_.tocar(Som::Ok);
-  mandarConfirmacao();   // se falhar, tenta de novo na próxima consulta
-}
-
-void Pochete::mandarConfirmacao() {
-  if (!confirmarPendente_) return;
-  Resposta r = servidor_.confirmarRecado(confirmarPendente_);
-  if (r.ok() || r.recusado()) confirmarPendente_ = 0;   // 4xx: mensagem apagada, não insiste
-}
-
-void Pochete::esquecerRecado() {
-  recado_ = Recado();
-  controles_.mensagemTocando(false);
-}
-
-bool Pochete::jaConfirmado(uint32_t id) const {
-  for (uint32_t c : recadosConfirmados_) if (c == id) return true;
-  return false;
-}
-
-// ---------------------------------------------------------------------------
 // Rotinas
 // ---------------------------------------------------------------------------
 void Pochete::consultarEstado() {
@@ -223,19 +178,6 @@ void Pochete::consultarEstado() {
       buzzer_.tocar(Som::Erro);
     }
     statusCorrida_ = estado.corrida;
-  }
-
-  // Mensagens: pega a primeira que ainda não foi confirmada aqui
-  if (recado_.id) return;
-  for (uint8_t i = 0; i < estado.totalRecados; i++) {
-    const RecadoServidor &r = estado.recados[i];
-    if (!r.id || jaConfirmado(r.id)) continue;
-    recado_.id = r.id;
-    recado_.texto = r.texto;
-    recado_.vezes = 0;
-    if (!emergenciaAtiva_) tocarRecado();
-    else controles_.mensagemTocando(true);
-    break;
   }
 }
 

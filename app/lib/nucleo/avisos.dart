@@ -6,7 +6,7 @@ import 'api.dart';
 import 'sessao.dart';
 
 /// Um aviso na tela: o mesmo que o servidor manda ao Telegram (emergência,
-/// pedido de carro, bateria baixa, teste) ou um recado do próprio app.
+/// pedido de carro, bateria baixa, teste) ou um aviso do próprio app.
 class Aviso {
   Aviso({
     required this.tipo,

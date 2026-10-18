@@ -344,10 +344,10 @@
     /* ---- app ----------------------------------------------------------- */
     {
       id: 'app', nome: 'o app do cuidador',
-      fortes: ['aplicativo', 'app', 'play store', 'app store', 'google play', 'notific', 'baixar', 'instalar o app', 'cadastr', 'loja de aplicativo', 'familiar', 'ligar para', 'ligacao', 'telefonar', 'mandar mensagem', 'mensagem para a pochete', 'enviar mensagem'],
+      fortes: ['aplicativo', 'app', 'play store', 'app store', 'google play', 'notific', 'baixar', 'instalar o app', 'cadastr', 'loja de aplicativo', 'familiar', 'ligar para', 'ligacao', 'telefonar'],
       fracas: ['celular', 'conta', 'instalar', 'cuidador', 'login', 'senha', 'perfil', 'tela'],
       respostas: [
-        'O app ELO está na App Store e no Google Play. Você cria a conta como cuidador e cadastra os dados de {pessoa}: nome, idade, contatos de emergência e informações médicas importantes.\n\nPelo app você recebe os alertas, aprova corridas, acompanha a localização e configura as notificações. No painel também dá para cadastrar familiares (quem tiver e-mail pode ser avisado numa emergência), ligar para {pessoa} ou para o 192 e mandar mensagens para a pochete: a pochete avisa com bipes e você vê quando {pessoa} ouviu.',
+        'O app ELO está na App Store e no Google Play. Você cria a conta como cuidador e cadastra os dados de {pessoa}: nome, idade, contatos de emergência e informações médicas importantes.\n\nPelo app você recebe os alertas, aprova corridas, acompanha a localização e configura as notificações. No painel também dá para cadastrar familiares (quem tiver e-mail pode ser avisado numa emergência), e ligar para {pessoa} ou para o 192.',
         'Baixa na App Store ou no Google Play, cria sua conta de cuidador e cadastra {pessoa} — nome, idade, contatos de emergência e o que for importante de saúde.\n\nDepois é por lá que tudo acontece: alertas, aprovação de corrida, localização. E dá para cadastrar mais de um contato de emergência.'
       ],
       seguimento: { texto: 'Quer que eu passe o passo a passo para conectar a pochete ao app?', alvo: 'configurar' }
@@ -493,19 +493,19 @@
       fortes: ['video', 'jogo', 'game', 'manual', 'instrucoes', '3d', 'modelo 3d', 'onde vejo', 'onde encontro', 'onde esta a pagina', 'qual pagina', 'pagina de', 'menu', 'navegar', 'onde fica', 'tem um jogo', 'tem video'],
       fracas: ['pagina', 'site', 'ver', 'assistir', 'mostrar'],
       respostas: [
-        'O site tem estas páginas:\n• Início — a visão geral da ELO\n• Instruções — o manual, com a pochete em 3D anotada e o vídeo demonstrativo\n• Produto — componentes, custos, o modelo 3D, o que vem na caixa e o preço\n• Quem Somos — a equipe, a missão e o formulário de contato\n• Referências — os artigos científicos\n• Jogo — ainda em desenvolvimento\n• Eloá — eu!',
-        'Depende do que você procura: o vídeo e a pochete em 3D com cada parte explicada estão em Instruções; preço e componentes, em Produto; a equipe e o formulário, em Quem Somos; os artigos, em Referências. A página Jogo ainda está sendo feita.'
+        'O site tem estas páginas:\n• Início — a visão geral da ELO\n• Instruções — o manual, com a pochete em 3D anotada e o vídeo demonstrativo\n• Produto — componentes, custos, o modelo 3D, o que vem na caixa e o preço\n• Quem Somos — a equipe, a missão e o formulário de contato\n• Referências — os artigos científicos\n• Jogo — ELO: O Jogo (é só entrar na conta para jogar, no computador ou no celular)\n• Eloá — eu!',
+        'Depende do que você procura: o vídeo e a pochete em 3D com cada parte explicada estão em Instruções; preço e componentes, em Produto; a equipe e o formulário, em Quem Somos; os artigos, em Referências. O jogo fica na página Jogo: entre na sua conta e jogue ali mesmo.'
       ]
     },
 
     /* ---- perguntas fora do roteiro -------------------------------------- */
     {
       id: 'o_que_nao_faz', nome: 'o que a pochete não faz',
-      fortes: ['tela', 'touch', 'musica', 'radio', 'foto', 'camera', 'filma', 'video chamada', 'videochamada', 'whatsapp', 'joguinho', 'mostra a hora', 'que horas', 'despertador', 'lanterna', 'pressao', 'batimento', 'coracao', 'glicose', 'diabete', 'mede a', 'sensor de queda', 'detecta queda', 'faz ligacao', 'atende ligacao', 'ela toca', 'toca musica'],
+      fortes: ['tela', 'touch', 'musica', 'radio', 'foto', 'camera', 'filma', 'video chamada', 'videochamada', 'whatsapp', 'joguinho', 'mostra a hora', 'que horas', 'despertador', 'lanterna', 'pressao', 'batimento', 'coracao', 'glicose', 'diabete', 'mede a', 'sensor de queda', 'detecta queda', 'faz ligacao', 'atende ligacao', 'ela toca', 'toca musica', 'mandar mensagem', 'mensagem para a pochete', 'enviar mensagem', 'recado'],
       fracas: ['remedio', 'lembrete'],
       respostas: [
-        'Ela não tem tela, câmera nem alto-falante de música — então não toca música, não tira foto, não faz chamada de vídeo nem mostra a hora. Também não mede pressão, batimento ou glicose e não detecta queda sozinha: não há sensor de saúde entre os componentes.\n\nO que ela tem são dois botões grandes (emergência e transporte), GPS e bipes que confirmam cada ação. Para lembrar do remédio, você manda pelo painel a mensagem pronta "Hora de tomar o remédio".',
-        'A ELO é de propósito simples: dois botões, GPS e sons de aviso. Nada de tela, música, câmera ou medição de saúde. Ligar para {pessoa} é com você, pelo painel; e lembrete de remédio também sai de lá, como mensagem pronta para a pochete.'
+        'Ela não tem tela, câmera nem alto-falante de música — então não toca música, não tira foto, não faz chamada de vídeo nem mostra a hora. Também não mede pressão, batimento ou glicose e não detecta queda sozinha: não há sensor de saúde entre os componentes.\n\nO que ela tem são dois botões grandes (emergência e transporte), GPS e bipes que confirmam cada ação. Ela também não recebe mensagens do cuidador; isso foi retirado. Para lembrar do remédio, você liga para {pessoa} pelo painel.',
+        'A ELO é de propósito simples: dois botões, GPS e sons de aviso. Nada de tela, música, câmera ou medição de saúde. Ela só avisa você; não recebe mensagens. Ligar para {pessoa}, inclusive para lembrar do remédio, é com você, pelo painel.'
       ]
     },
     {

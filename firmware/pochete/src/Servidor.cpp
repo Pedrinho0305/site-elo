@@ -112,15 +112,5 @@ EstadoServidor Servidor::consultarEstado() {
 
   estado.ok = true;
   if (!doc["corrida"].isNull()) estado.corrida = doc["corrida"]["status"].as<String>();
-  for (JsonObject r : doc["recados"].as<JsonArray>()) {
-    if (estado.totalRecados == EstadoServidor::MAX_RECADOS) break;
-    RecadoServidor &recado = estado.recados[estado.totalRecados++];
-    recado.id = r["id"] | 0;
-    recado.texto = r["texto"].as<String>();
-  }
   return estado;
-}
-
-Resposta Servidor::confirmarRecado(uint32_t id) {
-  return pedir("POST", "/pochete/recados/" + String(id) + "/confirmar", "{}", nullptr);
 }

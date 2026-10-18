@@ -5,7 +5,6 @@
 - https://site-elo-pi.vercel.app/api
 - POST https://site-elo-pi.vercel.app/api/pochete/evento
 - GET https://site-elo-pi.vercel.app/api/pochete/estado
-- POST https://site-elo-pi.vercel.app/api/pochete/recados/:id/confirmar
 
 ## Internos
 
@@ -42,16 +41,12 @@
 - DELETE /api/pochetes/:id
 - POST /api/pochetes/:id/chave
 - POST /api/pochetes/:id/simular
-- GET /api/pochetes/:id/recados
-- POST /api/pochetes/:id/recados
-- POST /api/pochetes/:id/recados/:rid/confirmar
 - GET /api/familiares
 - POST /api/familiares
 - PATCH /api/familiares/:id
 - DELETE /api/familiares/:id
 - POST /api/pochete/evento
 - GET /api/pochete/estado
-- POST /api/pochete/recados/:id/confirmar
 - GET /api/eventos
 - GET /api/eventos/stream
 - GET /api/corridas

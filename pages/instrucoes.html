@@ -99,7 +99,7 @@
                         <span class="scheme-num">3</span>
                         <div>
                             <h3>Sinal sonoro</h3>
-                            <p>Os bipes contam os 3 segundos enquanto você segura um botão e avisam o que aconteceu: alerta enviado, carro chamado, sem internet ou recado do cuidador.</p>
+                            <p>Os bipes contam os 3 segundos enquanto você segura um botão e avisam o que aconteceu: alerta enviado, carro chamado ou sem internet.</p>
                         </div>
                     </li>
                     <li class="scheme-item" id="f4" data-hotspot="4">
@@ -171,11 +171,11 @@
 
             <div class="step-card">
                 <div class="step-icon icon-purple">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"></circle><path d="M3.5 19a5.5 5.5 0 0 1 11 0"></path><path d="M15 5.5a3 3 0 0 1 0 5.8"></path><path d="M17 14a5.5 5.5 0 0 1 3.5 5"></path></svg>
                 </div>
                 <div class="step-content">
-                    <h3>5. Mande um Recado</h3>
-                    <p>No painel, escolha uma mensagem pronta (como "Estou a caminho" ou "Hora de tomar o remédio"). A pochete apita até o idoso dar um toque rápido em qualquer botão, e o painel mostra que ele ouviu.</p>
+                    <h3>5. Cadastre a Família</h3>
+                    <p>No painel, em Familiares, adicione quem mais acompanha o idoso e marque "Avisar por e-mail". Numa emergência, eles recebem o aviso junto com você, e dá para ligar para qualquer um direto do painel.</p>
                 </div>
             </div>
 
@@ -198,9 +198,9 @@
                     <p>Assista ao guia completo de utilização do ELO</p>
                 </div>
                 <div class="video-player" id="videoPlayer">
-                    <!-- Sem src por enquanto: quando o vídeo novo estiver pronto, adicione
-                         src="../assets/nome-do-video.mp4" aqui e o player liga sozinho. -->
-                    <video id="instructionVideo" preload="metadata" aria-label="Vídeo demonstrativo do ELO" playsinline></video>
+                    <!-- Gravado em iPhone (HEVC HDR) e convertido para H.264, que toca em qualquer
+                         navegador. Trocar o vídeo: mesmo nome, ou mude src e poster. -->
+                    <video id="instructionVideo" src="../assets/video/instrucoes-elo.mp4" poster="../assets/img/instrucoes-elo-capa.jpg" preload="metadata" aria-label="Vídeo demonstrativo do ELO" playsinline></video>
                     <div class="video-empty" aria-hidden="true">
                         <span class="video-empty-icon"><svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="14" height="14" rx="2.5"/><path d="M16.5 10l5-3v10l-5-3"/></svg></span>
                         <h3>Vídeo em produção</h3>

@@ -100,20 +100,17 @@ X-Pochete-Key: elo_xxxxxxxxxxxxxxxx
 
 Campos opcionais em qualquer evento: `lat`, `lng` (float), `bateria` (0–100), `destino: { lat, lng, nome }` (só transporte). Sem `lat/lng`, o servidor usa a última posição conhecida.
 
-3. **Ler o estado** com `GET /api/pochete/estado` (mesmo cabeçalho), a cada ~15 s. Devolve a corrida ativa, se houver, para a pochete avisar com luz e som ("corrida aprovada", "motorista a caminho"), e as **mensagens do cuidador** que a pessoa ainda não confirmou (das últimas 12 h, no máximo 5). As que estavam `pendente` passam a `entregue` nessa hora:
+3. **Ler o estado** com `GET /api/pochete/estado` (mesmo cabeçalho), a cada ~15 s. Devolve a corrida ativa, se houver, para a pochete avisar com luz e som ("corrida aprovada", "motorista a caminho"). A pochete não recebe mensagens do cuidador (os antigos "recados" foram retirados do projeto, como o comando de voz):
 
 ```json
 { "pochete": { "id": 1, "nome_idoso": "Sr. João", "bateria": 77, "posicao": { "lat": -23.56, "lng": -46.65 }, "endereco": "Rua das Flores, 123, São Paulo" },
   "cuidador": "Beatriz Floel",
-  "corrida": { "id": 7, "status": "a_caminho", "eta_min": 3, "motorista": "Carlos · +55 11 …", "veiculo": "Fiat Argo prata ABC1D23", "destino": { "nome": "Casa" } },
-  "recados": [ { "id": 12, "texto": "Hora de tomar o remédio.", "audio": 2, "criado_em": "2026-10-13T13:02:11.000Z" } ] }
+  "corrida": { "id": 7, "status": "a_caminho", "eta_min": 3, "motorista": "Carlos · +55 11 …", "veiculo": "Fiat Argo prata ABC1D23", "destino": { "nome": "Casa" } } }
 ```
 
 Status possíveis da corrida: `pendente` → `aprovada` → `solicitada` → `a_caminho` → `em_andamento` → `concluida`; ou `recusada`, `cancelada`, `sem_motorista`, `erro`.
 
-4. **Confirmar a mensagem** quando a pessoa apertar um botão com ela tocando: `POST /api/pochete/recados/:id/confirmar` (mesmo cabeçalho, corpo `{}`). O painel mostra "ouviu" e o Telegram do cuidador recebe 💬. `audio` é o número do arquivo gravado no cartão do módulo de som (`0001.mp3` a `0005.mp3` para as mensagens prontas); `null` = texto livre, que toca o aviso genérico de mensagem nova.
-
-**Firmware pronto:** [`firmware/pochete/`](../firmware/pochete/) implementa este contrato para ESP32 na montagem atual: botão vermelho (emergência) e preto (Uber) segurados por 3 s, GPS, buzzer, mensagens confirmadas com um toque curto, emergência que tenta de novo sem internet, bateria opcional e https com certificado conferido. C++ em classes (`src/`). Instruções em [`firmware/README.md`](../firmware/README.md).
+**Firmware pronto:** [`firmware/pochete/`](../firmware/pochete/) implementa este contrato para ESP32 na montagem atual: botão vermelho (emergência) e preto (Uber) segurados por 3 s, GPS, buzzer, emergência que tenta de novo sem internet, bateria opcional e https com certificado conferido. C++ em classes (`src/`). Instruções em [`firmware/README.md`](../firmware/README.md).
 
 Enquanto o dispositivo não existe, o painel tem a seção **"Testar sem a pochete"**, que manda exatamente os mesmos eventos pelo caminho `POST /api/pochetes/:id/simular`.
 
@@ -129,15 +126,12 @@ Enquanto o dispositivo não existe, o painel tem a seção **"Testar sem a poche
 | `POST` | `/api/pochetes` | `{ nome_idoso, telefone_idoso?, casa?: { endereco } }` | `201 { pochete, chave }` — a chave só aparece aqui. O servidor procura o endereço no mapa (Nominatim/OpenStreetMap, grátis, sem chave; `GEOCODER=off` desliga): achou, `pochete.casa = { lat, lng, nome }`; não achou, `casa = null` e o texto fica em `pochete.endereco` (o link do Uber leva o endereço escrito). `casa: { lat, lng, nome }` ainda é aceito |
 | `POST` | `/api/pochetes/:id/chave` | — | `{ chave }` nova (a antiga morre) |
 | `PATCH` / `DELETE` | `/api/pochetes/:id` | `{ nome_idoso?, telefone_idoso?, casa?: { endereco } \| null }` | `null` apaga o endereço |
-| `GET` | `/api/pochetes/:id/recados?limite=10` | — | `{ recados, prontos }`. Status: `pendente` (a pochete ainda não buscou), `entregue` (está tocando), `confirmado` (a pessoa apertou um botão) |
-| `POST` | `/api/pochetes/:id/recados` | `{ texto }` (2 a 160) | `201 { recado }`. Texto igual a uma das `prontos` ganha o `audio` dela. Até 20 por hora e 5 esperando por pochete |
-| `POST` | `/api/pochetes/:id/recados/:rid/confirmar` | — | `{ recado }`: o painel faz o papel da pessoa (teste sem a pochete) |
 | `GET` | `/api/familiares` | — | `{ familiares, parentescos, avisos_por_email }` |
 | `POST` | `/api/familiares` | `{ nome, parentesco, telefone?, email?, avisar? }` | `201 { familiar }`. Precisa de telefone ou e-mail; `avisar` exige e-mail. Até 10 por conta |
 | `PATCH` / `DELETE` | `/api/familiares/:id` | mesmos campos | `{ familiar }` / `{ ok }` |
 | `POST` | `/api/pochetes/:id/simular` | `{ tipo, lat?, lng?, bateria?, destino? }` | igual ao evento da pochete |
 | `GET` | `/api/eventos?limite=20&de=&ate=` | — | `{ eventos }`. `de`/`ate` (datas ISO) filtram o período, como nos Relatórios; com eles o limite vai até 1000 |
-| `GET` | `/api/eventos/stream?token=` | — | **SSE**: eventos `emergencia`, `transporte`, `bateria`, `localizacao`, `teste`, `corrida`, `telegram`, `recado` |
+| `GET` | `/api/eventos/stream?token=` | — | **SSE**: eventos `emergencia`, `transporte`, `bateria`, `localizacao`, `teste`, `corrida`, `telegram` |
 | `POST` | `/api/corridas` | `{ pochete_id?, origem?: { lat, lng }, destino?: { lat, lng, nome } }` | chama o carro pelo painel: `201 { modo: "api", corrida }` com credenciais da Uber, ou `{ modo: "link", link, origem, destino, aviso? }` sem elas |
 | `GET` | `/api/corridas` · `/api/corridas/:id` | — | `{ corridas }` / `{ corrida }` (consulta a Uber e atualiza) |
 | `POST` | `/api/corridas/:id/aprovar` | — | estima na Uber, pede o carro, `{ corrida }` |
@@ -212,8 +206,7 @@ eventos     id, pochete_id → pochetes, tipo, dados JSON, criado_em
 corridas    id, pochete_id → pochetes, status, origem_lat/lng, destino_lat/lng/nome, uber_request_id, uber_status, produto, valor, eta_min, motorista, veiculo, erro, solicitada_em, criado_em, atualizado_em
 mensagens   id, tipo (contato|pedido), nome, email, telefone, assunto, mensagem, detalhes JSON, cuidador_id → cuidadores, pagina, ip, email_status, lida, criado_em
 familiares id, cuidador_id → cuidadores, nome, parentesco, telefone, email, avisar, criado_em
-recados    id, pochete_id → pochetes, texto, audio, status (pendente|entregue|confirmado), criado_em, entregue_em, confirmado_em
-tentativas id, chave (ex.: login-email:…, login-ip:…, cadastro-ip:…, pochete-ip:…, recado-pochete:…, aviso-familiar:…), criado_em
+tentativas id, chave (ex.: login-email:…, login-ip:…, cadastro-ip:…, pochete-ip:…, aviso-familiar:…), criado_em
 ```
 
 Senhas com `scrypt` nativo (`scrypt$sal$chave`), mínimo de 8 caracteres e sem as óbvias. A chave da pochete é guardada só como SHA-256; sessões são tokens de 64 hex com validade de `SESSION_DAYS`, e o banco guarda **só o SHA-256 do token** (sessões antigas, com o token puro, são convertidas no primeiro uso). Todas as datas em UTC (`SET time_zone = '+00:00'` em cada conexão).
