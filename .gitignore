@@ -19,4 +19,8 @@ firmware/*/config.h
 jogo/*.exe
 assets/video/*.MOV
 assets/video/*.mov
-/game.zip
+/*.zip
+
+# Anotações privadas (senhas, chaves): ficam só na máquina
+/.LEIA-ME-PRIVADO.md
+/gdevelop-game*/

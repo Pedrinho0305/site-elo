@@ -19,4 +19,6 @@ jogo/*.exe
 assets/video/*.MOV
 assets/video/*.mov
 ferramentas
-game.zip
+*.zip
+.LEIA-ME-PRIVADO.md
+gdevelop-game*

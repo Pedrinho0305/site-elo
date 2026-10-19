@@ -81,6 +81,16 @@ gdjs.MenuCode.GDTxt_9595GirarDicaObjects1= [];
 gdjs.MenuCode.GDTxt_9595GirarDicaObjects2= [];
 gdjs.MenuCode.GDTxt_9595PauseTeclaObjects1= [];
 gdjs.MenuCode.GDTxt_9595PauseTeclaObjects2= [];
+gdjs.MenuCode.GDguia_9595caminhoObjects1= [];
+gdjs.MenuCode.GDguia_9595caminhoObjects2= [];
+gdjs.MenuCode.GDseta_9595guiaObjects1= [];
+gdjs.MenuCode.GDseta_9595guiaObjects2= [];
+gdjs.MenuCode.GDtrilha_9595guiaObjects1= [];
+gdjs.MenuCode.GDtrilha_9595guiaObjects2= [];
+gdjs.MenuCode.GDmarcador_9595saidaObjects1= [];
+gdjs.MenuCode.GDmarcador_9595saidaObjects2= [];
+gdjs.MenuCode.GDparede_9595tiroObjects1= [];
+gdjs.MenuCode.GDparede_9595tiroObjects2= [];
 
 
 gdjs.MenuCode.eventsList0 = function(runtimeScene) {
@@ -127,7 +137,7 @@ isConditionTrue_0 = false;
 isConditionTrue_0 = gdjs.evtTools.input.cursorOnObject(gdjs.MenuCode.mapOfGDgdjs_9546MenuCode_9546GDELIASObjects1Objects, runtimeScene, true, true);
 if (isConditionTrue_0) {
 isConditionTrue_0 = false;
-{isConditionTrue_0 = runtimeScene.getOnceTriggers().triggerOnce(23782548);
+{isConditionTrue_0 = runtimeScene.getOnceTriggers().triggerOnce(24330348);
 }
 }
 if (isConditionTrue_0) {
@@ -150,7 +160,7 @@ isConditionTrue_0 = false;
 isConditionTrue_0 = gdjs.evtTools.input.cursorOnObject(gdjs.MenuCode.mapOfGDgdjs_9546MenuCode_9546GDELIASObjects1Objects, runtimeScene, true, false);
 if (isConditionTrue_0) {
 isConditionTrue_0 = false;
-{isConditionTrue_0 = runtimeScene.getOnceTriggers().triggerOnce(23784020);
+{isConditionTrue_0 = runtimeScene.getOnceTriggers().triggerOnce(24334036);
 }
 }
 if (isConditionTrue_0) {
@@ -313,6 +323,16 @@ gdjs.MenuCode.GDTxt_9595GirarDicaObjects1.length = 0;
 gdjs.MenuCode.GDTxt_9595GirarDicaObjects2.length = 0;
 gdjs.MenuCode.GDTxt_9595PauseTeclaObjects1.length = 0;
 gdjs.MenuCode.GDTxt_9595PauseTeclaObjects2.length = 0;
+gdjs.MenuCode.GDguia_9595caminhoObjects1.length = 0;
+gdjs.MenuCode.GDguia_9595caminhoObjects2.length = 0;
+gdjs.MenuCode.GDseta_9595guiaObjects1.length = 0;
+gdjs.MenuCode.GDseta_9595guiaObjects2.length = 0;
+gdjs.MenuCode.GDtrilha_9595guiaObjects1.length = 0;
+gdjs.MenuCode.GDtrilha_9595guiaObjects2.length = 0;
+gdjs.MenuCode.GDmarcador_9595saidaObjects1.length = 0;
+gdjs.MenuCode.GDmarcador_9595saidaObjects2.length = 0;
+gdjs.MenuCode.GDparede_9595tiroObjects1.length = 0;
+gdjs.MenuCode.GDparede_9595tiroObjects2.length = 0;
 
 gdjs.MenuCode.eventsList1(runtimeScene);
 gdjs.MenuCode.GDTexto_9595MenuObjects1.length = 0;
@@ -395,6 +415,16 @@ gdjs.MenuCode.GDTxt_9595GirarDicaObjects1.length = 0;
 gdjs.MenuCode.GDTxt_9595GirarDicaObjects2.length = 0;
 gdjs.MenuCode.GDTxt_9595PauseTeclaObjects1.length = 0;
 gdjs.MenuCode.GDTxt_9595PauseTeclaObjects2.length = 0;
+gdjs.MenuCode.GDguia_9595caminhoObjects1.length = 0;
+gdjs.MenuCode.GDguia_9595caminhoObjects2.length = 0;
+gdjs.MenuCode.GDseta_9595guiaObjects1.length = 0;
+gdjs.MenuCode.GDseta_9595guiaObjects2.length = 0;
+gdjs.MenuCode.GDtrilha_9595guiaObjects1.length = 0;
+gdjs.MenuCode.GDtrilha_9595guiaObjects2.length = 0;
+gdjs.MenuCode.GDmarcador_9595saidaObjects1.length = 0;
+gdjs.MenuCode.GDmarcador_9595saidaObjects2.length = 0;
+gdjs.MenuCode.GDparede_9595tiroObjects1.length = 0;
+gdjs.MenuCode.GDparede_9595tiroObjects2.length = 0;
 
 
 return;

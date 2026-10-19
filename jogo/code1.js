@@ -85,16 +85,26 @@ gdjs.Inicio_45JogoCode.GDTxt_9595GirarDicaObjects1= [];
 gdjs.Inicio_45JogoCode.GDTxt_9595GirarDicaObjects2= [];
 gdjs.Inicio_45JogoCode.GDTxt_9595PauseTeclaObjects1= [];
 gdjs.Inicio_45JogoCode.GDTxt_9595PauseTeclaObjects2= [];
+gdjs.Inicio_45JogoCode.GDguia_9595caminhoObjects1= [];
+gdjs.Inicio_45JogoCode.GDguia_9595caminhoObjects2= [];
+gdjs.Inicio_45JogoCode.GDseta_9595guiaObjects1= [];
+gdjs.Inicio_45JogoCode.GDseta_9595guiaObjects2= [];
+gdjs.Inicio_45JogoCode.GDtrilha_9595guiaObjects1= [];
+gdjs.Inicio_45JogoCode.GDtrilha_9595guiaObjects2= [];
+gdjs.Inicio_45JogoCode.GDmarcador_9595saidaObjects1= [];
+gdjs.Inicio_45JogoCode.GDmarcador_9595saidaObjects2= [];
+gdjs.Inicio_45JogoCode.GDparede_9595tiroObjects1= [];
+gdjs.Inicio_45JogoCode.GDparede_9595tiroObjects2= [];
 
 
 gdjs.Inicio_45JogoCode.mapOfGDgdjs_9546Inicio_959545JogoCode_9546GDbotao_95959595startObjects1Objects = Hashtable.newFrom({"botao_start": gdjs.Inicio_45JogoCode.GDbotao_9595startObjects1});
-gdjs.Inicio_45JogoCode.asyncCallback23750140 = function (runtimeScene, asyncObjectsList) {
+gdjs.Inicio_45JogoCode.asyncCallback24300500 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.Inicio_45JogoCode.localVariables);
 {gdjs.evtTools.runtimeScene.replaceScene(runtimeScene, "Menu", false);
 }
 gdjs.Inicio_45JogoCode.localVariables.length = 0;
 }
-gdjs.Inicio_45JogoCode.idToCallbackMap.set(23750140, gdjs.Inicio_45JogoCode.asyncCallback23750140);
+gdjs.Inicio_45JogoCode.idToCallbackMap.set(24300500, gdjs.Inicio_45JogoCode.asyncCallback24300500);
 gdjs.Inicio_45JogoCode.eventsList0 = function(runtimeScene) {
 
 {
@@ -104,7 +114,7 @@ gdjs.Inicio_45JogoCode.eventsList0 = function(runtimeScene) {
 {
 const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.Inicio_45JogoCode.localVariables);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(1), (runtimeScene) => (gdjs.Inicio_45JogoCode.asyncCallback23750140(runtimeScene, asyncObjectsList)), 23750140, asyncObjectsList);
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(1), (runtimeScene) => (gdjs.Inicio_45JogoCode.asyncCallback24300500(runtimeScene, asyncObjectsList)), 24300500, asyncObjectsList);
 }
 }
 
@@ -112,13 +122,13 @@ runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(1), 
 
 
 };gdjs.Inicio_45JogoCode.mapOfGDgdjs_9546Inicio_959545JogoCode_9546GDbota_95959595exitObjects1Objects = Hashtable.newFrom({"bota_exit": gdjs.Inicio_45JogoCode.GDbota_9595exitObjects1});
-gdjs.Inicio_45JogoCode.asyncCallback23753564 = function (runtimeScene, asyncObjectsList) {
+gdjs.Inicio_45JogoCode.asyncCallback24301772 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.Inicio_45JogoCode.localVariables);
 {gdjs.evtTools.runtimeScene.stopGame(runtimeScene);
 }
 gdjs.Inicio_45JogoCode.localVariables.length = 0;
 }
-gdjs.Inicio_45JogoCode.idToCallbackMap.set(23753564, gdjs.Inicio_45JogoCode.asyncCallback23753564);
+gdjs.Inicio_45JogoCode.idToCallbackMap.set(24301772, gdjs.Inicio_45JogoCode.asyncCallback24301772);
 gdjs.Inicio_45JogoCode.eventsList1 = function(runtimeScene) {
 
 {
@@ -128,7 +138,7 @@ gdjs.Inicio_45JogoCode.eventsList1 = function(runtimeScene) {
 {
 const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.Inicio_45JogoCode.localVariables);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(1), (runtimeScene) => (gdjs.Inicio_45JogoCode.asyncCallback23753564(runtimeScene, asyncObjectsList)), 23753564, asyncObjectsList);
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(1), (runtimeScene) => (gdjs.Inicio_45JogoCode.asyncCallback24301772(runtimeScene, asyncObjectsList)), 24301772, asyncObjectsList);
 }
 }
 
@@ -136,13 +146,13 @@ runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(1), 
 
 
 };gdjs.Inicio_45JogoCode.mapOfGDgdjs_9546Inicio_959545JogoCode_9546GDbotao_95959595tutorialObjects1Objects = Hashtable.newFrom({"botao_tutorial": gdjs.Inicio_45JogoCode.GDbotao_9595tutorialObjects1});
-gdjs.Inicio_45JogoCode.asyncCallback23755556 = function (runtimeScene, asyncObjectsList) {
+gdjs.Inicio_45JogoCode.asyncCallback24296676 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.Inicio_45JogoCode.localVariables);
 {gdjs.evtTools.runtimeScene.replaceScene(runtimeScene, "Tutorial", false);
 }
 gdjs.Inicio_45JogoCode.localVariables.length = 0;
 }
-gdjs.Inicio_45JogoCode.idToCallbackMap.set(23755556, gdjs.Inicio_45JogoCode.asyncCallback23755556);
+gdjs.Inicio_45JogoCode.idToCallbackMap.set(24296676, gdjs.Inicio_45JogoCode.asyncCallback24296676);
 gdjs.Inicio_45JogoCode.eventsList2 = function(runtimeScene) {
 
 {
@@ -152,7 +162,7 @@ gdjs.Inicio_45JogoCode.eventsList2 = function(runtimeScene) {
 {
 const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.Inicio_45JogoCode.localVariables);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(1), (runtimeScene) => (gdjs.Inicio_45JogoCode.asyncCallback23755556(runtimeScene, asyncObjectsList)), 23755556, asyncObjectsList);
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(1), (runtimeScene) => (gdjs.Inicio_45JogoCode.asyncCallback24296676(runtimeScene, asyncObjectsList)), 24296676, asyncObjectsList);
 }
 }
 
@@ -202,7 +212,7 @@ isConditionTrue_0 = false;
 isConditionTrue_0 = gdjs.evtTools.input.isMouseButtonPressed(runtimeScene, "Left");
 if (isConditionTrue_0) {
 isConditionTrue_0 = false;
-{isConditionTrue_0 = runtimeScene.getOnceTriggers().triggerOnce(23749796);
+{isConditionTrue_0 = runtimeScene.getOnceTriggers().triggerOnce(24296444);
 }
 }
 }
@@ -232,7 +242,7 @@ isConditionTrue_0 = false;
 isConditionTrue_0 = gdjs.evtTools.input.isMouseButtonPressed(runtimeScene, "Left");
 if (isConditionTrue_0) {
 isConditionTrue_0 = false;
-{isConditionTrue_0 = runtimeScene.getOnceTriggers().triggerOnce(23752764);
+{isConditionTrue_0 = runtimeScene.getOnceTriggers().triggerOnce(24301396);
 }
 }
 }
@@ -262,7 +272,7 @@ isConditionTrue_0 = false;
 isConditionTrue_0 = gdjs.evtTools.input.isMouseButtonPressed(runtimeScene, "Left");
 if (isConditionTrue_0) {
 isConditionTrue_0 = false;
-{isConditionTrue_0 = runtimeScene.getOnceTriggers().triggerOnce(23754756);
+{isConditionTrue_0 = runtimeScene.getOnceTriggers().triggerOnce(24302980);
 }
 }
 }
@@ -401,6 +411,16 @@ gdjs.Inicio_45JogoCode.GDTxt_9595GirarDicaObjects1.length = 0;
 gdjs.Inicio_45JogoCode.GDTxt_9595GirarDicaObjects2.length = 0;
 gdjs.Inicio_45JogoCode.GDTxt_9595PauseTeclaObjects1.length = 0;
 gdjs.Inicio_45JogoCode.GDTxt_9595PauseTeclaObjects2.length = 0;
+gdjs.Inicio_45JogoCode.GDguia_9595caminhoObjects1.length = 0;
+gdjs.Inicio_45JogoCode.GDguia_9595caminhoObjects2.length = 0;
+gdjs.Inicio_45JogoCode.GDseta_9595guiaObjects1.length = 0;
+gdjs.Inicio_45JogoCode.GDseta_9595guiaObjects2.length = 0;
+gdjs.Inicio_45JogoCode.GDtrilha_9595guiaObjects1.length = 0;
+gdjs.Inicio_45JogoCode.GDtrilha_9595guiaObjects2.length = 0;
+gdjs.Inicio_45JogoCode.GDmarcador_9595saidaObjects1.length = 0;
+gdjs.Inicio_45JogoCode.GDmarcador_9595saidaObjects2.length = 0;
+gdjs.Inicio_45JogoCode.GDparede_9595tiroObjects1.length = 0;
+gdjs.Inicio_45JogoCode.GDparede_9595tiroObjects2.length = 0;
 
 gdjs.Inicio_45JogoCode.eventsList3(runtimeScene);
 gdjs.Inicio_45JogoCode.GDbota_9595exitObjects1.length = 0;
@@ -487,6 +507,16 @@ gdjs.Inicio_45JogoCode.GDTxt_9595GirarDicaObjects1.length = 0;
 gdjs.Inicio_45JogoCode.GDTxt_9595GirarDicaObjects2.length = 0;
 gdjs.Inicio_45JogoCode.GDTxt_9595PauseTeclaObjects1.length = 0;
 gdjs.Inicio_45JogoCode.GDTxt_9595PauseTeclaObjects2.length = 0;
+gdjs.Inicio_45JogoCode.GDguia_9595caminhoObjects1.length = 0;
+gdjs.Inicio_45JogoCode.GDguia_9595caminhoObjects2.length = 0;
+gdjs.Inicio_45JogoCode.GDseta_9595guiaObjects1.length = 0;
+gdjs.Inicio_45JogoCode.GDseta_9595guiaObjects2.length = 0;
+gdjs.Inicio_45JogoCode.GDtrilha_9595guiaObjects1.length = 0;
+gdjs.Inicio_45JogoCode.GDtrilha_9595guiaObjects2.length = 0;
+gdjs.Inicio_45JogoCode.GDmarcador_9595saidaObjects1.length = 0;
+gdjs.Inicio_45JogoCode.GDmarcador_9595saidaObjects2.length = 0;
+gdjs.Inicio_45JogoCode.GDparede_9595tiroObjects1.length = 0;
+gdjs.Inicio_45JogoCode.GDparede_9595tiroObjects2.length = 0;
 
 
 return;

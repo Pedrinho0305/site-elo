@@ -83,6 +83,16 @@ gdjs.TELA_32VITORIACode.GDTxt_9595GirarDicaObjects1= [];
 gdjs.TELA_32VITORIACode.GDTxt_9595GirarDicaObjects2= [];
 gdjs.TELA_32VITORIACode.GDTxt_9595PauseTeclaObjects1= [];
 gdjs.TELA_32VITORIACode.GDTxt_9595PauseTeclaObjects2= [];
+gdjs.TELA_32VITORIACode.GDguia_9595caminhoObjects1= [];
+gdjs.TELA_32VITORIACode.GDguia_9595caminhoObjects2= [];
+gdjs.TELA_32VITORIACode.GDseta_9595guiaObjects1= [];
+gdjs.TELA_32VITORIACode.GDseta_9595guiaObjects2= [];
+gdjs.TELA_32VITORIACode.GDtrilha_9595guiaObjects1= [];
+gdjs.TELA_32VITORIACode.GDtrilha_9595guiaObjects2= [];
+gdjs.TELA_32VITORIACode.GDmarcador_9595saidaObjects1= [];
+gdjs.TELA_32VITORIACode.GDmarcador_9595saidaObjects2= [];
+gdjs.TELA_32VITORIACode.GDparede_9595tiroObjects1= [];
+gdjs.TELA_32VITORIACode.GDparede_9595tiroObjects2= [];
 
 
 gdjs.TELA_32VITORIACode.mapOfGDgdjs_9546TELA_959532VITORIACode_9546GDBOTAO_95959595RECOMECARObjects1Objects = Hashtable.newFrom({"BOTAO_RECOMECAR": gdjs.TELA_32VITORIACode.GDBOTAO_9595RECOMECARObjects1});
@@ -232,6 +242,16 @@ gdjs.TELA_32VITORIACode.GDTxt_9595GirarDicaObjects1.length = 0;
 gdjs.TELA_32VITORIACode.GDTxt_9595GirarDicaObjects2.length = 0;
 gdjs.TELA_32VITORIACode.GDTxt_9595PauseTeclaObjects1.length = 0;
 gdjs.TELA_32VITORIACode.GDTxt_9595PauseTeclaObjects2.length = 0;
+gdjs.TELA_32VITORIACode.GDguia_9595caminhoObjects1.length = 0;
+gdjs.TELA_32VITORIACode.GDguia_9595caminhoObjects2.length = 0;
+gdjs.TELA_32VITORIACode.GDseta_9595guiaObjects1.length = 0;
+gdjs.TELA_32VITORIACode.GDseta_9595guiaObjects2.length = 0;
+gdjs.TELA_32VITORIACode.GDtrilha_9595guiaObjects1.length = 0;
+gdjs.TELA_32VITORIACode.GDtrilha_9595guiaObjects2.length = 0;
+gdjs.TELA_32VITORIACode.GDmarcador_9595saidaObjects1.length = 0;
+gdjs.TELA_32VITORIACode.GDmarcador_9595saidaObjects2.length = 0;
+gdjs.TELA_32VITORIACode.GDparede_9595tiroObjects1.length = 0;
+gdjs.TELA_32VITORIACode.GDparede_9595tiroObjects2.length = 0;
 
 gdjs.TELA_32VITORIACode.eventsList0(runtimeScene);
 gdjs.TELA_32VITORIACode.GDBOTAO_9595SAIRObjects1.length = 0;
@@ -316,6 +336,16 @@ gdjs.TELA_32VITORIACode.GDTxt_9595GirarDicaObjects1.length = 0;
 gdjs.TELA_32VITORIACode.GDTxt_9595GirarDicaObjects2.length = 0;
 gdjs.TELA_32VITORIACode.GDTxt_9595PauseTeclaObjects1.length = 0;
 gdjs.TELA_32VITORIACode.GDTxt_9595PauseTeclaObjects2.length = 0;
+gdjs.TELA_32VITORIACode.GDguia_9595caminhoObjects1.length = 0;
+gdjs.TELA_32VITORIACode.GDguia_9595caminhoObjects2.length = 0;
+gdjs.TELA_32VITORIACode.GDseta_9595guiaObjects1.length = 0;
+gdjs.TELA_32VITORIACode.GDseta_9595guiaObjects2.length = 0;
+gdjs.TELA_32VITORIACode.GDtrilha_9595guiaObjects1.length = 0;
+gdjs.TELA_32VITORIACode.GDtrilha_9595guiaObjects2.length = 0;
+gdjs.TELA_32VITORIACode.GDmarcador_9595saidaObjects1.length = 0;
+gdjs.TELA_32VITORIACode.GDmarcador_9595saidaObjects2.length = 0;
+gdjs.TELA_32VITORIACode.GDparede_9595tiroObjects1.length = 0;
+gdjs.TELA_32VITORIACode.GDparede_9595tiroObjects2.length = 0;
 
 
 return;

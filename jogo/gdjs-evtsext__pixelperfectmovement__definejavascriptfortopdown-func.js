@@ -9,7 +9,7 @@ gdjs.evtsExt__PixelPerfectMovement__DefineJavaScriptForTopDown = {};
 gdjs.evtsExt__PixelPerfectMovement__DefineJavaScriptForTopDown.idToCallbackMap = new Map();
 
 
-gdjs.evtsExt__PixelPerfectMovement__DefineJavaScriptForTopDown.userFunc0x14d0c00 = function GDJSInlineCode(runtimeScene, eventsFunctionContext) {
+gdjs.evtsExt__PixelPerfectMovement__DefineJavaScriptForTopDown.userFunc0x10429e8 = function GDJSInlineCode(runtimeScene, eventsFunctionContext) {
 "use strict";
 if (gdjs.__pixelPerfectExtension) {
   return;
@@ -462,7 +462,7 @@ gdjs.evtsExt__PixelPerfectMovement__DefineJavaScriptForTopDown.eventsList0 = fun
 {
 
 
-gdjs.evtsExt__PixelPerfectMovement__DefineJavaScriptForTopDown.userFunc0x14d0c00(runtimeScene, eventsFunctionContext);
+gdjs.evtsExt__PixelPerfectMovement__DefineJavaScriptForTopDown.userFunc0x10429e8(runtimeScene, eventsFunctionContext);
 
 }
 

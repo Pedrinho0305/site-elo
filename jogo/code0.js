@@ -130,9 +130,24 @@ gdjs.Escolha_45ModoCode.GDTxt_9595GirarDicaObjects3= [];
 gdjs.Escolha_45ModoCode.GDTxt_9595PauseTeclaObjects1= [];
 gdjs.Escolha_45ModoCode.GDTxt_9595PauseTeclaObjects2= [];
 gdjs.Escolha_45ModoCode.GDTxt_9595PauseTeclaObjects3= [];
+gdjs.Escolha_45ModoCode.GDguia_9595caminhoObjects1= [];
+gdjs.Escolha_45ModoCode.GDguia_9595caminhoObjects2= [];
+gdjs.Escolha_45ModoCode.GDguia_9595caminhoObjects3= [];
+gdjs.Escolha_45ModoCode.GDseta_9595guiaObjects1= [];
+gdjs.Escolha_45ModoCode.GDseta_9595guiaObjects2= [];
+gdjs.Escolha_45ModoCode.GDseta_9595guiaObjects3= [];
+gdjs.Escolha_45ModoCode.GDtrilha_9595guiaObjects1= [];
+gdjs.Escolha_45ModoCode.GDtrilha_9595guiaObjects2= [];
+gdjs.Escolha_45ModoCode.GDtrilha_9595guiaObjects3= [];
+gdjs.Escolha_45ModoCode.GDmarcador_9595saidaObjects1= [];
+gdjs.Escolha_45ModoCode.GDmarcador_9595saidaObjects2= [];
+gdjs.Escolha_45ModoCode.GDmarcador_9595saidaObjects3= [];
+gdjs.Escolha_45ModoCode.GDparede_9595tiroObjects1= [];
+gdjs.Escolha_45ModoCode.GDparede_9595tiroObjects2= [];
+gdjs.Escolha_45ModoCode.GDparede_9595tiroObjects3= [];
 
 
-gdjs.Escolha_45ModoCode.userFunc0x13f4778 = function GDJSInlineCode(runtimeScene) {
+gdjs.Escolha_45ModoCode.userFunc0x11be068 = function GDJSInlineCode(runtimeScene) {
 "use strict";
 // Roda a cada quadro. Diz aos eventos se é celular (EhCelular) e se um toque ainda pode
 // colocar o jogo em tela cheia na horizontal (PodeTocar). Na primeira vez, instala o "toque na tela".
@@ -289,7 +304,7 @@ gdjs.Escolha_45ModoCode.mapOfGDgdjs_9546Escolha_959545ModoCode_9546GDbtn_9595959
 gdjs.Escolha_45ModoCode.mapOfGDgdjs_9546Escolha_959545ModoCode_9546GDbtn_95959595modo_95959595celularObjects1Objects = Hashtable.newFrom({"btn_modo_celular": gdjs.Escolha_45ModoCode.GDbtn_9595modo_9595celularObjects1});
 gdjs.Escolha_45ModoCode.mapOfGDgdjs_9546Escolha_959545ModoCode_9546GDbtn_95959595modo_95959595pcObjects1Objects = Hashtable.newFrom({"btn_modo_pc": gdjs.Escolha_45ModoCode.GDbtn_9595modo_9595pcObjects1});
 gdjs.Escolha_45ModoCode.mapOfGDgdjs_9546Escolha_959545ModoCode_9546GDbtn_95959595modo_95959595celularObjects1Objects = Hashtable.newFrom({"btn_modo_celular": gdjs.Escolha_45ModoCode.GDbtn_9595modo_9595celularObjects1});
-gdjs.Escolha_45ModoCode.userFunc0x19dd7b8 = function GDJSInlineCode(runtimeScene) {
+gdjs.Escolha_45ModoCode.userFunc0x13c57d0 = function GDJSInlineCode(runtimeScene) {
 "use strict";
 try {
   var travar = function () {
@@ -307,7 +322,7 @@ gdjs.Escolha_45ModoCode.eventsList1 = function(runtimeScene) {
 {
 
 
-gdjs.Escolha_45ModoCode.userFunc0x19dd7b8(runtimeScene);
+gdjs.Escolha_45ModoCode.userFunc0x13c57d0(runtimeScene);
 
 }
 
@@ -317,7 +332,7 @@ gdjs.Escolha_45ModoCode.userFunc0x19dd7b8(runtimeScene);
 {
 
 
-gdjs.Escolha_45ModoCode.userFunc0x13f4778(runtimeScene);
+gdjs.Escolha_45ModoCode.userFunc0x11be068(runtimeScene);
 
 }
 
@@ -986,6 +1001,21 @@ gdjs.Escolha_45ModoCode.GDTxt_9595GirarDicaObjects3.length = 0;
 gdjs.Escolha_45ModoCode.GDTxt_9595PauseTeclaObjects1.length = 0;
 gdjs.Escolha_45ModoCode.GDTxt_9595PauseTeclaObjects2.length = 0;
 gdjs.Escolha_45ModoCode.GDTxt_9595PauseTeclaObjects3.length = 0;
+gdjs.Escolha_45ModoCode.GDguia_9595caminhoObjects1.length = 0;
+gdjs.Escolha_45ModoCode.GDguia_9595caminhoObjects2.length = 0;
+gdjs.Escolha_45ModoCode.GDguia_9595caminhoObjects3.length = 0;
+gdjs.Escolha_45ModoCode.GDseta_9595guiaObjects1.length = 0;
+gdjs.Escolha_45ModoCode.GDseta_9595guiaObjects2.length = 0;
+gdjs.Escolha_45ModoCode.GDseta_9595guiaObjects3.length = 0;
+gdjs.Escolha_45ModoCode.GDtrilha_9595guiaObjects1.length = 0;
+gdjs.Escolha_45ModoCode.GDtrilha_9595guiaObjects2.length = 0;
+gdjs.Escolha_45ModoCode.GDtrilha_9595guiaObjects3.length = 0;
+gdjs.Escolha_45ModoCode.GDmarcador_9595saidaObjects1.length = 0;
+gdjs.Escolha_45ModoCode.GDmarcador_9595saidaObjects2.length = 0;
+gdjs.Escolha_45ModoCode.GDmarcador_9595saidaObjects3.length = 0;
+gdjs.Escolha_45ModoCode.GDparede_9595tiroObjects1.length = 0;
+gdjs.Escolha_45ModoCode.GDparede_9595tiroObjects2.length = 0;
+gdjs.Escolha_45ModoCode.GDparede_9595tiroObjects3.length = 0;
 
 gdjs.Escolha_45ModoCode.eventsList2(runtimeScene);
 gdjs.Escolha_45ModoCode.GDfundo_9595modoObjects1.length = 0;
@@ -1117,6 +1147,21 @@ gdjs.Escolha_45ModoCode.GDTxt_9595GirarDicaObjects3.length = 0;
 gdjs.Escolha_45ModoCode.GDTxt_9595PauseTeclaObjects1.length = 0;
 gdjs.Escolha_45ModoCode.GDTxt_9595PauseTeclaObjects2.length = 0;
 gdjs.Escolha_45ModoCode.GDTxt_9595PauseTeclaObjects3.length = 0;
+gdjs.Escolha_45ModoCode.GDguia_9595caminhoObjects1.length = 0;
+gdjs.Escolha_45ModoCode.GDguia_9595caminhoObjects2.length = 0;
+gdjs.Escolha_45ModoCode.GDguia_9595caminhoObjects3.length = 0;
+gdjs.Escolha_45ModoCode.GDseta_9595guiaObjects1.length = 0;
+gdjs.Escolha_45ModoCode.GDseta_9595guiaObjects2.length = 0;
+gdjs.Escolha_45ModoCode.GDseta_9595guiaObjects3.length = 0;
+gdjs.Escolha_45ModoCode.GDtrilha_9595guiaObjects1.length = 0;
+gdjs.Escolha_45ModoCode.GDtrilha_9595guiaObjects2.length = 0;
+gdjs.Escolha_45ModoCode.GDtrilha_9595guiaObjects3.length = 0;
+gdjs.Escolha_45ModoCode.GDmarcador_9595saidaObjects1.length = 0;
+gdjs.Escolha_45ModoCode.GDmarcador_9595saidaObjects2.length = 0;
+gdjs.Escolha_45ModoCode.GDmarcador_9595saidaObjects3.length = 0;
+gdjs.Escolha_45ModoCode.GDparede_9595tiroObjects1.length = 0;
+gdjs.Escolha_45ModoCode.GDparede_9595tiroObjects2.length = 0;
+gdjs.Escolha_45ModoCode.GDparede_9595tiroObjects3.length = 0;
 
 
 return;
