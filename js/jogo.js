@@ -3,7 +3,11 @@
 //      mostra "Entre na sua conta para jogar" e o iframe nem é carregado;
 //   1. data-src local (../jogo/index.html, exportação HTML5 do GDevelop): verifica
 //      se existe (HEAD) e carrega com ?modo=pc no computador e ?modo=mobile no
-//      celular/tablet (jogo/modo-elo.js pula a tela de escolha do jogo);
+//      celular/tablet (jogo/modo-elo.js pula a tela de escolha do jogo). No
+//      celular o palco mostra "Tocar para jogar" e o jogo abre na tela toda
+//      (.is-aberto): numa caixa 16:9 dentro da página, o iframe pegava o tamanho
+//      do aparelho e os botões da borda saíam cortados. Vale para Android e iPhone;
+//      o "Sair" (ou o voltar do celular) fecha e descarrega o jogo;
 //   2. data-fallback (página do gd.games): usado se o arquivo local não existir;
 //   3. sem nenhum dos dois: aviso de "em desenvolvimento".
 document.addEventListener('DOMContentLoaded', () => {
@@ -40,14 +44,60 @@ document.addEventListener('DOMContentLoaded', () => {
     if (hint) hint.textContent = 'Disponível para quem tem conta na ELO';
   };
 
+  /* ---- Celular: o jogo na tela toda ---- */
+  const start = document.getElementById('gameStart');
+  const sairBotao = document.getElementById('gameSair');
+  let urlCelular = null;
+
+  const abrir = () => {
+    stage.classList.add('is-aberto', 'is-ready');
+    document.body.classList.add('jogo-aberto');
+    start.hidden = true;
+    stage.classList.remove('is-pronto');
+    sairBotao.hidden = false;
+    frame.src = urlCelular;
+    // O voltar do Android fecha o jogo em vez de sair da página
+    history.pushState({ jogoAberto: true }, '');
+    // Android: tela cheia de verdade, deitado (o toque no botão é o gesto que o navegador
+    // exige). iPhone não deixa página em tela cheia: lá o palco já ocupa a tela toda.
+    const pedir = stage.requestFullscreen || stage.webkitRequestFullscreen;
+    if (pedir) {
+      Promise.resolve(pedir.call(stage, { navigationUI: 'hide' }))
+        .then(() => screen.orientation?.lock?.('landscape'))
+        .catch(() => {});
+    }
+  };
+
+  const fechar = () => {
+    if (!stage.classList.contains('is-aberto')) return;
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else if (document.webkitFullscreenElement) document.webkitExitFullscreen?.();
+    stage.classList.remove('is-aberto', 'is-ready');
+    document.body.classList.remove('jogo-aberto');
+    frame.src = 'about:blank';   // para a música e libera a memória
+    sairBotao.hidden = true;
+    start.hidden = false;
+    stage.classList.add('is-pronto');
+    stage.scrollIntoView({ block: 'center' });
+  };
+
+  document.getElementById('gameAbrir')?.addEventListener('click', abrir);
+  sairBotao?.addEventListener('click', () => { if (history.state?.jogoAberto) history.back(); else fechar(); });
+  window.addEventListener('popstate', fechar);
+
   const load = (url, externo) => {
+    if (celular && !externo && start) {
+      urlCelular = url;
+      start.hidden = false;
+      stage.classList.add('is-pronto');
+      if (hint) hint.textContent = 'Abre na tela toda. Jogue com o celular deitado.';
+      return;
+    }
     frame.src = url;
     stage.classList.add('is-ready');
     if (hint) hint.textContent = externo
       ? 'Jogo carregado do gd.games. Use tela cheia para jogar melhor.'
-      : celular
-        ? 'Toque no jogo para abrir em tela cheia e jogue com o celular deitado.'
-        : 'Clique dentro do jogo para começar. Use tela cheia para jogar melhor.';
+      : 'Clique dentro do jogo para começar. Use tela cheia para jogar melhor.';
     if (fullscreen) fullscreen.hidden = false;
   };
 

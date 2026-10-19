@@ -261,7 +261,68 @@
 
 /* Tela cheia: o jogo é 16:9 (1280×720) e corta a direita em telas mais
    estreitas, então o iframe fica 16:9 com faixas pretas em volta. */
-.game-stage:fullscreen iframe { width: min(100vw, 100vh * 16 / 9); height: auto; aspect-ratio: 16 / 9; }
+.game-stage:fullscreen:not(.is-aberto) iframe { width: min(100vw, 100vh * 16 / 9); height: auto; aspect-ratio: 16 / 9; }
+
+/* Celular e tablet: o palco vira a tela toda, por cima do cabeçalho e dos avisos.
+   O iframe fica do tamanho do aparelho e o jogo se ajusta à largura dele
+   (no Android ele ainda pede a tela cheia de verdade no primeiro toque). */
+.game-stage.is-aberto {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+body.jogo-aberto { overflow: hidden; }
+/* O reveal deixa filter: blur(0) na seção, e um filter faz o position: fixed contar
+   a partir dela, não da tela (o palco saía deslocado da borda) */
+body.jogo-aberto .game-stage-section { filter: none; }
+
+.game-sair {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: max(.5rem, env(safe-area-inset-left));
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(238, 242, 255, .35);
+  background: rgba(0, 0, 0, .55);
+  color: #eef2ff;
+  cursor: pointer;
+}
+.game-sair[hidden] { display: none; }
+
+/* Aviso de girar: só com o jogo aberto e o aparelho em pé; o Sair fica por cima */
+.game-girar { display: none; }
+@media (orientation: portrait) {
+  .game-stage.is-aberto .game-girar {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    padding: 1.5rem;
+    text-align: center;
+    color: #eef2ff;
+    background: var(--grad-panel);
+  }
+}
+.game-girar h3 { font-size: 1.5rem; }
+.game-girar p { color: #c7cfec; max-width: 26ch; }
+.game-girar .demo-play svg { margin-left: 0; fill: none; stroke: #eef2ff; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.game-sair svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
 
 .game-stage iframe {
   display: block;
@@ -325,7 +386,8 @@
   .stage-head { flex-wrap: wrap; }
   .stage-hint { flex-basis: 100%; order: 3; }
   .game-stage.is-empty { aspect-ratio: 4 / 3; }   /* com o jogo carregado fica 16:9: o jogo corta o que não cabe */
-  .game-stage.is-locked { aspect-ratio: auto; min-height: 27rem; }   /* aviso de login: ícone, texto e dois botões empilhados */
+  .game-stage.is-locked { aspect-ratio: auto; min-height: 27rem; }
+  .game-stage.is-pronto:not(.is-aberto) { aspect-ratio: auto; min-height: 21rem; }   /* "Tocar para jogar" com o celular em pé */   /* aviso de login: ícone, texto e dois botões empilhados */
   .game-stage-empty .btn { width: 100%; }
   .game-lock-actions { width: 100%; flex-direction: column; gap: 0; }
   .game-art figcaption { position: static; margin-top: .8rem; padding: 0 1rem 1rem; }

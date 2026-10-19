@@ -19,3 +19,4 @@ firmware/*/config.h
 jogo/*.exe
 assets/video/*.MOV
 assets/video/*.mov
+/game.zip

@@ -132,7 +132,7 @@ gdjs.Escolha_45ModoCode.GDTxt_9595PauseTeclaObjects2= [];
 gdjs.Escolha_45ModoCode.GDTxt_9595PauseTeclaObjects3= [];
 
 
-gdjs.Escolha_45ModoCode.userFunc0xca2958 = function GDJSInlineCode(runtimeScene) {
+gdjs.Escolha_45ModoCode.userFunc0x13f4778 = function GDJSInlineCode(runtimeScene) {
 "use strict";
 // Roda a cada quadro. Diz aos eventos se é celular (EhCelular) e se um toque ainda pode
 // colocar o jogo em tela cheia na horizontal (PodeTocar). Na primeira vez, instala o "toque na tela".
@@ -289,7 +289,7 @@ gdjs.Escolha_45ModoCode.mapOfGDgdjs_9546Escolha_959545ModoCode_9546GDbtn_9595959
 gdjs.Escolha_45ModoCode.mapOfGDgdjs_9546Escolha_959545ModoCode_9546GDbtn_95959595modo_95959595celularObjects1Objects = Hashtable.newFrom({"btn_modo_celular": gdjs.Escolha_45ModoCode.GDbtn_9595modo_9595celularObjects1});
 gdjs.Escolha_45ModoCode.mapOfGDgdjs_9546Escolha_959545ModoCode_9546GDbtn_95959595modo_95959595pcObjects1Objects = Hashtable.newFrom({"btn_modo_pc": gdjs.Escolha_45ModoCode.GDbtn_9595modo_9595pcObjects1});
 gdjs.Escolha_45ModoCode.mapOfGDgdjs_9546Escolha_959545ModoCode_9546GDbtn_95959595modo_95959595celularObjects1Objects = Hashtable.newFrom({"btn_modo_celular": gdjs.Escolha_45ModoCode.GDbtn_9595modo_9595celularObjects1});
-gdjs.Escolha_45ModoCode.userFunc0x122e500 = function GDJSInlineCode(runtimeScene) {
+gdjs.Escolha_45ModoCode.userFunc0x19dd7b8 = function GDJSInlineCode(runtimeScene) {
 "use strict";
 try {
   var travar = function () {
@@ -307,7 +307,7 @@ gdjs.Escolha_45ModoCode.eventsList1 = function(runtimeScene) {
 {
 
 
-gdjs.Escolha_45ModoCode.userFunc0x122e500(runtimeScene);
+gdjs.Escolha_45ModoCode.userFunc0x19dd7b8(runtimeScene);
 
 }
 
@@ -317,7 +317,7 @@ gdjs.Escolha_45ModoCode.userFunc0x122e500(runtimeScene);
 {
 
 
-gdjs.Escolha_45ModoCode.userFunc0xca2958(runtimeScene);
+gdjs.Escolha_45ModoCode.userFunc0x13f4778(runtimeScene);
 
 }
 

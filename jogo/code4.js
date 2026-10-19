@@ -1156,7 +1156,7 @@ if (isConditionTrue_0) {
 }
 
 
-};gdjs.Fase2Code.userFunc0x17f44a8 = function GDJSInlineCode(runtimeScene) {
+};gdjs.Fase2Code.userFunc0x1110288 = function GDJSInlineCode(runtimeScene) {
 "use strict";
 // Roda a cada quadro. Diz aos eventos se é celular (EhCelular) e se um toque ainda pode
 // colocar o jogo em tela cheia na horizontal (PodeTocar). Na primeira vez, instala o "toque na tela".
@@ -1197,7 +1197,7 @@ if (ehCelular && !window.__auraToque) {
 };
 gdjs.Fase2Code.mapOfGDgdjs_9546Fase2Code_9546GDbtn_95959595pauseObjects2Objects = Hashtable.newFrom({"btn_pause": gdjs.Fase2Code.GDbtn_9595pauseObjects2});
 gdjs.Fase2Code.mapOfGDgdjs_9546Fase2Code_9546GDbtn_95959595pauseObjects2Objects = Hashtable.newFrom({"btn_pause": gdjs.Fase2Code.GDbtn_9595pauseObjects2});
-gdjs.Fase2Code.userFunc0xec86f0 = function GDJSInlineCode(runtimeScene) {
+gdjs.Fase2Code.userFunc0x144b680 = function GDJSInlineCode(runtimeScene) {
 "use strict";
 try {
   if (document.fullscreenElement && screen.orientation && screen.orientation.lock) {
@@ -1210,7 +1210,7 @@ gdjs.Fase2Code.eventsList3 = function(runtimeScene) {
 {
 
 
-gdjs.Fase2Code.userFunc0xec86f0(runtimeScene);
+gdjs.Fase2Code.userFunc0x144b680(runtimeScene);
 
 }
 
@@ -1336,7 +1336,7 @@ gdjs.Fase2Code.eventsList5 = function(runtimeScene) {
 {
 
 
-gdjs.Fase2Code.userFunc0x17f44a8(runtimeScene);
+gdjs.Fase2Code.userFunc0x1110288(runtimeScene);
 
 }
 

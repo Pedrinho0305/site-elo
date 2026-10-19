@@ -21,8 +21,14 @@
 
   if (modo !== 'mobile') return;
 
-  // O mesmo que o botão "Celular" da Escolha-Modo fazia: no primeiro toque, tela cheia
-  // na horizontal (o navegador só permite logo depois de um toque; o iPhone não tem).
+  // As fases instalam o mesmo "toque = tela cheia" se esta marca não existir
+  window.__auraToque = true;
+  // Dentro do site (iframe de pages/jogo.html), quem pede a tela cheia é a página, para
+  // o palco inteiro (com o botão Sair); se o jogo pedisse, o iframe cobriria o Sair.
+  if (window.parent !== window) return;
+
+  // Aberto direto: o mesmo que o botão "Celular" da Escolha-Modo fazia. No primeiro
+  // toque, tela cheia na horizontal (o navegador só permite logo depois de um toque).
   var d = document;
   var travar = function () {
     try {
@@ -31,7 +37,6 @@
       }
     } catch (e) {}
   };
-  window.__auraToque = true;   // a cena original instala o mesmo toque; evita dois
   d.addEventListener('touchend', function () {
     if (d.fullscreenElement || d.webkitFullscreenElement) { travar(); return; }
     var el = d.documentElement;

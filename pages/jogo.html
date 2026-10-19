@@ -6,7 +6,7 @@
 	<title>ELO: O Jogo</title>
 	<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="../css/header.css?v=9">
-	<link rel="stylesheet" href="../css/jogo.css?v=9">
+	<link rel="stylesheet" href="../css/jogo.css?v=10">
 	<link rel="stylesheet" href="../css/reveal.css?v=7">
 	<script src="../js/jogo.js" defer></script>
 	<script src="../js/header.js" defer></script>
@@ -79,6 +79,24 @@
 
 			<div class="game-stage" id="gameStage">
 				<iframe id="gameFrame" data-src="../jogo/index.html" data-fallback="https://gd.games/games/15184de8-d773-4b90-b41d-5c0a2c104402" title="ELO: O Jogo" allow="fullscreen; autoplay; gamepad" allowfullscreen loading="lazy"></iframe>
+				<!-- Celular e tablet: o jogo abre ocupando a tela toda (o iframe pega o tamanho do
+				     aparelho; numa caixa 16:9 os botões da borda cortavam). -->
+				<button type="button" class="game-sair" id="gameSair" aria-label="Sair do jogo" title="Sair do jogo" hidden>
+					<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+				</button>
+				<!-- Em pé, o jogo (feito para a horizontal) corta a tela inicial: pede para deitar.
+				     No Android a tela cheia já trava na horizontal; serve sobretudo ao iPhone. -->
+				<div class="game-girar" aria-live="polite">
+					<span class="demo-play" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M3.5 14.5a8.5 8.5 0 0 0 4 6M20.5 9.5a8.5 8.5 0 0 0-4-6"/><path d="M3 18.5l.5-4 3.5 1.5"/></svg></span>
+					<h3>Gire o celular</h3>
+					<p>O jogo é na horizontal. Deite o aparelho para continuar.</p>
+				</div>
+				<div class="game-stage-empty" id="gameStart" hidden>
+					<span class="demo-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg></span>
+					<h3>Pronto para jogar</h3>
+					<p>O jogo abre na tela toda. Deite o celular para jogar.</p>
+					<button type="button" class="btn btn-green" id="gameAbrir">Tocar para jogar</button>
+				</div>
 				<div class="game-stage-empty" id="gameLock" hidden>
 					<span class="demo-play" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/><circle cx="12" cy="15.2" r="1.2"/></svg></span>
 					<h3 id="gameLockTitle">Entre na sua conta para jogar</h3>
@@ -109,26 +127,27 @@
 
 				<aside class="story-objectives" aria-labelledby="objetivos-titulo">
 					<h3 id="objetivos-titulo">O que o jogo ensina</h3>
+					<!-- Tirado das próprias fases (Sector Zero): o que o jogador precisa aprender para passar -->
 					<ol class="objectives">
 						<li class="objective objective--red">
-							<span class="objective-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.8a7.2 7.2 0 0 1 7.2 7.2v4.6l1.7 2.9a1 1 0 0 1-.9 1.5H4a1 1 0 0 1-.9-1.5l1.7-2.9V11A7.2 7.2 0 0 1 12 3.8Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></svg></span>
-							<span>Como funcionam os alertas de emergência</span>
+							<span class="objective-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/></svg></span>
+							<span>Esperar a hora certa: o Porteiro só leva dano quando baixa a guarda</span>
 						</li>
 						<li class="objective objective--orange">
-							<span class="objective-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 13l1.5-4.5A2 2 0 0 1 7.4 7h9.2a2 2 0 0 1 1.9 1.5L20 13"/><rect x="3" y="13" width="18" height="5" rx="1.5"/><circle cx="7.5" cy="18.5" r="1.5"/><circle cx="16.5" cy="18.5" r="1.5"/></svg></span>
-							<span>Aprovação inteligente de transportes</span>
+							<span class="objective-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="12" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M12 10.5v5M9.5 13h5"/></svg></span>
+							<span>Cuidar dos recursos: munição é pouca e o kit médico fica guardado para quando precisar</span>
 						</li>
 						<li class="objective objective--green">
-							<span class="objective-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/></svg></span>
-							<span>Botões simples, sem tela, para quem tem dificuldade com tecnologia</span>
+							<span class="objective-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 10.5h16v8a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-8Z"/><path d="M4 10.5V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v2.5"/><path d="M10.5 10.5v3h3v-3"/></svg></span>
+							<span>Explorar com atenção: baús, cartões de acesso e checkpoints estão espalhados pelo mapa</span>
 						</li>
 						<li class="objective objective--blue">
-							<span class="objective-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-10a6 6 0 0 0-12 0c0 4.8 6 10 6 10Z"/><circle cx="12" cy="11" r="2.2"/></svg></span>
-							<span>Localização em tempo real e zonas de segurança</span>
+							<span class="objective-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.5 6.5l1.5 1.5 3-3M4.5 12.5l1.5 1.5 3-3M4.5 18.5l1.5 1.5 3-3"/><path d="M12 7h7.5M12 13h7.5M12 19h7.5"/></svg></span>
+							<span>Resolver por etapas: desligar os 5 computadores derruba o escudo do chefe</span>
 						</li>
 						<li class="objective objective--cyan">
-							<span class="objective-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 3.5V16A2.5 2.5 0 0 1 4 13.5v-7Z"/><path d="M8.5 9h7M8.5 12h4"/></svg></span>
-							<span>Comunicação efetiva entre cuidador e idoso</span>
+							<span class="objective-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 3.5V7H8"/></svg></span>
+							<span>Não desistir: quem cai volta ao último checkpoint e tenta de novo</span>
 						</li>
 					</ol>
 				</aside>
