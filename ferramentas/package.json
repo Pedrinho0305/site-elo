@@ -1,0 +1,11 @@
+{
+  "name": "elo-ferramentas",
+  "private": true,
+  "description": "Scripts de manutenção que rodam só na máquina (não vão para o deploy)",
+  "scripts": {
+    "otimizar-jogo": "node otimizar-imagens-jogo.cjs"
+  },
+  "dependencies": {
+    "sharp": "0.33.5"
+  }
+}

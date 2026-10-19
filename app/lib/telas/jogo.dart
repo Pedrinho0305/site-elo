@@ -46,11 +46,11 @@ class TelaJogo extends StatelessWidget {
           const Text('O que o jogo ensina', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
           const SizedBox(height: 12),
           for (final (icone, cor, texto) in [
-            (Icons.notification_important_rounded, c.red, 'Como funcionam os alertas de emergência'),
-            (Icons.directions_car_rounded, c.orange, 'Aprovação inteligente de transportes'),
-            (Icons.radio_button_checked_rounded, c.purple, 'Botões simples, sem tela, para quem tem dificuldade com tecnologia'),
-            (Icons.place_rounded, c.cyan, 'Localização em tempo real e zonas de segurança'),
-            (Icons.forum_rounded, c.green, 'Comunicação efetiva entre cuidador e idoso'),
+            (Icons.gps_fixed_rounded, c.red, 'Esperar a hora certa: o Porteiro só leva dano quando baixa a guarda'),
+            (Icons.medical_services_rounded, c.orange, 'Cuidar dos recursos: munição é pouca e o kit médico fica guardado para quando precisar'),
+            (Icons.inventory_2_rounded, c.green, 'Explorar com atenção: baús, cartões de acesso e checkpoints estão espalhados pelo mapa'),
+            (Icons.checklist_rounded, c.blue2, 'Resolver por etapas: desligar os 5 computadores derruba o escudo do chefe'),
+            (Icons.replay_rounded, c.cyan, 'Não desistir: quem cai volta ao último checkpoint e tenta de novo'),
           ])
             Padding(padding: const EdgeInsets.only(bottom: 10), child: Row(children: [
               IconeAnel(icone, cor: cor, tamanho: 38),
