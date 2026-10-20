@@ -88,6 +88,15 @@
       ]
     },
     {
+      "source": "/jogo/:arquivo(.+\\.(?:webp|png|jpg|aac|mp3|ogg|ttf|fnt))",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        }
+      ]
+    },
+    {
       "source": "/jogo/:arquivo([0-9a-f]{64}[-_].+)",
       "headers": [
         {
