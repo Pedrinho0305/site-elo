@@ -7,7 +7,7 @@ import '../widgets/comum.dart';
 import '../widgets/quadro_web.dart';
 import 'casca.dart';
 
-/// Jogo: a arte do Sr. João com o HUD, "Jogar agora" (o jogo do site em tela
+/// Jogo: a arte do jogo com o HUD, "Jogar agora" (o jogo do site em tela
 /// cheia, na horizontal), a história, o que o jogo ensina e a partida gravada.
 class TelaJogo extends StatelessWidget {
   const TelaJogo({super.key});
@@ -20,7 +20,7 @@ class TelaJogo extends StatelessWidget {
       body: PaginaRolavel(children: [
         const TituloSecao('ELO: O Jogo', grande: true, apoio: 'Uma jornada interativa sobre cuidado, conexão e tecnologia.'),
         const SizedBox(height: 12),
-        Text('Você é o cuidador. A cidade é grande, a noite chegou e o Sr. João saiu para caminhar com a pochete. Tudo certo por aqui?',
+        Text('Ele não bateu a meta de produtividade e foi descartado no lixão. Agora é subir de volta até o topo.',
             style: TextStyle(color: c.text2, fontSize: 16, height: 1.55)),
         const SizedBox(height: 18),
         ClipRRect(
@@ -37,9 +37,9 @@ class TelaJogo extends StatelessWidget {
         const TituloSecao('História do jogo'),
         const SizedBox(height: 12),
         for (final p in [
-          'Você é um cuidador tecnológico responsável por garantir a segurança e o bem-estar de idosos em uma cidade moderna. Equipado com a tecnologia ELO, você precisa monitorar, responder a emergências e tomar decisões rápidas para manter todos seguros.',
-          'Em cada fase, você enfrentará diferentes cenários: desde ajudar dona Maria a chamar um Uber para sua consulta médica até responder a alertas de emergência do Sr. João, que se perdeu no parque. O jogo simula situações reais do dia a dia.',
-          'À medida que você avança, desbloqueia novos recursos da pochete ELO e enfrenta desafios mais complexos. Será que você consegue manter o elo forte com todos sob seus cuidados?',
+          'Um chefão mede todo mundo pela produtividade. E, do mesmo jeito que a gente manda para o ferro-velho o carro que não usa mais, ele descarta quem deixou de ser produtivo o bastante. É o que acontece com um idoso que não bateu a meta: ele vai parar no lixão.',
+          'O jogo é a volta dele até o topo. Começa no lixão, onde é preciso passar pelo Porteiro, que toma conta do lugar. Depois vem um esgoto cibernético, cheio de ratos cibernéticos, onde ele junta cartões de acesso para seguir em frente. É o caminho com menos vigilância, por onde dá para atravessar a cidade longe da segurança.',
+          'Na última fase, o chefão está bem protegido. Antes de enfrentá-lo, é preciso desligar os computadores que o defendem sem ser pego pela segurança do lugar. Com os computadores desligados, o combate é liberado, e vencer o chefão termina o jogo.',
         ])
           Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(p, style: TextStyle(color: c.text2, height: 1.6, fontSize: 15.5))),
         const SizedBox(height: 8),
