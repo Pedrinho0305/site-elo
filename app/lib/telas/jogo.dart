@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../nucleo/config.dart';
 import '../nucleo/tema.dart';
@@ -6,8 +7,8 @@ import '../widgets/comum.dart';
 import '../widgets/quadro_web.dart';
 import 'casca.dart';
 
-/// Jogo: a arte do Sr. João com o HUD, "Jogar agora" (o jogo do gd.games em
-/// tela cheia), a história, o que o jogo ensina e a demonstração (em produção).
+/// Jogo: a arte do Sr. João com o HUD, "Jogar agora" (o jogo do site em tela
+/// cheia, na horizontal), a história, o que o jogo ensina e a partida gravada.
 class TelaJogo extends StatelessWidget {
   const TelaJogo({super.key});
 
@@ -61,27 +62,69 @@ class TelaJogo extends StatelessWidget {
         const Respiro(28),
         const TituloSecao('Demonstração do jogo', apoio: 'Veja o jogo em ação: gameplay e mecânicas principais.'),
         const SizedBox(height: 14),
-        Cartao(child: SizedBox(height: 160, child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Icon(Icons.videocam_outlined, size: 44, color: c.text3),
-          const SizedBox(height: 8),
-          const Text('Vídeo em produção', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
-          Text('A demonstração completa será inserida aqui.', style: TextStyle(color: c.text3)),
-        ]))),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(Raio.lg),
+          child: const AspectRatio(aspectRatio: 16 / 9, child: QuadroWeb(html: _videoHtml)),
+        ),
       ]),
     );
   }
 }
 
-class _TelaJogando extends StatelessWidget {
+/// O mesmo <video> da página Jogo do site. Sem o botão de tela cheia: a
+/// WebView do Android não abre o vídeo em tela cheia e o botão ficaria morto.
+const String _videoHtml = '''<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<style>html,body{margin:0;height:100%;background:#000;overflow:hidden}video{width:100%;height:100%;display:block;object-fit:contain}</style></head>
+<body><video src="$jogoVideoUrl" poster="$jogoVideoCapaUrl" controls controlslist="nofullscreen nodownload" disablepictureinpicture preload="metadata" playsinline aria-label="Partida gravada de ELO: O Jogo, Fase 1"></video></body></html>''';
+
+/// O jogo ocupando a tela toda, na horizontal e sem as barras do sistema,
+/// como no site pelo celular. Sair: o botão no canto ou o voltar do aparelho.
+class _TelaJogando extends StatefulWidget {
   const _TelaJogando();
+
+  @override
+  State<_TelaJogando> createState() => _TelaJogandoState();
+}
+
+class _TelaJogandoState extends State<_TelaJogando> {
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setPreferredOrientations(const []);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('ELO: O Jogo'), actions: [
-        IconButton(tooltip: 'Abrir no navegador', icon: const Icon(Icons.open_in_new_rounded), onPressed: () => abrirLink(context, jogoUrl)),
+      backgroundColor: Colors.black,
+      body: Stack(children: [
+        const Positioned.fill(child: QuadroWeb(url: jogoUrl)),
+        Positioned(
+          left: 8,
+          top: 8,
+          child: SafeArea(
+            child: Material(
+              color: Colors.black45,
+              shape: const CircleBorder(),
+              child: IconButton(
+                tooltip: 'Sair do jogo',
+                color: Colors.white,
+                icon: const Icon(Icons.close_rounded),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+          ),
+        ),
       ]),
-      body: const SafeArea(child: QuadroWeb(url: jogoUrl)),
     );
   }
 }

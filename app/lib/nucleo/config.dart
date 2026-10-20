@@ -11,8 +11,13 @@ const String eloaUrl = String.fromEnvironment('ELOA_API', defaultValue: '$siteBa
 /// Modelo 3D da pochete (2 MB): baixado só quando a pessoa pede.
 const String modelo3dUrl = '$siteBase/assets/3d/pochete.glb';
 
-/// O jogo publicado no gd.games (o mesmo da página Jogo do site).
-const String jogoUrl = 'https://gd.games/games/15184de8-d773-4b90-b41d-5c0a2c104402';
+/// O jogo: a mesma exportação HTML5 da página Jogo do site (pasta jogo/), só o
+/// jogo, sem a interface do gd.games. ?modo=mobile liga os controles de toque.
+const String jogoUrl = '$siteBase/jogo/index.html?modo=mobile';
+
+/// A partida gravada da página Jogo do site (14 MB): tocada do site, não vai no APK.
+const String jogoVideoUrl = '$siteBase/assets/video/jogo-gameplay.mp4';
+const String jogoVideoCapaUrl = '$siteBase/assets/img/jogo-gameplay-capa.jpg';
 
 /// Preço: o mesmo da home e da página Produto do site (mude junto).
 const String precoAVista = 'R\$ 997';

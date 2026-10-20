@@ -11,7 +11,7 @@ O site inteiro da ELO como aplicativo, em Dart/Flutter. Fala com **o mesmo backe
 | **Eloá** | A assistente, pela mesma API (`/api/eloa/perguntar`), com o histórico da conversa | `pages/eloa.html` |
 | **Painel** (com login) | Estado da pochete, **Chamar Uber**, ações rápidas, corrida com aprovar/recusar/cancelar, vincular pochete (chave), Telegram, testar os botões sem a pochete, perfil | `pages/painel.html` |
 | **Entrar** (sem login) | Login e cadastro — **só entra quem o backend reconhece** | `pages/login.html`, `cadastro.html` |
-| **Mais** | Instruções (com a pochete em 3D sob demanda), Quem Somos (equipe e **contato**), Referências, Jogo (gd.games), Relatórios, tema, sair | as outras páginas |
+| **Mais** | Instruções (com a pochete em 3D sob demanda), Quem Somos (equipe e **contato**), Referências, Jogo (o mesmo jogo HTML5 do site, em tela cheia na horizontal, e a partida gravada), Relatórios, tema, sair | as outras páginas |
 | **Relatórios** | Período, os 4 números com comparação, **mapa do Google** da pochete e o registro | `pages/relatorios.html` |
 | **Avisos** | O mesmo card do site em qualquer tela: emergência (com "Ligar 192"), pedido de carro, bateria, teste; consulta a cada 15 s | `js/avisos.js` |
 
